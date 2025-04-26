@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главная страница</title>
+  <link rel="stylesheet" th:href="@{/css/TeamPage.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+  <main>
+      <div class="photo-container" id="photo-container">
+          <form id="upload-form" enctype="multipart/form-data">
+              <input type="file" name="teamImage" id="teamImage" accept="image/*" style="display: none;">
+              <button type="button" class="upload-btn" id="uploadTrigger">
+                  <img src="/icons/load-photo.svg" alt="Добавить фото" class="upload-icon">
+              </button>
+          </form>
+      </div>
+    <div class="main-container">
+        <div class="team-name-container">
+            <span class="team-name" id="team-name-text">Загрузка...</span>
+            <button class="edit-team-name-btn" id="edit-team-name-btn">
+                <img src="/icons/edit.svg">
+            </button>
+          </div>
+          <p class="team-description-title">Описание команды</p>
+          <textarea type ="text" placeholder="Расскажите о своей команде" class="team-description-container"></textarea>
+          <div class="team-actions">
+            <button class="add-members-btn">
+                Добавить участника
+            </button>
+              <div id="add-members-modal" class="add-members-modal" style="display: none;">
+                  <div class="add-members-modal-content">
+                      <h2 class="add-members-title">Добавить участников</h2>
+                      <label for="members-input" class="add-members-label">Почта</label>
+                      <input type="text" id="members-input" class="add-members-input" placeholder="Введите почту пользователя">
+                      <span class="example">Вводите почту в формате: example@example.com</span>
+                      <div class="add-members-actions">
+                          <button id="cancel-add-members" class="add-members-btn-cancel">Отмена</button>
+                          <button id="confirm-add-members" class="add-members-btn-confirm">Добавить</button>
+                      </div>
+                  </div>
+              </div>
+              <div class="more-options-container">
+                  <button class="more-options-btn">
+                      <img src="/icons/extramenu.svg" alt="Дополнительные опции" class="more-options-icon">
+                  </button>
+                  <ul class="more-options-menu" style="display: none;">
+                      <li class="option-leave">Покинуть команду</li>
+                      <li class="option-delete">Удалить команду</li>
+                  </ul>
+              </div>
+              <div id="more-options-modal" class="more-options-modal hidden">
+                  <div class="more-options-modal-content">
+                      <p class="more-options-modal-message">Вы уверены?</p>
+                      <div class="more-options-modal-actions">
+                          <button class="more-options-modal-btn cancel">Отмена</button>
+                          <button class="more-options-modal-btn confirm">Да</button>
+                      </div>
+                  </div>
+              </div>
+        </div>
+        <div class="participants-container">
+            <p class="participants-title">Список участников</p>
+            <p class="participants-count"> Участников</p>
+            <hr class="participants-divider">
+            <div class="team-participants">
+            </div>
+        </div>
+        <div class="tasks-table-wrapper">
+            <div class="table-titles">
+                <span class="table-title">Задачи команды</span>
+                <span class="table-title">Проект</span>
+                <span class="table-title">Исполнитель</span>
+            </div>
+            <div class="tasks-table-container">
+            </div>
+        </div>
+         
+    </div>
+  </main>
+<script th:src="@{/js/team_page.js}"></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главная страница</title>
+  <link rel="stylesheet" th:href="@{/css/profile.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+  <main class="main-content">
+    <div class="left-info">
+        <div class ="user-photo">
+            <button class = "user-photo-btn">
+                <img src="/icons/load-photo.svg" alt="Загрузите фото" class="upload-photo">
+            </button>
+        </div>
+        <div class="user-name" >
+            <h2 id="username">Загрузка...</h2>
+        </div>
+        <div class = "user-information">
+            <div class = "subheader-title">
+                <p>Сведения</p>
+            </div>
+                <div class = "user-information-input">
+                <img src="/icons/position.svg" alt="Должность" class="icon-info">
+                <input id="position" type="text" class="input-information" placeholder="Ваша должность">
+                </div>
+                <div class = "user-information-input">
+                    <img src="/icons/organisation.svg" alt="Организация" class="icon-info">
+                    <input  id="organization" type="text" class="input-information" placeholder="Ваша организация">
+                </div>
+                <div class = "subheader-title">
+                    <p>Контактные данные</p>
+                </div>
+                <div class = "user-information-input">
+                    <img src="/icons/email.svg" alt="Организация" class="icon-info">
+                    <input  id="email" style="cursor: not-allowed" type="text" class="input-information" placeholder="Ваш email" disabled>
+                    <div class="tooltip">Изменить email можно только в настройках</div>
+                </div>
+                <div class = "subheader-title">
+                    <p>Команды</p>
+                    <div id="user-teams-list" class="user-teams-list">
+                        <!-- Здесь будут отображаться команды -->
+                    </div>
+                </div>
+                <a class ="btn-container" href="#create-team-modal">
+                    <img src="/icons/plus.svg" alt="Добавление" class="icon-info team">
+                    <p class = "btn-container-text">Создать команду</p>
+                </a>
+        </div>
+    </div>
+    <div class = "right-container">
+        <div class = "right-btns">
+            <button class ="submit-btn">Настройки аккаунта</button>
+            <button class ="delete-btn">Выйти из аккаунта</button>
+        </div>
+        <div class = "activity-info">
+            <p class="container-title">Активные задачи</p>
+        </div>
+        <div class = "table">
+            <p>Проект</p>
+            <p>Срок</p>
+            <div class="tasks">
+                <p>Здесь будут отображаться задачи, которые вы выполняете</p>
+            </div>
+        </div>
+            <div class="title-wrap">
+            <p class ="container-title">Участие в проектах</p>
+            </div>
+            <div class = "table">
+                <p>Срок</p>
+                <div class="tasks">
+                    <p>Здесь будут отображаться проекты, в которых вы участвуйте</p>
+                </div>
+            </div>
+            <div class="title-wrap">
+                <p class ="container-title">С кем работаете</p>
+                </div>
+                <div class = "table">
+                    <div class="tasks">
+                        <p>Здесь будут отображаться те, с кем вы работали за последнее время</p>
+                    </div>
+                </div>
+    </div>
+
+</main>
+<script th:src="@{/js/profile.js}"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главная страница</title>
+  <link rel="stylesheet" th:href="@{/css/projects.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+  <main class="main-content">
+    <!-- Заголовок и кнопка создания проекта -->
+    <div class="header-bar">
+      <h1>Проекты</h1>
+      <a href="#create-project-modal" class="create-project-btn">Создать проект</a>
+    </div>
+
+    <!-- Панель поиска и фильтров -->
+    <div class="projects-toolbar">
+      <div class="search-bar-projects">
+        <img src="/icons/search.svg" alt="Поиск" class="search-icon">
+        <input type="text" placeholder="Поиск" class="search-input">
+      </div>
+      <select class="filters" id="sort-options">
+        <option value="default">Фильтры</option>
+        <option value="asc">По алфавиту (A - Z)</option>
+        <option value="desc">По алфавиту (Z - A)</option>
+      </select>
+    </div>
+
+    <div class="projects-table-wrapper">
+      <table class="projects-table">
+        <thead>
+        <tr>
+          <th>Название</th>
+          <th>Ключ</th>
+          <th>Руководитель</th>
+          <th>Описание</th>
+          <th>Статус</th>
+          <th>Дополнительные действия</th>
+        </tr>
+        </thead>
+        <tbody id="projects-tbody">
+<!--          <td><button class="action-btn">-->
+<!--            <img src="/icons/extramenu.svg">-->
+<!--          </button></td>-->
+        </tbody>
+      </table>
+    </div>
+
+   <!-- Пагинация -->
+<div class="pagination">
+
+    <button class="pagination-arrow" id="prev-page" disabled>&lt;</button>
+
+    <a href="#" class="pagination-page active">1</a>
+
+    <button class="pagination-arrow" id="next-page">&gt;</button>
+  </div>
+</main>
+<script th:src="@{/js/projects.js}"></script>
+</body>
+</html>

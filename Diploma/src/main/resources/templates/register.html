@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/css/register.css}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <title>Registration</title>
+</head>
+<body>
+
+<div class="container">
+    <div class="text-container">
+        <h2 class="subheading">Зарегистрируйтесь, чтобы продолжить</h2>
+    </div>
+    <form action="register" method="post" class="login-form">
+        <div class="input-container">
+            <img src="/icons/email.svg" alt="Email icon" class="icon">
+            <input type="email" id="email" class="input-email" name="email" placeholder="Введите email" required >
+        </div>
+        <div class="input-container">
+            <img src="/icons/password.svg" alt="Lock Icon" class="icon">
+            <input type="password" id="password" class="input-password" name="password" placeholder="Введите пароль" >
+        </div>
+        <ul class="password-requirements">
+            <li>Минимум 8 символов</li>
+            <li>Большие и маленькие буквы</li>
+            <li>Цифры</li>
+        </ul>
+        <div class="input-container">
+            <img src="/icons/password.svg" alt="Lock Icon" class="icon">
+            <input type="password"  id="confirmpassword" class="input-password" name="confirmPassword" placeholder="Повторите пароль" required>
+        </div>
+        <p id="error-message" class="error-message"></p>
+        <button id="submit" type="submit">Зарегистрироваться</button>
+    </form>
+    <div class="create-account">
+        <a href="/login" class="create-link">Уже есть аккаунт? Войти</a>
+    </div>
+</div>
+</body>
+<script th:src="@{/js/register.js}"></script>
+</html>
