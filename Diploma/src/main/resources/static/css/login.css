@@ -1,0 +1,233 @@
+body {
+  background-color: #F6F6F6;
+}
+a,
+button,
+input,
+select,
+h1,
+h2,
+h3,
+h4,
+h5,
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+  text-decoration: none;
+  background: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+menu, ol, ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.error-message {
+  color: red;
+  font-family: "IBM Plex Sans", sans-serif;
+  opacity: 0.9;
+  margin-top: -18px;
+  letter-spacing: 0.2px;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.input-container {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.input-email,
+.input-password {
+  width: 100%;
+  padding: 10px 10px 10px 40px;
+  font-size: 14px;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  font-family: "IBM Plex Sans", sans-serif;
+  background-color: #007BFF;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+.container {
+  width: 500px;
+  height: 700px; 
+  background-color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+}
+
+.error-message {
+  opacity: 0.9;
+  font-family: "IBM Plex Sans", sans-serif;
+  color: red;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  margin-bottom: -18px;
+}
+
+.text-container {
+  width: 280px;
+  height: 60px;
+  text-align: center;
+  margin-bottom: 75px;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 280px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px; 
+}
+
+.input-container {
+  position: relative;
+  width: 100%;
+}
+
+.input-email, .input-password {
+  width: 100%;
+  padding: 10px 10px 10px 40px;
+  border: 1px solid #C0C0C0;
+  border-radius: 5px;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.2px;
+  transition: border-color 0.3s;
+}
+.input-password::-ms-reveal {
+  opacity: 0.6;
+}
+.input-email:focus, .input-password:focus {
+  outline: none;
+  border-color: #3290EC; 
+}
+
+.input-container .icon {
+  position: absolute;
+  left: 10px; 
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.login-form button {
+  width: 80px;
+  height: 30px;
+  padding: 0; 
+  background: #3498db;
+  color: white;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 13px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.3s;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  text-align: center; 
+}
+
+
+.login-form button:hover {
+  background: #0055CC;
+  transform: scale(1.02); 
+}
+
+
+.subheading{
+  color: #000000;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  opacity: 90%;
+  font-style: normal;
+  letter-spacing: 0.02em;
+}
+.forgot-link {
+  display: block; 
+  text-align: right; 
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 12px;
+  color: #3498db;
+  margin-top: 5px; 
+  margin-bottom: 15px; 
+  letter-spacing: 0.2px;
+}
+
+.forgot-password {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%; 
+  margin-top: -15px;
+  margin-bottom: -20px;
+}
+
+.forgot-link:hover {
+  text-decoration-line: underline;
+}
+.create-account {
+  display: flex; 
+  justify-content: center;
+  margin-top: 15px; 
+}
+
+.create-link {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 12px;
+
+  color: #3498db; 
+  letter-spacing: 0.2px;
+}
+
+.create-link:hover {
+  text-decoration-line: underline;
+}

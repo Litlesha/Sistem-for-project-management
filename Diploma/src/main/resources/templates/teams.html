@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главная страница</title>
+  <link rel="stylesheet" th:href="@{/css/teams.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+  <main class="main-content">
+    <!-- Заголовок и кнопка -->
+    <div class="header-bar">
+      <div class="header-text">
+        <h1></h1>
+      </div>
+    </div>
+
+    <!-- Поле поиска -->
+    <div class="search-bar search-bar-custom">
+      <img src="/icons/search.svg" alt="Поиск" class="search-icon">
+      <input type="text" placeholder="Поиск команд и людей" class="search-input"/>
+    </div>
+
+    <!-- Контейнеры для Команд и Людей -->
+    <div class="sections-wrapper">
+      <!-- Секция "Команды" -->
+      <h2>Команды</h2>
+      <div class="section-team" id="teams-container">
+
+      </div>
+      <!-- Секция "Пользователи" -->
+      <h2>Пользователи</h2>
+      <div class="section-people">
+        <div class="create-user-card">
+          <div class="card-top">
+            <img src="/icons/person.svg" alt="Иконка пользователя" class="card-icon">
+          </div>
+          <div class="card-bottom">
+            <a class="card-btn">Добавить пользователя</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+<script th:src="@{/js/teams.js}"></script>
+</html>

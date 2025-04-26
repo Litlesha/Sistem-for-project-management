@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главная страница</title>
+  <link rel="stylesheet" th:href="@{/css/project_page.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+  <div class="project-container">
+    <!-- Навигация слева -->
+    <nav class="project-sidebar">
+      <h2 class="project-title" id="project-title">Загрузка...</h2>
+      <div class="project-nav">
+        <h3>Планирование</h3>
+        <ul>
+          <li>
+            <a href="#" class="nav-link active" data-section="backlog">
+              <img src="/icons/backlog.svg" alt="Бэклог" class="nav-icon">
+              Бэклог
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" data-section="board">
+              <img src="/icons/board.svg" alt="Доска" class="nav-icon">
+              Доска
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" data-section="chat">
+              <img src="/icons/chat.svg" alt="Доска" class="nav-icon">
+              Чат
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  
+    <!-- Основной контент -->
+    <section id="backlog" class="section active-section">
+      <main class="main-content">
+        <!-- Заголовок страницы -->
+        <div class="backlog-header">
+          <div class="header-main">
+            <h1>Бэклог</h1>
+            <button class="complete-project-btn">Завершить проект</button>
+          </div>
+          <!-- Строка поиска и иконки участников -->
+          <div class="search-bar">
+            <div class="search-field">
+              <img src="/icons/search.svg" alt="Поиск" class="search-icon">
+              <input type="text" class="search-input" placeholder="Поиск">
+            </div>
+            <div class="participants-icons">
+              <button class="add-participant-btn">
+                <img src="/icons/addUser.svg" alt="Добавить участника" class="add-icon">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Модальное окно для создания спринта -->
+        <div id="sprintModal" class="modal1">
+          <div class="create-spring-modal">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 class="create-sprint-text">Запустить спринт</h2>
+            <input type="hidden" id="projectId">
+
+            <label>Название спринта:</label>
+            <input type="text" id="sprintName" placeholder="Введите название" required>
+
+            <label>Длительность:</label>
+            <select id="sprintDuration" onchange="updateDatesFromDuration()" required>
+              <option value="" disabled selected>Выберите</option>
+              <option value="1">1 неделя</option>
+              <option value="2">2 недели</option>
+              <option value="3">3 недели</option>
+              <option value="4">4 недели</option>
+              <option value="custom">Выбирает пользователь</option>
+            </select>
+
+            <label>Дата начала:</label>
+            <input type="datetime-local" id="startDate">
+
+            <label>Дата окончания:</label>
+            <input type="datetime-local" id="endDate" readonly>
+
+            <label>Цель спринта:</label>
+            <textarea id="sprintGoal" placeholder="Опишите цель спринта..."></textarea>
+
+            <div class="modal-actions">
+              <button class="cancel-btn" onclick="closeModal()">Отмена</button>
+              <button class="submit-btn" onclick="submitSprint()">Начать</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="scrollable-backlog-container">
+          <!-- Кнопка "Создать спринт" + пустой бэклог -->
+          <div class="backlog-sprint-tusk-wrapper backlog-section">
+            <button class="start-project-btn" onclick="openModal()">Создать спринт</button>
+            <div class="empty-backlog">
+              <p>Бэклог пуст</p>
+            </div>
+            <div class="create-task-btn-wrapper">
+              <button class="create-task-btn">
+                <img src="/icons/plus.svg" alt="Добавить" class="plus-icon">
+                Создать задачу
+              </button>
+
+              <div class="task-form-container" style="display: none;">
+                <div class="task-type-select">
+                  <div class="custom-select">
+                    <div class="selected-option">
+                      <div class="content">
+                        <img src="/icons/tusk.svg" alt="иконка задачи" />
+                        <span class="selected-text">Задача</span>
+                      </div>
+                      <div class="arrow">
+                        <img src="/icons/mingcute_down-line.svg" />
+                      </div>
+                    </div>
+                    <div class="optionsbacklog">
+                      <div class="option" data-value="task">
+                        <img src="/icons/tusk.svg" alt="иконка задачи" />
+                        <span class="option-text">Задача</span>
+                      </div>
+                      <div class="option" data-value="story">
+                        <img src="/icons/history.svg" alt="иконка истории" />
+                        <span class="option-text">История</span>
+                      </div>
+                      <div class="option" data-value="bug">
+                        <img src="/icons/bug.svg" alt="иконка бага" />
+                        <span class="option-text">Баг</span>
+                      </div>
+                    </div>
+
+                    <input type="hidden" name="taskType" value="task" />
+                  </div>
+                </div>
+
+                <input type="text" class="task-title-bs" placeholder="Название задачи" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </section>
+    <section id="board" class="section">
+      <main class="main-content">
+        <div class="header-main">
+          <h1>Доска</h1>
+          <div class="main-content-complete-container">
+            <div class="duration-info">
+              <img src="/icons/clock.svg" alt="Иконка времени">
+              <p>14 дней</p>
+            </div>
+            <button class="complete-project-btn">Завершить спринт</button>
+          </div>
+        </div>
+        <div class="header-main-wrap">
+          <div class="top-bar">
+            <div class="search-bar">
+              <div class="search-field">
+                <img src="/icons/search.svg" alt="Поиск" class="search-icon">
+                <input type="text" class="search-input" placeholder="Поиск">
+              </div>
+            </div>
+            <div class="participants-icons">
+              <button class="add-participant-btn">
+                <img src="/icons/addUser.svg" alt="Добавить участника" class="add-icon">
+              </button>
+            </div>
+            <div class="filters">
+              <select class="filter-select">
+                <option value="">Все</option>
+                <option value="done">Завершённые</option>
+                <option value="in-progress">В процессе</option>
+                <option value="todo">К выполнению</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="kanban">
+          <div class="kanban-column">
+            <div class="kanban-column-name">
+              <span>В выполнению</span>
+            </div>
+            <div class="tusk-container">
+              <div class="task-content">
+                <div class="task-name">
+                  <span class="task-title">Добавить возможность импорта CSV dsafdasdfasdfasdfa</span>
+                </div>
+                <div class="tusk-bottom">
+                  <div class="tag-and-key">
+                    <img class="tag" src="/icons/green-tusk-tag.svg">
+                    <span class="task-id">PROJ-24</span>
+                  </div>
+                  <button>
+                    <img class="performer" src="/icons/Group%205.svg">
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="tusk-container">
+            </div>
+            <div class="tusk-container">
+            </div>
+            <div class="tusk-container">
+            </div><div class="tusk-container">
+          </div>
+            <div class="tusk-container">
+            </div>
+            <div class="tusk-container">
+            </div>
+            <div class="tusk-container">
+            </div>
+            <div class="tusk-container">
+            </div>
+            <div class="tusk-container">
+            </div>
+          </div>
+          <div class="kanban-column">
+
+          </div>
+          <div class="kanban-column"></div>
+          <div class="create-column-container">
+            <button class="create-column">
+              <img src="/icons/plus.svg">
+            </button>
+          </div>
+        </div>
+      </main>
+    </section>
+
+    <!-- Секция Чат -->
+    <section id="chat" class="section">
+      <div class="messenger">
+        <div class="chat-messages" id="chat-messages">
+        </div>
+      </div>
+      <div class="chat-input-wrap">
+        <label class="file-attach-label">
+          <input type="file" class="file-input" hidden>
+          <img src="/icons/send-file.svg" alt="Прикрепить файл" class="attach-icon">
+        </label>
+
+        <input type="text" class="chat-input" placeholder="Сообщение">
+
+        <button class="send-button">
+          <img src="/icons/send-message.svg" alt="Отправить">
+        </button>
+      </div>
+    </section>
+  </div>
+<script th:src="@{/js/project_page.js}"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главная страница</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+<main class="main-content">
+  <div class="recent-projects">
+    <p class="recent-projects-title">Недавние проекты</p>
+    <div class = "line"></div>
+    <div class="create-project-card">
+      <h3>Создать проект</h3>
+      <p>Начните проект вместе с нами</p>
+      <a  href="#create-project-modal" class="create-project-btn" > Новый проект</a>
+    </div>
+  </div>
+  <div class="last-section">
+    <p class="last-title">Последние</p>
+    <div class="tabs">
+      <a href="#" class="tab-link" id="in-progress">В работе</a>
+      <a href="#" class="tab-link" id="viewed">Просмотренные</a>
+      <a href="#" class="tab-link" id="assigned">Назначенные</a>
+    </div>
+    <div class ="in-progress-info">
+      <p>У вас еще нет задач в работе</p>
+    </div>
+  </div>
+</main>
+</body>
+</html>

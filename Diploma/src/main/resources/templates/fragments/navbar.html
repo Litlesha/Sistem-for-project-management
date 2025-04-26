@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="header">
+    <nav class="navbar">
+        <a href="/main" class="nav-item" tabindex="0">Главная</a>
+
+        <div class="dropdown-container">
+            <button class="dropdown-btn">
+                <span class="dropdown-text">Проекты</span>
+                <img src="/icons/dropdown.svg" alt="dropdown" class="dropdown-icon">
+            </button>
+            <ul class="dropdown-menu">
+                <li class="dropdown-header">Ваши проекты</li>
+                <li class="dropdown-separator"></li>
+                <li><a href="#create-project-modal">Создать проект</a></li>
+                <li><a href="/projects">Просмотреть все проекты</a></li>
+            </ul>
+        </div>
+        <div class="dropdown-container">
+            <button class="dropdown-btn">
+                <span class="dropdown-text">Команды</span>
+                <img src="/icons/dropdown.svg" alt="dropdown" class="dropdown-icon">
+            </button>
+            <ul class="dropdown-menu">
+                <li class="dropdown-header">Ваши команды</li>
+                <li class="dropdown-separator"></li>
+                <li><a href="#create-team-modal"b>Создать команду</a></li>
+                <li><a href="/teams">Просмотреть все команды</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="header-right">
+        <div class="search-bar">
+            <img src="/icons/search.svg" alt="Поиск" class="search-icon">
+            <input type="text" placeholder="Поиск" class="search-input">
+        </div>
+        <a href="#" class="icon-btn" id="settings">
+            <img src="/icons/settings.svg" alt="Настройки" class="search-icon">
+        </a>
+        <a href="/profile" class="icon-btn" id="profile">
+            <img src="/icons/profile.svg" alt="Профиль" class="search-icon">
+        </a>
+    </div>
+    <div id="create-project-modal" class="modal">
+        <div class="modal-content modal-content-large">
+            <h2>Создание проекта</h2>
+            <form id="project-form">
+                <label for="project-name">Дайте название проекту<span class="required">*</span></label>
+                <input type="text" id="project-name" name="name" required>
+                <label for="project-key">Придумайте ключ<span class="required">*</span></label>
+                <input type="text" id="project-key" name="key_project" placeholder="Введите значение из 4-х заглавных латинских букв" required>
+                <p class="input-hint">Ключ позволит легко искать задачи и определять проект</p>
+                <p id="key-error" class="error-message"></p>
+                <label for="project-description">Добавьте описание проекта</label>
+                <textarea id="project-description" name="description" rows="4"></textarea>
+
+                <div class="form-actions">
+                    <a onclick="goBack()" class="cancel-btn">Отмена</a>
+                    <button  type="submit" class="submit-btn">Создать проект</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="create-team-modal" class="modal">
+        <div class="modal-content">
+            <h2>Создайте команду</h2>
+            <form id="team-form">
+            <label for="team-name">Название команды <span class="required">*</span></label>
+            <input type="text" id="team-name" name="team_name" required>
+            <p class="input-hint">Например, отдел дизайнеров</p>
+
+            <label for="team-members">Кто должен входить в команду? <span class="required">*</span></label>
+                <input type="text" id="team-members" name="memberEmails">
+            <p class="input-hint">Введите email участников через запятую, например: user1@example.com, user2@example.com</p>
+
+            <div class="form-actions">
+                <a class="cancel-btn" onclick="goBack()">Отмена</a>
+                <button type="submit" class="submit-btn">Создать команду</button>
+            </div>
+        </form>
+        </div>
+    </div>
+        </header>
+<script th:src="@{/js/navbar.js}"></script>
+        </body>
+        </html>
