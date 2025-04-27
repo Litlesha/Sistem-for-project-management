@@ -5,13 +5,18 @@ import org.diploma.fordiplom.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 public class ProfileController {
@@ -37,6 +42,35 @@ public class ProfileController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // В случае ошибки возвращаем статус 400
         }
+    }
+    @PostMapping("/api/user/upload-photo")
+    public ResponseEntity<Map<String, String>> uploadUserPhoto(@RequestParam("image") MultipartFile imageFile,
+                                                               @RequestParam Long userId) throws IOException {
+        if (imageFile.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Файл пустой"));
+        }
+
+        String fileName = UUID.randomUUID() + "_" + StringUtils.cleanPath(imageFile.getOriginalFilename());
+
+        // Абсолютный путь
+        Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads");
+        Files.createDirectories(uploadPath);
+
+        Path filePath = uploadPath.resolve(fileName);
+
+        try {
+            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Не удалось загрузить файл: " + e.getMessage()));
+        }
+
+        // Сохраняем путь изображения в БД
+        String imageUrl = "/uploads/" + fileName;
+        userService.saveUserImgPath(userId, imageUrl);  // 🆕 Сохраняем путь в БД
+
+        return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
     }
 }
 

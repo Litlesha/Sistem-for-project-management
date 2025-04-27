@@ -34,8 +34,8 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(regs ->{
-                    regs.requestMatchers("/","/js/**","/register","/css/**", "/icons/**").permitAll();
+                .authorizeHttpRequests(regs -> {
+                    regs.requestMatchers("/", "/js/**", "/register", "/css/**", "/icons/**").permitAll();
                     regs.anyRequest().authenticated();
                 })
                 .formLogin(httpSecurityFormLoginConfigurer -> {
@@ -45,6 +45,12 @@ public class SecurityConfiguration {
                             .successHandler(new org.diploma.fordiplom.config.AuthenticationSuccessHandler())
                             .permitAll();
                 })
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                        .permitAll()
+                )
                 .build();
     }
     @Bean

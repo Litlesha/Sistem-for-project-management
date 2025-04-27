@@ -308,15 +308,24 @@ body {
     
  }
 
- .user-photo{
+.user-photo {
     display: flex;
+    justify-content: center;
+    align-items: center;
     width: 150px;
     height: 150px;
     background-color: #d4783b;
     border-radius: 50%;
     margin-top: 30px;
-    
- }
+    overflow: hidden;  /* Это гарантирует, что изображение не выйдет за границы контейнера */
+}
+
+.user-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;  /* Заполнение контейнера изображением с сохранением пропорций */
+    border-radius: 50%;
+}
  .user-photo-btn{
     width: 100%;
     height: 100%;
@@ -331,6 +340,16 @@ body {
     width: 30px;
     height: 30px;
  }
+.upload-photo-btn{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
 
  .user-name{
     width: 200px;
@@ -352,7 +371,7 @@ body {
     border: 1px solid #ccc;
     padding: 5px;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 12px;
     width: 100%;
 }
 .user-name input:focus {

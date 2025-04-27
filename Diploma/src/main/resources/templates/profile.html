@@ -9,12 +9,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
+<input type="file" id="user-image-input" style="display: none;">
 <body>
 <div th:replace="fragments/navbar.html"></div>
   <main class="main-content">
     <div class="left-info">
-        <div class ="user-photo">
-            <button class = "user-photo-btn">
+        <div id="photo-container" class="user-photo">
+            <button class="user-photo-btn">
                 <img src="/icons/load-photo.svg" alt="Загрузите фото" class="upload-photo">
             </button>
         </div>

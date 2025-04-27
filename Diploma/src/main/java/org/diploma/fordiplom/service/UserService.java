@@ -19,5 +19,5 @@ public interface UserService {
         public UserEntity getCurrentUser(Principal principal);
         public boolean existsByEmail(String email);
         UserEntity updateUserProfile(String email, String position,String username, String organization);
-
+        void saveUserImgPath(Long userId, String imgUrl);
 }

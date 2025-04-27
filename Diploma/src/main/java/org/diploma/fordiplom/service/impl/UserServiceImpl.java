@@ -86,6 +86,13 @@ public class UserServiceImpl implements UserService {
         // Сохранить обновленного пользователя в базу данных
          return userRepository.save(user);
     }
+    @Override
+    public void saveUserImgPath(Long userId, String imgUrl) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setUserImgPath(imgUrl);
+        userRepository.save(user);  // Сохраняем обновленного пользователя
+    }
 
 
 }
