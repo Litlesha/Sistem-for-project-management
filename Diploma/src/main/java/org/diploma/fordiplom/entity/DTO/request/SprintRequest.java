@@ -11,6 +11,15 @@ public class SprintRequest {
     private String goal;
     private Integer duration;
     private Long projectId;
+    private boolean isActive;
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
 
     public Long getProjectId() {
         return projectId;

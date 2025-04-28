@@ -4,6 +4,7 @@ package org.diploma.fordiplom.service.impl;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.entity.SprintEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
+import org.diploma.fordiplom.repository.SprintRepository;
 import org.diploma.fordiplom.repository.TaskRepository;
 import org.diploma.fordiplom.service.ProjectService;
 import org.diploma.fordiplom.service.SprintService;
@@ -22,6 +23,8 @@ public class TaskServiceImpl implements TaskService {
     private SprintService sprintService;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private SprintRepository sprintRepository;
 
     @Override
     public TaskEntity createTask(TaskRequest request){
@@ -77,4 +80,21 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskEntity> getBackLogTasksByProjectId(Long projectId){
         return taskRepository.findByProject_IdAndSprintIsNull(projectId);
     }
-}
+
+    @Override
+    public void updateTaskLocation(Long taskId, Long sprintId) {
+        TaskEntity task = taskRepository.findById(taskId).get();
+
+        // Если sprintId не null, обновляем привязку задачи к спринту
+        if (sprintId != null) {
+            SprintEntity sprint = sprintRepository.findById(sprintId)
+                    .orElseThrow(() -> new RuntimeException("Спринт не найден"));
+            task.setSprint(sprint);
+        } else {
+            task.setSprint(null); // Если задача возвращается в бэклог, убираем привязку
+        }
+
+        taskRepository.save(task); // Сохраняем обновлённую задачу
+    }
+    }
+

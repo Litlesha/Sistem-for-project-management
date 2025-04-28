@@ -63,31 +63,36 @@ function renderTaskToSprint(task, sprintContainer) {
     const icon = iconMap[task.taskType] || 'icons/tusk.svg';
 
     const taskHTML = `
-        <div class="task-wrap-container">
-            <div class="tusk-wrap">
-                <div class="tusk-wrap-right">
-                    <img src="${icon}">
-                    <div class="key-and-name">
-                        <span class="key">${task.taskKey}</span>
-                        <span class="tusk-name">${task.title}</span>
-                    </div>
-                </div>
-                <div class="tusk-wrap-left">
-                    <select class="sprint-to-column">
-                        <option>К выполнению</option>
-                    </select>
-                    <button><img class="performer" src="icons/performer.svg"></button>
-                    <button><img class="extra-menu" src="icons/extra-menu.svg"></button>
+    <div class="task-wrap-container" draggable="true" data-task-id="${task.id}" data-sprint-id="${task.sprintId}">
+        <div class="tusk-wrap">
+            <div class="tusk-wrap-right">
+                <img src="${icon}">
+                <div class="key-and-name">
+                    <span class="key">${task.taskKey}</span>
+                    <span class="tusk-name">${task.title}</span>
                 </div>
             </div>
+            <div class="tusk-wrap-left">
+                <select class="sprint-to-column">
+                    <option>К выполнению</option>
+                </select>
+                <button><img class="performer" src="icons/performer.svg"></button>
+                <button><img class="extra-menu" src="icons/extra-menu.svg"></button>
+            </div>
         </div>
-    `;
+    </div>
+`;
 
     const createBtnWrapper = sprintContainer.querySelector('.create-task-btn-wrapper');
     const emptyBacklog = sprintContainer.querySelector('.empty-backlog');
     if (emptyBacklog) emptyBacklog.remove();
 
     createBtnWrapper.insertAdjacentHTML('beforebegin', taskHTML);
+    const taskElement = sprintContainer.querySelector(`div[data-task-id="${task.id}"]`);
+    console.log(taskElement);
+    taskElement.addEventListener("dragstart", handleDragStart);
+    taskElement.addEventListener("dragover", handleDragOver);
+    taskElement.addEventListener("drop", handleDrop);
 }
 
 function renderTaskToBacklog(task) {
@@ -99,7 +104,7 @@ function renderTaskToBacklog(task) {
     const icon = iconMap[task.taskType] || 'icons/tusk.svg';
 
     const taskHTML = `
-        <div class="task-wrap-container">
+        <div class="task-wrap-container" draggable="true" data-task-id="${task.id}" data-sprint-id="${task.sprintId}">
             <div class="tusk-wrap">
                 <div class="tusk-wrap-right">
                     <img src="${icon}">
@@ -130,8 +135,89 @@ function renderTaskToBacklog(task) {
 
     createBtnWrapper.insertAdjacentHTML('beforebegin', taskHTML);
     initTaskInputHandlers();
+    const taskElement = backlogContainer.querySelector(`div[data-task-id="${task.id}"]`);
+    console.log(taskElement);
+    taskElement.addEventListener("dragstart", handleDragStart);
+    taskElement.addEventListener("dragover", handleDragOver);
+    taskElement.addEventListener("drop", handleDrop);
+}
+function handleDragStart(e) {
+    // Храним ID задачи для использования при drop
+    e.dataTransfer.setData("taskId", e.target.dataset.taskId);
 }
 
+function handleDragOver(e) {
+    e.preventDefault(); // Нужно для разрешения drop
+}
+
+async function handleDrop(e) {
+    e.preventDefault();
+
+    const taskId = e.dataTransfer.getData("taskId");
+    const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+    let dropTarget = e.target.closest('.task-wrap-container');
+    let newContainer = e.target.closest('.backlog-sprint-tusk-wrapper');
+
+    // Если дропнули на пустую надпись
+    if (e.target.classList.contains('empty-backlog') || e.target.closest('.empty-backlog')) {
+        newContainer = e.target.closest('.backlog-sprint-tusk-wrapper');
+    }
+
+    if (!newContainer) return;
+
+    const sprintId = newContainer.dataset.sprintId || null;
+
+    try {
+        const response = await fetch('/update_task_location', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                taskId: taskId,
+                sprintId: sprintId
+            })
+        });
+
+        if (!response.ok) throw new Error('Ошибка при обновлении задачи');
+
+        const createBtnWrapper = newContainer.querySelector('.create-task-btn-wrapper');
+
+        if (dropTarget && dropTarget !== taskElement) {
+            newContainer.insertBefore(taskElement, dropTarget);
+        } else if (createBtnWrapper) {
+            newContainer.insertBefore(taskElement, createBtnWrapper);
+        } else {
+            newContainer.appendChild(taskElement);
+        }
+
+        const emptyBacklog = newContainer.querySelector('.empty-backlog');
+        if (emptyBacklog) emptyBacklog.remove();
+    } catch (err) {
+        console.error('Ошибка при перемещении задачи:', err);
+    }
+}
+
+function initDragOverHandlers() {
+    const containers = document.querySelectorAll('.backlog-sprint-tusk-wrapper');
+
+    containers.forEach(container => {
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        container.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+        });
+
+        container.addEventListener('drop', handleDrop);
+    });
+}
+
+
+initDragOverHandlers();
+
+
+
+// =======================================>//
 function initCreateTaskButtons(scope = document) {
     scope.querySelectorAll(".create-task-btn-wrapper").forEach(wrapper => {
         const createBtn = wrapper.querySelector(".create-task-btn");

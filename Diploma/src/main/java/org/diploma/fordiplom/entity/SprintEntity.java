@@ -45,6 +45,8 @@ public class SprintEntity {
 
     @Column(name = "duration")
     private Integer duration;
+    @Column(name = "is_active")
+    private Boolean isActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)

@@ -13,4 +13,5 @@ public interface TaskService {
     String keyGenerator(TaskRequest request);
     List<TaskEntity> getTasksBySprintId(Long sprintId);
     List<TaskEntity> getBackLogTasksByProjectId(Long projectId);
+    void updateTaskLocation(Long taskId, Long sprintId);
 }

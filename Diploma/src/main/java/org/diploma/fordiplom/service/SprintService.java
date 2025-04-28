@@ -13,4 +13,5 @@ public interface SprintService {
     SprintEntity updateSprint(SprintEntity sprint);
     public List<SprintEntity> getSprintByProjectId(Long projectId);
     List<SprintResponse> getSprintsByProjectId(Long projectId);
+    void startSprint(Long sprintId);
 }

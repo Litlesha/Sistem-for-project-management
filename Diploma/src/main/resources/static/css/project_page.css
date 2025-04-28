@@ -1165,7 +1165,7 @@ header-main-wrap{
   flex-direction: column;
   overflow-y: auto;
   margin-top: 170px;
-  max-height: 370px;
+  max-height: 500px;
   gap: 50px;
 
 }
@@ -1375,4 +1375,9 @@ input[readonly] {
 }
 .extra-menu:hover{
   background-color: #DCDFE4;
+}
+.drag-over {
+  background-color: rgba(0, 123, 255, 0.1); /* нежно-синий фон */
+  border: 2px dashed #007bff; /* пунктирная граница */
+  transition: background-color 0.2s, border 0.2s;
 }
