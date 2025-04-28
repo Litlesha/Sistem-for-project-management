@@ -10,4 +10,6 @@ import java.util.List;
 public interface SprintRepository extends JpaRepository<SprintEntity, Long> {
     @Query ("SELECT s FROM SprintEntity s JOIN s.project p WHERE p.id = :id_project")
     List<SprintEntity> findByProjectId(@Param("id_project") Long id_project);
+
+    <T> SprintEntity findByProjectIdAndIsActiveTrue(long projectId);
 }

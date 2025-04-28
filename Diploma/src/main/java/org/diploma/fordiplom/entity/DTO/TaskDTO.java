@@ -1,10 +1,11 @@
 package org.diploma.fordiplom.entity.DTO;
 
+import org.diploma.fordiplom.entity.TaskEntity;
+
 public class TaskDTO {
     private Long id;
     private String title;
     private Long sprintId;
-
     private String taskType;
 
     private String taskKey;

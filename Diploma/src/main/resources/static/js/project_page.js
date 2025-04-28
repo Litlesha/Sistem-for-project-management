@@ -1,3 +1,70 @@
+
+async function startSprint(button) {
+    const sprintWrapper = button.closest('.backlog-sprint-tusk-wrapper');
+    const sprintId = sprintWrapper.dataset.sprintId;
+    const iconMap = {
+        task: 'icons/tusk.svg',
+        story: 'icons/history.svg',
+        bug: 'icons/bug.svg'
+    };
+
+    try {
+        const response = await fetch(`/api/sprint/${sprintId}/start`, {
+            method: 'POST'
+        });
+
+        if (!response.ok) {
+            throw new Error('Не удалось запустить спринт');
+
+        }
+
+        const kanbanTodoColumn = document.querySelector('.kanban .kanban-column:first-child .tusk-container');
+        const tasks = sprintWrapper.querySelectorAll('.task-wrap-container');
+
+        tasks.forEach(task => {
+            const taskType = task.querySelector('.task-type')?.src.includes('history') ? 'story' :
+                task.querySelector('.task-type')?.src.includes('bug') ? 'bug' : 'task';
+            const icon = iconMap[taskType] || 'icons/tusk.svg';
+            const taskKey = task.querySelector('.key')?.textContent || '';
+            const taskTitle = task.querySelector('.tusk-name')?.textContent || '';
+
+            const taskContentHTML = `
+                <div class="task-content">
+                    <div class="task-name">
+                        <span class="task-title">${taskTitle}</span>
+                    </div>
+                    <div class="tusk-bottom">
+                        <div class="tag-and-key">
+                            <img class="tag" src="${icon}">
+                            <span class="task-id">${taskKey}</span>
+                        </div>
+                        <button>
+                            <img class="performer" src="/icons/Group%205.svg">
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Создаём контейнер задачи и вставляем в колонку
+            const taskContainer = document.createElement('div');
+            taskContainer.innerHTML = taskContentHTML;
+            kanbanTodoColumn.appendChild(taskContainer.firstElementChild);
+        });
+
+        // Удаляем спринт из бэклога
+        sprintWrapper.remove();
+
+        // Переключаем отображение
+        document.getElementById('backlog').classList.remove('active-section');
+        document.getElementById('board').classList.add('active-section');
+
+    } catch (err) {
+        console.error('Ошибка при запуске спринта:', err);
+    }
+}
+
+
+// Логика для Drag-and-drop
 async function initTaskInputHandlers(scope = document) {
     scope.querySelectorAll('.task-title-bs').forEach(input => {
         if (input.dataset.handlerAttached === "true") return;
@@ -66,7 +133,7 @@ function renderTaskToSprint(task, sprintContainer) {
     <div class="task-wrap-container" draggable="true" data-task-id="${task.id}" data-sprint-id="${task.sprintId}">
         <div class="tusk-wrap">
             <div class="tusk-wrap-right">
-                <img src="${icon}">
+                <img  class="task-type" src="${icon}">
                 <div class="key-and-name">
                     <span class="key">${task.taskKey}</span>
                     <span class="tusk-name">${task.title}</span>
@@ -455,7 +522,7 @@ function renderSprint(sprint) {
         <button class="edit-sprint-btn">
           <img src="/icons/pepicons-pencil_dots-x.svg">
         </button>
-        <button class="start-project-btn" style="margin-right: 0px">Начать спринт</button>
+        <button class="start-project-btn" style="margin-right: 0px" onclick="startSprint(this)">Начать спринт</button>
       </div>
     </div>
 

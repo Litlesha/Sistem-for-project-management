@@ -14,4 +14,5 @@ public interface SprintService {
     public List<SprintEntity> getSprintByProjectId(Long projectId);
     List<SprintResponse> getSprintsByProjectId(Long projectId);
     void startSprint(Long sprintId);
+    SprintEntity getActiveSprint(Long projectId);
 }
