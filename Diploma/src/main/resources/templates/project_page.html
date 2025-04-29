@@ -12,35 +12,7 @@
 <body>
 <div th:replace="fragments/navbar.html"></div>
   <div class="project-container">
-    <!-- Навигация слева -->
-    <nav class="project-sidebar">
-      <h2 class="project-title" id="project-title">Загрузка...</h2>
-      <div class="project-nav">
-        <h3>Планирование</h3>
-        <ul>
-          <li>
-            <a href="#" class="nav-link active" data-section="backlog">
-              <img src="/icons/backlog.svg" alt="Бэклог" class="nav-icon">
-              Бэклог
-            </a>
-          </li>
-          <li>
-            <a href="#" class="nav-link" data-section="board">
-              <img src="/icons/board.svg" alt="Доска" class="nav-icon">
-              Доска
-            </a>
-          </li>
-          <li>
-            <a href="#" class="nav-link" data-section="chat">
-              <img src="/icons/chat.svg" alt="Доска" class="nav-icon">
-              Чат
-            </a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-  
-    <!-- Основной контент -->
+    <div th:replace="fragments/project-side-navigation.html"></div>
     <section id="backlog" class="section active-section">
       <main class="main-content">
         <!-- Заголовок страницы -->
@@ -69,7 +41,7 @@
             <span class="close" onclick="closeModal()">&times;</span>
             <h2 class="create-sprint-text">Создать спринт</h2>
             <input type="hidden" id="projectId">
-
+            <input type="hidden" id="sprintId">
             <label>Название спринта:</label>
             <input type="text" id="sprintName" placeholder="Введите название" required>
 
@@ -146,64 +118,6 @@
                 <input type="text" class="task-title-bs" placeholder="Название задачи" />
               </div>
             </div>
-          </div>
-        </div>
-      </main>
-    </section>
-    <section id="board" class="section">
-      <main class="main-content">
-        <div class="header-main">
-          <h1>Доска</h1>
-          <div class="main-content-complete-container">
-            <div class="duration-info">
-              <img src="/icons/clock.svg" alt="Иконка времени">
-              <p>14 дней</p>
-            </div>
-            <button class="complete-project-btn">Завершить спринт</button>
-          </div>
-        </div>
-        <div class="header-main-wrap">
-          <div class="top-bar">
-            <div class="search-bar">
-              <div class="search-field">
-                <img src="/icons/search.svg" alt="Поиск" class="search-icon">
-                <input type="text" class="search-input" placeholder="Поиск">
-              </div>
-            </div>
-            <div class="participants-icons">
-              <button class="add-participant-btn">
-                <img src="/icons/addUser.svg" alt="Добавить участника" class="add-icon">
-              </button>
-            </div>
-            <div class="filters">
-              <select class="filter-select">
-                <option value="">Все</option>
-                <option value="done">Завершённые</option>
-                <option value="in-progress">В процессе</option>
-                <option value="todo">К выполнению</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="kanban">
-          <div class="kanban-inner">
-          <div class="kanban-column">
-            <div class="kanban-column-name">
-              <span>В выполнению</span>
-            </div>
-            <div class="tusk-container">
-
-            </div>
-          </div>
-          <div class="kanban-column">
-
-          </div>
-          <div class="kanban-column"></div>
-          <div class="create-column-container">
-            <button class="create-column">
-              <img src="/icons/plus.svg">
-            </button>
-          </div>
           </div>
         </div>
       </main>

@@ -1,0 +1,76 @@
+.project-container {
+    display: flex;
+    height: 100vh;
+    background-color: #f9f9f9;
+    font-family: "IBM Plex Sans", sans-serif;
+}
+
+/* Навигация слева */
+.project-sidebar {
+    width: 250px;
+    position: fixed;
+    background-color: #ffffff;
+    border-right: 1px solid #DDDEDF;
+    padding: 20px;
+    height: calc(100vh - 75px);
+    top: 75px;
+    left: 0;
+    z-index: 1000; /* чтобы была поверх других элементов */
+    overflow-y: auto; /* если навигация длинная */
+}
+
+.project-title {
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 15px;
+    margin-bottom: 40px;
+    margin-top: 20px;
+    color: black;
+    opacity: 0.9;
+    letter-spacing: 0.2px;
+}
+
+.project-nav h3 {
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;
+    letter-spacing: 0.2px;
+    color: black;
+    opacity: 0.7;
+    margin-bottom: 20px;
+}
+
+.project-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.project-nav li {
+    margin-bottom: 10px;
+}
+
+.project-nav a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 14px;
+    opacity: 0.9;
+    letter-spacing: 0.2px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    gap: 10px;
+    margin-left: -12px;
+}
+
+.project-nav a:hover,
+.project-nav a:focus {
+    background-color:#e6f2ff;
+    color: #0055cc;
+}

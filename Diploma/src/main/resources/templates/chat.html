@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главная страница</title>
+  <link rel="stylesheet" th:href="@{/css/chat.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+<div class="project-container">
+  <div th:replace="fragments/project-side-navigation.html"></div>
+  <!-- Секция Чат -->
+  <section id="chat" class="section">
+    <div class="messenger">
+      <div class="chat-messages" id="chat-messages">
+      </div>
+    </div>
+    <div class="chat-input-wrap">
+      <label class="file-attach-label">
+        <input type="file" class="file-input" hidden>
+        <img src="/icons/send-file.svg" alt="Прикрепить файл" class="attach-icon">
+      </label>
+
+      <input type="text" class="chat-input" placeholder="Сообщение">
+
+      <button class="send-button">
+        <img src="/icons/send-message.svg" alt="Отправить">
+      </button>
+    </div>
+  </section>
+</div>
+<script th:src="@{/js/chat.js}"></script>
+</body>
+</html>

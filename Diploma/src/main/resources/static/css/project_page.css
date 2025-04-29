@@ -435,83 +435,6 @@ menu, ol, ul {
 }
 
 
-/* Контейнер всего проекта */
-.project-container {
-  display: flex;
-  height: 100vh;
-  background-color: #f9f9f9;
-  font-family: "IBM Plex Sans", sans-serif;
-}
-
-/* Навигация слева */
-.project-sidebar {
-  width: 250px;
-  position: fixed;
-  background-color: #ffffff;
-  border-right: 1px solid #DDDEDF;
-  padding: 20px;
-  height: calc(100vh - 75px);
-  top: 75px;
-  left: 0;
-  z-index: 1000; /* чтобы была поверх других элементов */
-  overflow-y: auto; /* если навигация длинная */
-}
-
-.project-title {
-  font-family: "IBM Plex Sans", serif;
-  font-weight: 500;
-  font-style: normal;
-  font-size: 15px;
-  margin-bottom: 40px;
-  margin-top: 20px;
-  color: black;
-  opacity: 0.9;
-  letter-spacing: 0.2px;
-}
-
-.project-nav h3 {
-  font-family: "IBM Plex Sans", serif;
-  font-weight: 400;
-  font-style: normal;
-  font-size: 16px;
-  letter-spacing: 0.2px;
-  color: black;
-  opacity: 0.7;
-  margin-bottom: 20px;
-}
-
-.project-nav ul {
-  list-style: none;
-  padding: 0;
-}
-
-.project-nav li {
-  margin-bottom: 10px;
-}
-
-.project-nav a {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: black;
-  font-family: "IBM Plex Sans", serif;
-  font-weight: 400;
-  font-style: normal;
-  font-size: 14px;
-  opacity: 0.9;
-  letter-spacing: 0.2px;
-  padding: 8px 12px;
-  border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s;
-  gap: 10px;
-  margin-left: -12px;
-}
-
-.project-nav a:hover,
-.project-nav a:focus {
-  background-color:#e6f2ff;
-  color: #0055cc;
-}
 
 /* Основной контент */
 .main-content {
@@ -541,39 +464,6 @@ menu, ol, ul {
 .header-main h1 {
   font-size: 28px;
   font-weight: 700;
-}
-.main-content-complete-container{
-  width: 25%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: "IBM Plex Sans", serif;
-  font-weight: 500;
-  font-style: normal;
-  font-size: 13px;
-  letter-spacing: 0.2px;
-  opacity: 0.9;
-}
-.complete-project-btn {
-  padding: 10px;
-  border-radius: 5px;
-  align-items: center;
-  background-color: #f0f0f0;
-  cursor: pointer;
-  font-family: "IBM Plex Sans", serif;
-  font-weight: 500;
-  font-style: normal;
-  font-size: 13px;
-  opacity: 0.9;
-  cursor: pointer;
-}
-.duration-info {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.complete-project-btn:hover {
-  background-color: #DCDFE4;
 }
 
 /* Планирование секция */
@@ -756,11 +646,7 @@ menu, ol, ul {
 .add-participant-btn:hover {
   background-color: #003d99;
 }
-.top-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+
 .add-icon {
   width: 16px;
   height: 16px;
@@ -776,120 +662,6 @@ menu, ol, ul {
   align-items: center;
   gap: 10px;
   flex: 1; /* Занимает всё доступное пространство */
-}
-.filters {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.filter-select {
-  padding: 8px 10px;
-  border: 1px solid #DDDEDF;
-  border-radius: 5px;
-  font-family: "IBM Plex Sans", serif;
-  font-size: 13px;
-  background-color: white;
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #3290ec;
-}
-.kanban{
-  display: flex;
-  flex-direction: column;
-  overflow-x: auto;
-  overflow-y: auto;
-  max-height: 400px;
-}
-.kanban-inner {
-  display: flex;
-  gap: 10px;
-  min-height: 100%;
-  flex-wrap: wrap;
-  align-content: stretch;
-}
-.kanban-column{
-  display: flex;
-  flex-direction: column;
-  width: 20%;
-  /*height: 100%;*/
-  min-height: 60vh;
-  align-items: center;
-  justify-content: flex-start;
-  border-radius: 5px;
-  background-color: white;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  gap: 2px;
-}
-.kanban-column-name{
-  display: flex;
-  width: 100%;
-  min-height: 3%;
-  position: static;
-  align-items: center;
-  justify-content: flex-start;
-  font-family: "IBM Plex Sans", serif;
-  font-weight: 500;
-  font-style: normal;
-  font-size: 15px;
-  letter-spacing: 0.2px;
-  opacity: 0.9;
-  padding-left: 20px;
-  padding-bottom: 5px;
-
-}
-.create-column-container{
-  display: flex;
-  position: relative;
-  width: 30px;
-  height: 30px;
-
-}
-.create-column{
-  position: absolute;
-  background-color: #D9D9D9;
-  width: 100%;
-  align-items: center;
-  height: 100%;
-  border-radius: 5px;
-}
-.create-column:hover{
-  background-color: #C6C6C6;
-}
-.create-column:active{
-  background-color: #8B8B8B;
-}
-
-.tusk-container{
-  display: flex;
-  flex-direction: column;
-  /* position: relative; */
-  width: 90%;
-  /*height: 100%;*/
-  align-items: flex-start;
-  transition: 0.2s ease;
-  gap: 2px;
-}
-
-.task-content {
-  display: flex;
-  position: relative;
-  flex-direction: column;
-  width: 100%;
-  gap: 15px;
-  padding: 10px;
-  box-sizing: border-box;
-  border-radius: 5px;
-  border: 1px solid #DDDEDF;
-}
-.task-content:hover {
-  background-color: #dddedf;
-  cursor: pointer;
 }
 .task-name {
   display: flex;
@@ -939,49 +711,8 @@ menu, ol, ul {
   display: flex;
   gap: 5px;
 }
-header-main-wrap{
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000; /* чтобы перекрывала остальной контент */
-  background-color: #fff; /* или другой фон, чтобы контент под ней не просвечивал */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* легкая тень для отделения */
-}
 
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100vh; /* чат занимает весь экран */
-  border: 1px solid #ddd;
-  overflow: hidden;
-  background: #fff;
-}
 
-.chat-messages {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  overflow-y: auto;
-  height: 100%;
-}
-
-.chat-input {
-  flex: 1;
-  padding: 10px 14px;
-  border-radius: 5px; /* круглый стиль */
-  font-size: 14px;
-  outline: none;
-
-}
-
-.file-attach-label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
 
 .attach-icon {
   width: 20px;
@@ -992,92 +723,6 @@ header-main-wrap{
   background-color: #DCDFE4;
 }
 
-.send-button {
-  background: none;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  width: 30px;
-  height: 30px;
-  transition: 0.2s ease;
-  display: flex
-;
-  align-items: center;
-  justify-content: center;
-  padding-right: 3px;
-}
-
-.send-button img {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-}
-.send-button:hover {
-  background-color: #DCDFE4;
-
-}
-.messenger {
-  position: fixed;
-  top: 75px; /* как margin-top: 75px */
-  left: 250px; /* как margin-left: 250px */
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: calc(100% - 250px); /* с учётом сайдбара */
-  height: calc(100% - 75px); /* с учётом хедера */
-  overflow: auto;
-}
-
-
-.chat-input-wrap {
-  display: flex;
-  width: 81%;
-  height: 40px;
-  align-items: center;
-  margin-bottom: 50px;
-  margin-top: 10px;
-  gap: 10px;
-  box-sizing: border-box;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-}
-
-
-.chat-input-wrap {
-  position: fixed;
-  bottom: 0;
-  background: white;
-  padding: 15px;
-  border-top: 1px solid #eee;
-  z-index: 10;
-}
-
-.chat-message {
-  max-width: 60%;
-  padding: 10px 14px;
-  border-radius: 16px;
-  font-size: 14px;
-  line-height: 1.4;
-  word-break: break-word;
-  display: inline-block;
-  position: relative;
-}
-
-/* Сообщения отправленные пользователем */
-.sent {
-  background-color: #DCF8C6;
-  align-self: flex-end;
-  text-align: right;
-}
-
-/* Сообщения полученные от других */
-.received {
-  background-color: #FFFFFF;
-  align-self: flex-start;
-  text-align: left;
-}
 .modal1 {
   display: none;
   position: fixed;
@@ -1192,10 +837,47 @@ header-main-wrap{
   padding:5px;
   border-radius: 5px;
   transition: background-color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  position: relative;
 }
 .edit-sprint-btn:hover{
   background-color: #DCDFE4;
 }
+.edit-sprint-wrapper {
+  position: relative; /* Чтобы меню позиционировалось относительно кнопки */
+  display: inline-block;
+}
+
+.dropdown-menu-sprint {
+  position: absolute;
+  top: 100%; /* Появляется сразу под кнопкой */
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  z-index: 1000;
+  display: none; /* Изначально скрыто */
+  min-width: 150px;
+  padding: 5px 0;
+}
+
+.dropdown-menu-sprint button {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 10px 15px;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dropdown-menu-sprint button:hover {
+  background-color: #f0f0f0; /* Подсветка при наведении */
+}
+
+
 .sprint-wrap-header{
   display: flex;
   flex-direction: row;

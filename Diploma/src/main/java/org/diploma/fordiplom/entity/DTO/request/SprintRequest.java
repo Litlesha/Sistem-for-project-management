@@ -14,8 +14,8 @@ public class SprintRequest {
     private Long projectId;
     private boolean isActive;
 
-    public SprintRequest(Long id, @Size(max = 100) @NotNull String sprintName, Boolean isActive) {
-    }
+//    public SprintRequest(Long id, String sprintName, Boolean isActive) {
+//    }
 
     public boolean isActive() {
         return isActive;

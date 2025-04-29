@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главная страница</title>
+  <link rel="stylesheet" th:href="@{/css/project-side-navigation.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+
+
+    <nav class="project-sidebar">
+      <h2 class="project-title" id="project-title">Загрузка...</h2>
+      <div class="project-nav">
+        <h3>Планирование</h3>
+        <ul>
+          <li>
+            <a href="#" class="nav-link active" data-section="backlog">
+              <img src="/icons/backlog.svg" alt="Бэклог" class="nav-icon">
+              Бэклог
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" data-section="board">
+              <img src="/icons/board.svg" alt="Доска" class="nav-icon">
+              Доска
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" data-section="chat">
+              <img src="/icons/chat.svg" alt="Доска" class="nav-icon">
+              Чат
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+<script th:src="@{/js/project-side-navigation.js}"></script>
+</body>
+</html>

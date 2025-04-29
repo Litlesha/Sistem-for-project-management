@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <link rel="stylesheet" th:href="@{/css/board.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+<div class="project-container">
+    <div th:replace="fragments/project-side-navigation.html"></div>
+    <section id="board" class="section">
+        <main class="main-content">
+            <div class="header-main">
+                <h1>Доска</h1>
+                <div class="main-content-complete-container">
+                    <div class="duration-info">
+                        <img src="/icons/clock.svg" alt="Иконка времени">
+                        <p>14 дней</p>
+                    </div>
+                    <button class="complete-project-btn">Завершить спринт</button>
+                </div>
+            </div>
+            <div class="header-main-wrap">
+                <div class="top-bar">
+                    <div class="search-bar">
+                        <div class="search-field">
+                            <img src="/icons/search.svg" alt="Поиск" class="search-icon">
+                            <input type="text" class="search-input" placeholder="Поиск">
+                        </div>
+                    </div>
+                    <div class="participants-icons">
+                        <button class="add-participant-btn">
+                            <img src="/icons/addUser.svg" alt="Добавить участника" class="add-icon">
+                        </button>
+                    </div>
+                    <div class="filters">
+                        <select class="filter-select">
+                            <option value="">Все</option>
+                            <option value="done">Завершённые</option>
+                            <option value="in-progress">В процессе</option>
+                            <option value="todo">К выполнению</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="kanban">
+                <div class="kanban-inner">
+                    <div class="kanban-column">
+                        <div class="kanban-column-name">
+                            <span>В выполнению</span>
+                        </div>
+                        <div class="tusk-container">
+
+                        </div>
+                    </div>
+                    <div class="kanban-column">
+
+                    </div>
+                    <div class="kanban-column"></div>
+                    <div class="create-column-container">
+                        <button class="create-column">
+                            <img src="/icons/plus.svg">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+</div>
+<script th:src="@{/js/board.js}"></script>
+</body>
+</html>

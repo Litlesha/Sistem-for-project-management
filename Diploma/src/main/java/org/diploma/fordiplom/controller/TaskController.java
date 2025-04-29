@@ -29,7 +29,7 @@ public class TaskController {
     }
 
 
-    @GetMapping("/api/project/{projectId}/backlog_tasks")
+    @GetMapping("/api/project/{projectId}/backlog/backlog_tasks")
     public List<TaskEntity> getBacklogTasks(@PathVariable Long projectId) {
         return taskService.getBackLogTasksByProjectId(projectId);
     }
@@ -40,7 +40,7 @@ public class TaskController {
 //    }
 
 
-    @GetMapping("/sprint_tasks/{sprintId}")
+    @GetMapping("/sprint_tasks/backlog/{sprintId}")
     public List<TaskDTO> getTasksBySprintId(@PathVariable Long sprintId) {
         List<TaskEntity> tasks = taskService.getTasksBySprintId(sprintId);
 

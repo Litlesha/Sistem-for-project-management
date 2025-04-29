@@ -36,8 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 projects.forEach(project => {
                     const row = document.createElement('tr');
                     row.style.cursor = 'pointer';
-                    row.onclick = () => window.location.href = `/project_page?id=${project.id}`;
-
+                    row.onclick = () => window.location.href = `/project_page?id=${project.id}&section=backlog`;
                     // Ячейка с названием проекта
                     const nameCell = document.createElement('td');
                     nameCell.textContent = project.name;
@@ -65,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     viewBtn.innerHTML = '<img src="/icons/extramenu.svg">';
                     viewBtn.onclick = (e) => {
                         e.stopPropagation();
-                        window.location.href = `/project_page?id=${project.id}`;
+                        window.location.href = `/project_page?id=${project.id}&section=backlog`;
                     };
                     actionCell.appendChild(viewBtn);
 

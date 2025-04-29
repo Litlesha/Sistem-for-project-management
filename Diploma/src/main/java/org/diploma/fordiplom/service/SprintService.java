@@ -10,9 +10,8 @@ import java.util.List;
 public interface SprintService {
     SprintEntity createSprint(SprintRequest request);
     SprintEntity getSprintById(Long id);
-    SprintEntity updateSprint(SprintEntity sprint);
     public List<SprintEntity> getSprintByProjectId(Long projectId);
     List<SprintResponse> getSprintsByProjectId(Long projectId);
     void startSprint(Long sprintId);
-    SprintEntity getActiveSprint(Long projectId);
+    SprintEntity updateSprint(Long sprintId, SprintRequest request);
 }

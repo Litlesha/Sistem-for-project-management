@@ -24,7 +24,7 @@ public class ProjectController {
     public ProjectEntity createNewProject(@RequestBody ProjectRequest projectRequest, Principal principal) {
         return projectService.createProject(projectRequest, principal.getName());
     }
-    @GetMapping("/api/project/{id}")
+    @GetMapping("/api/project/{id}/backlog")
     public ResponseEntity<ProjectEntity> getProjectById(@PathVariable Long id) {
         ProjectEntity project = projectService.getProjectById(id);
         if (project != null) {
@@ -33,6 +33,16 @@ public class ProjectController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/api/project/{id}/board")
+    public ResponseEntity<ProjectEntity> getProjectBoardById(@PathVariable Long id) {
+        ProjectEntity project = projectService.getProjectById(id);
+        if (project != null) {
+            return ResponseEntity.ok(project);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping(path="/api/projects")
     public List<ProjectEntity> getProjectsByUser(Principal principal) {
         String currentUserEmail = principal.getName(); // получаем email текущего пользователя

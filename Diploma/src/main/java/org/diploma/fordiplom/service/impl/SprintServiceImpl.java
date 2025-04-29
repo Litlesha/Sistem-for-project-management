@@ -17,11 +17,13 @@ import java.util.List;
 @Service
 public class SprintServiceImpl implements SprintService {
 
-    @Autowired private SprintRepository sprintRepository;
+    @Autowired
+    private SprintRepository sprintRepository;
     @Autowired
     private ProjectService projectService;
     @Autowired
     TaskRepository taskRepository;
+
 
     @Override
     public SprintEntity createSprint(SprintRequest request){
@@ -33,10 +35,18 @@ public class SprintServiceImpl implements SprintService {
         sprintEntity.setEndDate(request.getEndDate());
         ProjectEntity project = projectService.getProjectById(request.getProjectId());
         sprintEntity.setProject(project);
+        sprintEntity.setIsActive(false);
         return sprintRepository.save(sprintEntity);
     }
     @Override
-    public SprintEntity updateSprint(SprintEntity sprint){return null;}
+    public SprintEntity updateSprint(Long sprintId, SprintRequest request){
+        SprintEntity updSprint = sprintRepository.findById(sprintId).get();
+        updSprint.setSprintName(request.getSprintName());
+        updSprint.setGoal(request.getGoal());
+        updSprint.setDuration(request.getDuration());
+        updSprint.setStartDate(request.getStartDate());
+        updSprint.setEndDate(request.getEndDate());
+        return sprintRepository.save(updSprint);}
     @Override
     public SprintEntity getSprintById(Long id){return sprintRepository.findById(id).orElse(null);}
     @Override
@@ -71,9 +81,5 @@ public class SprintServiceImpl implements SprintService {
         dto.setGoal(entity.getGoal());
         dto.setDuration(entity.getDuration());
         return dto;
-    }
-    public SprintEntity getActiveSprint(Long projectId) {
-        return sprintRepository.findByProjectIdAndIsActiveTrue(projectId);
-
     }
 }
