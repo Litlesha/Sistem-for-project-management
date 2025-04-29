@@ -5,6 +5,7 @@ import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.SprintRequest;
 import org.diploma.fordiplom.entity.DTO.request.TaskLocationUpdateRequest;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
+import org.diploma.fordiplom.entity.DTO.request.TaskStatusUpdateRequest;
 import org.diploma.fordiplom.entity.SprintEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.service.SprintService;
@@ -62,5 +63,11 @@ public class TaskController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при обновлении задачи");
         }
+
+    }
+    @PostMapping("/update_status")
+    public ResponseEntity<?> updateStatus(@RequestBody TaskStatusUpdateRequest request) {
+        taskService.updateStatus(request.getTaskId(), request.getStatus());
+        return ResponseEntity.ok().build();
     }
 }

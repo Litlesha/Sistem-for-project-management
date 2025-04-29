@@ -96,5 +96,14 @@ public class TaskServiceImpl implements TaskService {
 
         taskRepository.save(task); // Сохраняем обновлённую задачу
     }
+
+    @Override
+    public void updateStatus(Long taskId, String status) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Задача не найдена"));
+
+        task.setStatus(status);
+        taskRepository.save(task);
     }
+}
 

@@ -14,4 +14,5 @@ public interface TaskService {
     List<TaskEntity> getTasksBySprintId(Long sprintId);
     List<TaskEntity> getBackLogTasksByProjectId(Long projectId);
     void updateTaskLocation(Long taskId, Long sprintId);
+    void updateStatus(Long taskId, String status);
 }
