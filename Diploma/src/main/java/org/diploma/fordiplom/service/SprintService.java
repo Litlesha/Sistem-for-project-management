@@ -1,5 +1,6 @@
 package org.diploma.fordiplom.service;
 
+import org.diploma.fordiplom.entity.DTO.SprintDTO;
 import org.diploma.fordiplom.entity.DTO.request.SprintRequest;
 import org.diploma.fordiplom.entity.DTO.response.SprintResponse;
 import org.diploma.fordiplom.entity.SprintEntity;
@@ -14,4 +15,5 @@ public interface SprintService {
     List<SprintResponse> getSprintsByProjectId(Long projectId);
     void startSprint(Long sprintId);
     SprintEntity updateSprint(Long sprintId, SprintRequest request);
+    SprintDTO getActiveSprintWithTasks(Long projectId);
 }

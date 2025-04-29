@@ -1,5 +1,6 @@
 package org.diploma.fordiplom.service.impl;
 
+import org.diploma.fordiplom.entity.DTO.SprintDTO;
 import org.diploma.fordiplom.entity.DTO.request.SprintRequest;
 import org.diploma.fordiplom.entity.DTO.response.SprintResponse;
 import org.diploma.fordiplom.entity.ProjectEntity;
@@ -47,6 +48,24 @@ public class SprintServiceImpl implements SprintService {
         updSprint.setStartDate(request.getStartDate());
         updSprint.setEndDate(request.getEndDate());
         return sprintRepository.save(updSprint);}
+
+    @Override
+    public SprintDTO getActiveSprintWithTasks(Long projectId) {
+        SprintEntity activeSprint = sprintRepository.findActiveSprintByProjectId(projectId)
+                .orElseThrow(() -> new RuntimeException("Активный спринт не найден"));
+
+        List<TaskEntity> tasks = taskRepository.findBySprintId(activeSprint.getId());
+
+        // Создаём DTO для активного спринта
+        SprintDTO sprintDTO = new SprintDTO(activeSprint.getId(), activeSprint.getSprintName(), activeSprint.getStartDate(),
+                activeSprint.getEndDate(), activeSprint.getGoal(), activeSprint.getDuration(), activeSprint.getIsActive());
+
+        // Преобразуем задачи в список DTO (если нужно)
+        sprintDTO.setTasks(tasks);  // Нужно создать соответствующий TaskDTO, если нужно преобразовать TaskEntity в DTO
+
+        return sprintDTO;
+    }
+
     @Override
     public SprintEntity getSprintById(Long id){return sprintRepository.findById(id).orElse(null);}
     @Override

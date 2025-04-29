@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.diploma.fordiplom.entity.SprintEntity;
+import org.diploma.fordiplom.entity.TaskEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class SprintDTO{
 private Long id;
@@ -15,6 +17,16 @@ private LocalDateTime endDate;
 private String goal;
 private Integer duration;
 private Boolean isActive;
+
+    public List<TaskEntity> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<TaskEntity> tasks) {
+        this.tasks = tasks;
+    }
+
+    private List<TaskEntity> tasks;
 
     public SprintDTO(Long id, String sprintName, LocalDateTime startDate, LocalDateTime endDate, String goal, Integer duration, Boolean isActive) {
         this.id = id;

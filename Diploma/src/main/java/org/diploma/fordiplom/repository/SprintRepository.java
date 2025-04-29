@@ -6,10 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SprintRepository extends JpaRepository<SprintEntity, Long> {
-    @Query ("SELECT s FROM SprintEntity s JOIN s.project p WHERE p.id = :id_project")
+    @Query("SELECT s FROM SprintEntity s JOIN s.project p WHERE p.id = :id_project AND (s.isActive IS NULL OR s.isActive = false)")
     List<SprintEntity> findByProjectId(@Param("id_project") Long id_project);
-
-    <T> SprintEntity findByProjectIdAndIsActiveTrue(long projectId);
+    @Query("SELECT s FROM SprintEntity s WHERE s.project.id = :projectId AND s.isActive = true")
+    Optional<SprintEntity> findActiveSprintByProjectId(@Param("projectId") Long projectId);
 }

@@ -10,6 +10,7 @@ import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.service.SprintService;
 import org.diploma.fordiplom.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +48,15 @@ public class SprintController {
     public SprintEntity updateSprint(@PathVariable Long sprintId, @RequestBody SprintRequest request) {
         return sprintService.updateSprint(sprintId, request);
         }
+    @GetMapping("/api/sprint/active/{projectId}")
+    public ResponseEntity<SprintDTO> getActiveSprintWithTasks(@PathVariable Long projectId) {
+        try {
+            SprintDTO sprintDTO = sprintService.getActiveSprintWithTasks(projectId);
+            return ResponseEntity.ok(sprintDTO);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
     }
 
 

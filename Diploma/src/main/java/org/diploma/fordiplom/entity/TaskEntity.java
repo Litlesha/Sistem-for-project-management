@@ -55,7 +55,7 @@ public class TaskEntity {
     @JoinColumn(name = "assigned_user_id")
     private UserEntity assignedUser;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sprint_id")
     private SprintEntity sprint;
     @ManyToOne(fetch = FetchType.EAGER)

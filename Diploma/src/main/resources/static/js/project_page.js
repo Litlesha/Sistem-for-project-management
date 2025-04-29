@@ -2,11 +2,7 @@
 async function startSprint(button) {
     const sprintWrapper = button.closest('.backlog-sprint-tusk-wrapper');
     const sprintId = sprintWrapper.dataset.sprintId;
-    const iconMap = {
-        task: 'icons/tusk.svg',
-        story: 'icons/history.svg',
-        bug: 'icons/bug.svg'
-    };
+    const { projectId } = getProjectIdAndSectionFromUrl();
 
     try {
         const response = await fetch(`/api/sprint/${sprintId}/start`, {
@@ -15,53 +11,18 @@ async function startSprint(button) {
 
         if (!response.ok) {
             throw new Error('Не удалось запустить спринт');
-
         }
-
-        const kanbanTodoColumn = document.querySelector('.kanban .kanban-column:first-child .tusk-container');
-        const tasks = sprintWrapper.querySelectorAll('.task-wrap-container');
-
-        tasks.forEach(task => {
-            const taskType = task.querySelector('.task-type')?.src.includes('history') ? 'story' :
-                task.querySelector('.task-type')?.src.includes('bug') ? 'bug' : 'task';
-            const icon = iconMap[taskType] || 'icons/tusk.svg';
-            const taskKey = task.querySelector('.key')?.textContent || '';
-            const taskTitle = task.querySelector('.tusk-name')?.textContent || '';
-
-            const taskContentHTML = `
-                <div class="task-content">
-                    <div class="task-name">
-                        <span class="task-title">${taskTitle}</span>
-                    </div>
-                    <div class="tusk-bottom">
-                        <div class="tag-and-key">
-                            <img class="tag" src="${icon}">
-                            <span class="task-id">${taskKey}</span>
-                        </div>
-                        <button>
-                            <img class="performer" src="/icons/Group%205.svg">
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            // Создаём контейнер задачи и вставляем в колонку
-            const taskContainer = document.createElement('div');
-            taskContainer.innerHTML = taskContentHTML;
-            kanbanTodoColumn.appendChild(taskContainer.firstElementChild);
-        });
 
         // Удаляем спринт из бэклога
         sprintWrapper.remove();
 
-        // Переключаем отображение
-        document.getElementById('backlog').classList.remove('active-section');
-        document.getElementById('board').classList.add('active-section');
-
+        // Перенаправляем на страницу доски
+        window.location.href = `/project_page?id=${projectId}&section=board`;
     } catch (err) {
         console.error('Ошибка при запуске спринта:', err);
     }
 }
+
 
 
 // Логика для Drag-and-drop
@@ -354,28 +315,6 @@ function initCreateTaskButtons(scope = document) {
 document.addEventListener("DOMContentLoaded", () => {
     initCreateTaskButtons();
 })
-//
-// async function loadProjectData() {
-//     const projectId = getProjectIdFromUrl();
-//     if (!projectId) {
-//         document.getElementById("project-title").textContent = "Проект не найден";
-//         return;
-//     }
-//
-//     try {
-//         const response = await fetch(`/api/project/${projectId}/backlog`);
-//         if (!response.ok) throw new Error("Проект не найден");
-//
-//         const project = await response.json();
-//         document.getElementById("project-title").textContent = project.name;
-//     } catch (err) {
-//         console.error(err);
-//         document.getElementById("project-title").textContent = "Ошибка загрузки проекта";
-//     }
-// }
-//
-// window.addEventListener("DOMContentLoaded", loadProjectData);
-
 
 function openModal() {
     document.getElementById("sprintModal").style.display = "block";
