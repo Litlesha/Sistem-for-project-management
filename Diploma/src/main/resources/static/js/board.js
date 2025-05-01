@@ -153,8 +153,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectId = getProjectIdFromUrl();
     if (projectId) {
         loadActiveSprint(projectId);
-        loadSprintInfo(projectId)
+        loadSprintInfo(projectId);
     }
+
+    const searchInput = document.querySelector(".search-input-board");
+    let searchTimeout = null;
+
+    searchInput.addEventListener("input", async (e) => {
+        const query = e.target.value.trim();
+
+        // Очищаем предыдущий таймер
+        if (searchTimeout) clearTimeout(searchTimeout);
+
+        searchTimeout = setTimeout(async () => {
+            const projectId = getProjectIdFromUrl();
+
+            // Если строка поиска пуста — перезагружаем все задачи
+            if (!query) {
+                console.log("Строка поиска пуста — загружаем все задачи снова");
+                const columns = document.querySelectorAll(".kanban-column");
+                columns.forEach(column => {
+                    const container = column.querySelector(".tusk-container");
+                    container.querySelectorAll(".task-content").forEach(el => el.remove());
+                });
+                loadActiveSprint(projectId);
+                return;
+            }
+
+            // Если введён текст — ищем
+            console.log("Поиск начался...");
+            const sprintId = await getActiveSprintId(projectId);
+            if (!sprintId) return;
+
+            try {
+                const res = await fetch(`/api/sprint/${sprintId}/search?projectId=${projectId}&query=${encodeURIComponent(query)}`);
+                if (!res.ok) {
+                    console.error("Ошибка поиска задач");
+                    return;
+                }
+
+                const tasks = await res.json();
+                console.log("Найденные задачи:", tasks);
+
+                renderSearchResults(tasks);
+            } catch (err) {
+                console.error("Ошибка во время выполнения поиска:", err);
+            }
+        }, 400); // Задержка 400 мс
+    });
 });
 
 // создание задачи на доске
@@ -353,6 +399,82 @@ function setupCustomSelect(container) {
         });
     });
 }
+// Поиск по доске
+
+
+async function getActiveSprintId(projectId) {
+    const res = await fetch(`/api/sprint/active/${projectId}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.id;
+}
+
+function renderSearchResults(tasks) {
+    const columns = document.querySelectorAll(".kanban-column");
+
+    // Очистить все контейнеры задач
+    columns.forEach(column => {
+        const container = column.querySelector(".tusk-container");
+        container.querySelectorAll(".task-content").forEach(el => el.remove());
+    });
+
+    const iconMap = {
+        task: 'icons/tusk.svg',
+        story: 'icons/history.svg',
+        bug: 'icons/bug.svg'
+    };
+
+    const query = document.querySelector(".search-input-board").value.trim().toLowerCase();
+
+    tasks.forEach(task => {
+        const column = [...columns].find(col => {
+            const name = col.querySelector(".kanban-column-name").textContent.trim();
+            return name === task.status;
+        });
+
+        if (!column) return;
+
+        const container = column.querySelector(".tusk-container");
+
+        // Подсветка совпадений в названии задачи
+        const titleLower = task.title.toLowerCase();
+        const matchIndex = titleLower.indexOf(query);
+        let highlightedTitle = task.title;
+
+        if (matchIndex !== -1 && query.length > 0) {
+            const before = task.title.slice(0, matchIndex);
+            const match = task.title.slice(matchIndex, matchIndex + query.length);
+            const after = task.title.slice(matchIndex + query.length);
+            highlightedTitle = `${before}<span class="highlight">${match}</span>${after}`;
+        }
+
+        const html = `
+            <div class="task-content" draggable="true" data-task-id="${task.id}">
+                <div class="task-name">
+                    <span class="task-title">${highlightedTitle}</span>
+                </div>
+                <div class="tusk-bottom">
+                    <div class="tag-and-key">
+                        <img class="tag" src="${iconMap[task.taskType] || 'icons/tusk.svg'}">
+                        <span class="task-id">${task.taskKey}</span>
+                    </div>
+                    <button>
+                        <img class="performer" src="/icons/Group%205.svg">
+                    </button>
+                </div>
+            </div>
+        `;
+
+        const taskElement = document.createElement("div");
+        taskElement.innerHTML = html;
+
+        const addButton = column.querySelector(".add-task-btn");
+        column.querySelector(".tusk-container").insertBefore(taskElement.firstElementChild, addButton);
+    });
+}
+
+
+
 
 
 

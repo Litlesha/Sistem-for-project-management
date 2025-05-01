@@ -7,7 +7,7 @@ public class TaskDTO {
     private String title;
     private Long sprintId;
     private String taskType;
-
+    private String Status;
     private String taskKey;
 
     public String getTaskType() {
@@ -26,12 +26,13 @@ public class TaskDTO {
         this.taskKey = taskKey;
     }
 
-    public TaskDTO(Long id, String title, Long sprintId, String taskKey, String taskType) {
+    public TaskDTO(Long id, String title, Long sprintId, String taskKey, String taskType, String status) {
         this.id = id;
         this.title = title;
         this.sprintId = sprintId;
         this.taskKey = taskKey;
         this.taskType = taskType;
+        this.Status = status;
     }
 
     public Long getId() {
@@ -56,5 +57,13 @@ public class TaskDTO {
 
     public void setSprintId(Long sprintId) {
         this.sprintId = sprintId;
+    }
+
+    public String getStatus() {
+        return Status;
+    }
+
+    public void setStatus(String status) {
+        Status = status;
     }
 }

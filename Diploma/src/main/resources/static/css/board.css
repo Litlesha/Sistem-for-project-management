@@ -1068,3 +1068,6 @@ menu, ol, ul {
 .task-form:hover{
     background-color: white;
 }
+.highlight {
+    background-color: #CFE1FD;
+}

@@ -10,4 +10,13 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {    @Qu
     List<String> findTaskKeysByProjectKey(@Param("projectKey") String projectKey);
     List<TaskEntity> findBySprintId(Long sprintId);
     List<TaskEntity> findByProject_IdAndSprintIsNull(Long projectId);
+    @Query("""
+    SELECT t FROM TaskEntity t
+    WHERE LOWER(t.title) LIKE LOWER(CONCAT(:query, '%'))
+      AND t.project.id = :projectId
+      AND t.sprint.id = :sprintId
+""")
+    List<TaskEntity> searchInSprint(@Param("query") String query,
+                                    @Param("projectId") Long projectId,
+                                    @Param("sprintId") Long sprintId);
 }

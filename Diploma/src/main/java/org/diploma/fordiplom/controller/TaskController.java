@@ -51,7 +51,8 @@ public class TaskController {
                         task.getTitle(),
                         task.getSprint() != null ? task.getSprint().getId() : null,
                         task.getTaskKey(),
-                        task.getTaskType()
+                        task.getTaskType(),
+                        task.getStatus()
                 ))
                 .collect(Collectors.toList());
     }
@@ -69,5 +70,31 @@ public class TaskController {
     public ResponseEntity<?> updateStatus(@RequestBody TaskStatusUpdateRequest request) {
         taskService.updateStatus(request.getTaskId(), request.getStatus());
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/api/sprint/{sprintId}/search")
+    public ResponseEntity<List<TaskEntity>> searchTasksInSprint(
+            @PathVariable Long sprintId,
+            @RequestParam Long projectId,
+            @RequestParam String query) {
+        List<TaskEntity> tasks = taskService.searchTasksInSprint(query, projectId, sprintId);
+        return ResponseEntity.ok(tasks);
+    }
+    @GetMapping("/api/sprint/{sprintId}/tasks")
+    public ResponseEntity<List<TaskDTO>> getTasksBySprintIdBoard(@PathVariable Long sprintId) {
+        List<TaskEntity> tasks = taskService.getTasksBySprintId(sprintId);
+        if (tasks.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<TaskDTO> taskDTOs = tasks.stream()
+                .map(task -> new TaskDTO(
+                        task.getId(),
+                        task.getTitle(),
+                        task.getSprint() != null ? task.getSprint().getId() : null,
+                        task.getStatus(),
+                        task.getTaskKey(),
+                        task.getTaskType()
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(taskDTOs);
     }
 }

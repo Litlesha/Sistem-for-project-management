@@ -106,5 +106,8 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus(status);
         taskRepository.save(task);
     }
+    public List<TaskEntity> searchTasksInSprint(String query, Long projectId, Long sprintId) {
+        return taskRepository.searchInSprint(query, projectId, sprintId);
+    }
 }
 
