@@ -32,6 +32,7 @@ public class TaskServiceImpl implements TaskService {
         task.setTitle(request.getTitle());
         task.setTaskType(request.getTask_type());
         task.setTaskKey(keyGenerator(request));
+        task.setStatus(request.getStatus());
         if (request.getSprintId() != null) {
             SprintEntity sprint = sprintService.getSprintById(request.getSprintId());
             task.setSprint(sprint);

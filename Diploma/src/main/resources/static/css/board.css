@@ -816,7 +816,6 @@ menu, ol, ul {
     display: flex;
     flex-direction: column;
     width: 20%;
-    /*height: 100%;*/
     min-height: 60vh;
     align-items: center;
     justify-content: flex-start;
@@ -825,6 +824,39 @@ menu, ol, ul {
     padding-top: 10px;
     padding-bottom: 10px;
     gap: 2px;
+}
+.add-task-btn {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    /*display: none;*/
+    /*visibility: hidden;*/
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    align-self: center;
+    width: 100%;
+}
+.on-board{
+    font-family: "IBM Plex Sans", sans-serif;
+    letter-spacing: 0.2px;
+    display: flex;
+    justify-content: flex-start;
+    margin: 0;
+    background-color: white;
+}
+
+.kanban-column:hover .add-task-btn {
+    /*display: block;*/
+    /*visibility: visible;*/
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.add-task-btn:hover {
+    background-color: #DCDFE4;
 }
 .kanban-column-name{
     display: flex;
@@ -843,6 +875,7 @@ menu, ol, ul {
     padding-bottom: 5px;
 
 }
+
 .create-column-container{
     display: flex;
     position: relative;
@@ -938,4 +971,100 @@ menu, ol, ul {
 .tag-and-key{
     display: flex;
     gap: 5px;
+}
+.task-type-select select {
+    padding: 5px;
+    font-size: 14px;
+}
+
+.task-title-bs {
+    font-family: "IBM Plex Sans", sans-serif;
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+    outline:none;
+}
+.task-title-bs::placeholder{
+    font-weight: lighter;
+}
+.custom-select {
+    position: relative;
+    border-radius: 5px;
+}
+.custom-select:hover{
+    background-color: #DCDFE4;
+}
+
+.selected-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.selected-option .content {
+    display: flex;
+    align-items: center;
+}
+
+.selected-option .content img {
+    margin-right: 8px;
+}
+
+.selected-option .content span {
+    display: none; /* Скрыто изначально */
+}
+.optionsbacklog {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    /*display: none;*/
+    width: 110px;
+    margin-left: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+.option {
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.option:hover {
+    background-color: #f0f0f0;
+}
+
+.arrow img {
+    transition: transform 0.3s;
+}
+
+.arrow.open img {
+    transform: rotate(180deg);
+}
+.task-content:focus-within {
+    border: 2px solid #3290ec;
+    border-radius: 5px;
+}
+.save-task-btn{
+    border: 1px solid #DCDFE4;
+    border-radius: 5px;
+    display: flex;
+}
+.save-task-btn:hover{
+    background-color: #DCDFE4;
+}
+.select-create-wrap-board{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-form:hover{
+    background-color: white;
 }

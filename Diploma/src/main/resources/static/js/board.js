@@ -31,8 +31,9 @@ function initKanbanDragAndDrop() {
 
             const dropTarget = e.target.closest('.task-content');
 
-            if (!dropTarget) {
-                container.appendChild(taskElement);
+            if (!dropTarget || dropTarget.classList.contains('add-task-btn')) {
+                const addButton = container.querySelector('.add-task-btn');
+                container.insertBefore(taskElement, addButton); // вставка ПЕРЕД кнопкой
             } else if (dropTarget !== taskElement) {
                 container.insertBefore(taskElement, dropTarget);
             }
@@ -72,7 +73,6 @@ async function loadActiveSprint(projectId) {
         if (!response.ok) {
             throw new Error('Не удалось загрузить активный спринт');
         }
-
         const sprintData = await response.json();
         const { tasks } = sprintData;
 
@@ -86,7 +86,7 @@ async function loadActiveSprint(projectId) {
         tasks.forEach(task => {
             const icon = iconMap[task.taskType] || 'icons/tusk.svg';
             const statusColumn = task.status; // Предполагаем, что статус хранится в поле task.status
-
+            if (!task.status) return;
             const taskContentHTML = `
                 <div class="task-content" draggable="true" data-task-id="${task.id}">
                     <div class="task-name">
@@ -109,7 +109,8 @@ async function loadActiveSprint(projectId) {
 
             // Находим колонку по статусу задачи
             const kanbanColumn = document.querySelector(columnMap[statusColumn]);
-            kanbanColumn.appendChild(taskContainer.firstElementChild);
+            const addButton = kanbanColumn.querySelector('.add-task-btn');
+            kanbanColumn.insertBefore(taskContainer.firstElementChild, addButton);
             const taskElement = kanbanColumn.querySelector(`[data-task-id="${task.id}"]`);
             taskElement.addEventListener("dragstart", handleDragStart);
         });
@@ -123,9 +124,236 @@ function getProjectIdFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('id');
 }
+
+// Загрузка данных спринта
+async function loadSprintInfo(projectId) {
+    try {
+        const response = await fetch(`/api/sprint/active/${projectId}`);
+        if (!response.ok) {
+            throw new Error('Не удалось загрузить данные о спринте');
+        }
+
+        const sprintData = await response.json();
+        const sprintName = sprintData.sprintName || "Спринт какой по списку был создан";
+        const startDate = new Date(sprintData.startDate);
+        const endDate = new Date(sprintData.endDate);
+        const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+        // Отображаем название и длительность
+        document.getElementById('sprint-name').textContent = `${sprintName}`;
+        document.getElementById('sprint-duration').textContent = `${duration} дней`;
+    } catch (error) {
+        console.error(error);
+        document.getElementById('sprint-name').textContent = "Спринт";
+        document.getElementById('sprint-duration').textContent = "Длительность:";
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const projectId = getProjectIdFromUrl();
     if (projectId) {
         loadActiveSprint(projectId);
+        loadSprintInfo(projectId)
     }
 });
+
+// создание задачи на доске
+function createTaskFormBoard() {
+    const formContainer = document.createElement("div");
+    formContainer.className = "task-content task-form";
+
+    formContainer.innerHTML = `
+        <input type="text" class="task-title-bs" placeholder="Введите что хотите сделать" />
+        <div class="select-create-wrap-board">
+        <div class="task-type-select">
+            <div class="custom-select">
+                <div class="selected-option">
+                    <div class="content">
+                        <img src="/icons/tusk.svg" alt="иконка задачи" />
+                        <span class="selected-text">Задача</span>
+                    </div>
+                    <div class="arrow">
+                        <img src="/icons/mingcute_down-line.svg" />
+                    </div>
+                </div>
+                <div class="optionsbacklog" style="display: none;">
+                    <div class="option" data-value="task">
+                        <img src="/icons/tusk.svg" alt="иконка задачи" />
+                        <span class="option-text">Задача</span>
+                    </div>
+                    <div class="option" data-value="story">
+                        <img src="/icons/history.svg" alt="иконка истории" />
+                        <span class="option-text">История</span>
+                    </div>
+                    <div class="option" data-value="bug">
+                        <img src="/icons/bug.svg" alt="иконка бага" />
+                        <span class="option-text">Баг</span>
+                    </div>
+                </div>
+                <input type="hidden" name="taskType" class="task-type-input" value="task" />
+            </div>
+        </div>
+              <button class="save-task-btn">
+               <img src="/icons/enter.svg"> 
+            </button>
+        </div>
+    `;
+
+    return formContainer;
+}
+
+document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".add-task-btn");
+    if (!btn) return;
+
+    const column = btn.closest(".kanban-column");
+
+    // Если форма уже есть — не добавляем
+    if (column.querySelector(".task-form")) return;
+
+    const form = createTaskFormBoard();
+    column.querySelector(".tusk-container").insertBefore(form, btn);
+
+    form.querySelector(".task-title-bs").focus();
+
+    setupCustomSelect(form);
+    form.querySelector(".save-task-btn").addEventListener("click", async () => {
+
+        const title = form.querySelector(".task-title-bs").value.trim();
+        const taskType = form.querySelector(".task-type-input").value;
+
+        if (!title) {
+            alert("Введите название задачи");
+            return;
+        }
+
+        const status = column.querySelector(".kanban-column-name").textContent.trim();
+        const projectId = getProjectIdFromUrl();
+
+        const sprintRes = await fetch(`/api/sprint/active/${projectId}`);
+        if (!sprintRes.ok) {
+            alert("Ошибка загрузки активного спринта");
+            return;
+        }
+
+        const sprint = await sprintRes.json();
+
+        const newTask = {
+            title: title,
+            task_type: taskType,
+            sprintId: sprint.id,
+            projectId: projectId,
+            status: status
+        };
+
+        const createRes = await fetch("/create_task", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newTask)
+        });
+
+        if (!createRes.ok) {
+            alert("Ошибка создания задачи");
+            return;
+        }
+
+        const taskData = await createRes.json();
+
+        const iconMap = {
+            task: 'icons/tusk.svg',
+            story: 'icons/history.svg',
+            bug: 'icons/bug.svg'
+        };
+
+        const taskContentHTML = `
+        <div class="task-content" draggable="true" data-task-id="${taskData.id}">
+            <div class="task-name">
+                <span class="task-title">${taskData.title}</span>
+            </div>
+            <div class="tusk-bottom">
+                <div class="tag-and-key">
+                    <img class="tag" src="${iconMap[taskData.taskType] || 'icons/tusk.svg'}">
+                    <span class="task-id">${taskData.taskKey}</span>
+                </div>
+                <button>
+                    <img class="performer" src="/icons/Group%205.svg">
+                </button>
+            </div>
+        </div>
+    `;
+
+        const taskContainer = document.createElement("div");
+        taskContainer.innerHTML = taskContentHTML;
+
+        const addButton = column.querySelector(".add-task-btn");
+        column.querySelector(".tusk-container").insertBefore(taskContainer.firstElementChild, addButton);
+
+        const taskElement = column.querySelector(`[data-task-id="${taskData.id}"]`);
+        taskElement.addEventListener("dragstart", handleDragStart);
+
+        // Убираем форму
+        form.remove();
+        addButton.style.display = "flex";
+    });
+
+
+    btn.style.display = "none";
+
+    // Отключаем hover эффекты для кнопок внутри колонки
+
+    // Удаление формы при клике вне
+    document.addEventListener("click", function handler(event) {
+        if (!form.contains(event.target) && event.target !== btn) {
+            form.remove();
+            btn.style.display = "flex";
+
+            // Восстанавливаем hover эффекты для кнопок
+
+            document.removeEventListener("click", handler);
+        }
+    });
+
+});
+
+function setupCustomSelect(container) {
+    const select = container.querySelector(".custom-select");
+    const selected = select.querySelector(".selected-option");
+    const options = select.querySelector(".optionsbacklog");
+    const input = select.querySelector(".task-type-input");
+    const textSpan = select.querySelector(".selected-text");
+    const iconImg = select.querySelector(".selected-option .content img");
+
+    selected.addEventListener("click", () => {
+        const isVisible = options.style.display === "block";
+
+        // Перед открытием: скрыть выбранную опцию
+        const currentValue = input.value;
+        options.querySelectorAll(".option").forEach(option => {
+            option.style.display = option.dataset.value === currentValue ? "none" : "flex";
+        });
+
+        options.style.display = isVisible ? "none" : "block";
+        selected.querySelector(".arrow").classList.toggle("open", !isVisible);
+    });
+
+    options.querySelectorAll(".option").forEach(option => {
+        option.addEventListener("click", () => {
+            const value = option.dataset.value;
+            const text = option.querySelector(".option-text").textContent;
+            const icon = option.querySelector("img").src;
+
+            input.value = value;
+            textSpan.textContent = text;
+            iconImg.src = icon;
+
+            options.style.display = "none";
+            selected.querySelector(".arrow").classList.remove("open");
+        });
+    });
+}
+
+
+
+
