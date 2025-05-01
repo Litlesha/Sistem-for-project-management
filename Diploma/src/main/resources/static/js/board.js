@@ -139,9 +139,12 @@ async function loadSprintInfo(projectId) {
         const endDate = new Date(sprintData.endDate);
         const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
-        // Отображаем название и длительность
+        // Отображаем название спринта
         document.getElementById('sprint-name').textContent = `${sprintName}`;
-        document.getElementById('sprint-duration').textContent = `${duration} дней`;
+
+        // Запуск отсчета
+        startSprintCountdownDisplay(sprintData.startDate, duration);
+
     } catch (error) {
         console.error(error);
         document.getElementById('sprint-name').textContent = "Спринт";
@@ -471,6 +474,31 @@ function renderSearchResults(tasks) {
         const addButton = column.querySelector(".add-task-btn");
         column.querySelector(".tusk-container").insertBefore(taskElement.firstElementChild, addButton);
     });
+}
+
+// Длительность спринта
+function startSprintCountdownDisplay(startDateStr, durationInDays) {
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(startDate.getTime() + durationInDays * 24 * 60 * 60 * 1000);
+
+    function updateCountdown() {
+        const now = new Date();
+        const diff = endDate - now;
+
+        const durationElement = document.getElementById('sprint-duration');
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+
+        // Форматируем с ведущим нулём
+        const formatted = `${days} дней ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        durationElement.textContent = formatted;
+
+        setTimeout(updateCountdown, 60 * 1000); // обновляем каждую минуту
+    }
+
+    updateCountdown();
 }
 
 
