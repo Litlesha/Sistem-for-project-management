@@ -1,6 +1,8 @@
 package org.diploma.fordiplom.service.impl;
 
 
+import jakarta.persistence.EntityNotFoundException;
+import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.entity.SprintEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
@@ -108,6 +110,11 @@ public class TaskServiceImpl implements TaskService {
     }
     public List<TaskEntity> searchTasksInSprint(String query, Long projectId, Long sprintId) {
         return taskRepository.searchInSprint(query, projectId, sprintId);
+    }
+
+    @Override
+    public TaskEntity getTaskById(Long id) {
+       return taskRepository.findById(id).get();
     }
 }
 

@@ -2,13 +2,10 @@ package org.diploma.fordiplom.controller;
 
 
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
-import org.diploma.fordiplom.entity.DTO.request.SprintRequest;
 import org.diploma.fordiplom.entity.DTO.request.TaskLocationUpdateRequest;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.entity.DTO.request.TaskStatusUpdateRequest;
-import org.diploma.fordiplom.entity.SprintEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
-import org.diploma.fordiplom.service.SprintService;
 import org.diploma.fordiplom.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,6 +53,7 @@ public class TaskController {
                 ))
                 .collect(Collectors.toList());
     }
+
     @PostMapping("/update_task_location")
     public ResponseEntity<?> updateTaskLocation(@RequestBody TaskLocationUpdateRequest request) {
         try {
@@ -66,11 +64,13 @@ public class TaskController {
         }
 
     }
+
     @PostMapping("/update_status")
     public ResponseEntity<?> updateStatus(@RequestBody TaskStatusUpdateRequest request) {
         taskService.updateStatus(request.getTaskId(), request.getStatus());
         return ResponseEntity.ok().build();
     }
+
     @GetMapping("/api/sprint/{sprintId}/search")
     public ResponseEntity<List<TaskEntity>> searchTasksInSprint(
             @PathVariable Long sprintId,
@@ -79,6 +79,7 @@ public class TaskController {
         List<TaskEntity> tasks = taskService.searchTasksInSprint(query, projectId, sprintId);
         return ResponseEntity.ok(tasks);
     }
+
     @GetMapping("/api/sprint/{sprintId}/tasks")
     public ResponseEntity<List<TaskDTO>> getTasksBySprintIdBoard(@PathVariable Long sprintId) {
         List<TaskEntity> tasks = taskService.getTasksBySprintId(sprintId);
@@ -96,5 +97,11 @@ public class TaskController {
                 ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(taskDTOs);
+    }
+
+    @GetMapping("/api/tasks/{id}")
+    public ResponseEntity<TaskEntity> getTaskById(@PathVariable Long id) {
+        TaskEntity task = taskService.getTaskById(id);
+        return ResponseEntity.ok(task);
     }
 }

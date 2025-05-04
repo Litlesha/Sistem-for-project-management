@@ -2,6 +2,8 @@ package org.diploma.fordiplom.entity.DTO;
 
 import org.diploma.fordiplom.entity.TaskEntity;
 
+import java.security.Timestamp;
+
 public class TaskDTO {
     private Long id;
     private String title;
@@ -9,6 +11,55 @@ public class TaskDTO {
     private String taskType;
     private String Status;
     private String taskKey;
+    private String description;
+    private String priority;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
+
+    public TaskDTO(Long id, String title, Long sprintId, String taskType, String status, String taskKey, String description, String priority, Timestamp createdAt, Timestamp updatedAt) {
+        this.id = id;
+        this.title = title;
+        this.sprintId = sprintId;
+        this.taskType = taskType;
+        this.Status = status;
+        this.taskKey = taskKey;
+        this.description = description;
+        this.priority = priority;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getTaskType() {
         return taskType;

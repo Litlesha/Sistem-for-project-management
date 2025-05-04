@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tiny.cloud/1/echsbgwhmwfpf0hrwm2yabgagdjujrtgnuksgo7xosxv01l4/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
 <body>
 <div th:replace="fragments/navbar.html"></div>
@@ -78,7 +79,7 @@
                         </div>
                     </div>
                     <div class="create-column-container">
-                        <button class="create-column">
+                        <button  id="add-column-btn" class="create-column">
                             <img src="/icons/plus.svg">
                         </button>
                     </div>
@@ -86,6 +87,165 @@
             </div>
         </main>
     </section>
+    <div id="modal-container"></div>
+    <template id="task-modal-template">
+        <div class="task-modal-overlay">
+            <div class="task-modal-container">
+                <div class="task-top-content">
+                    <div class="task-key-info">
+                        <img src="icons/green-tusk-tag.svg">
+                        <span>KEYS-1</span>
+                    </div>
+                    <div class="task-buttons">
+                        <button class="close-modal">×</button>
+                    </div>
+                </div>
+                <div class="task-modal-wrapper">
+                    <div class="task-content-left">
+                        <span class="task-title-modal">Название задачи</span>
+                        <button type="button" class="add-file">
+                            <img src="/icons/plus.svg">
+                            <span>Добавить файл</span>
+                        </button>
+                        <div class="description-container">
+                            <h2>Описание</h2>
+                            <span>Здесь будет описание задачи</span>
+                        </div>
+                        <div class="task-action">
+                            <h2>Активность</h2>
+                            <div class="action-nav">
+                                <ul>
+                                    <li>
+                                        <button data-target="comments-section">Комментарии</button>
+                                    </li>
+                                    <li>
+                                        <button data-target="history-section">История</button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="activity-content">
+                                <div class="comments-section section" style="display: none;">
+                                    <form method="post">
+                                        <textarea id="comments"></textarea>
+                                    </form>
+                                    <div class="comment-container">
+                                        <div class="section-grid section-photo">
+                                            <img src="icons/Group%205.svg">
+                                        </div>
+                                        <div class="section-grid section-void"></div>
+                                        <div class="section-grid section-comment">
+                                            <div class="sender-info">
+                                                <span class="sender-name">Винисиус Джуниор Реал Мадрид</span>
+                                                <span>4 мая 2025 г. в 10:08</span>
+                                            </div>
+                                            <div class="comment-message">
+                                                Здесь будет текст, написанный отправителем
+                                            </div>
+                                        </div>
+                                        <div class="section-grid section-actions">
+                                            <button class="comment-btn edit">Изменить</button>
+                                            <button class="comment-btn delete">Удалить</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="history-section section" style="display: none;">
+                                    <div class="grid-container-history">
+                                        <div class="section-photo-history">
+                                            <img src="icons/Group%205.svg">
+                                        </div>
+                                        <div class="section-action-history">
+                                            <div class="action-container">
+                                                <span>Винисиус Джуниор</span>
+                                                <span>обновил</span>
+                                                <span class="bold">Метки</span>
+                                                <span>5 минут назад</span>
+                                            </div>
+                                        </div>
+                                        <div class="section-actin-show-history">
+                                            <div class="actions-show">
+                                                <span class="action-before">Нет</span>
+                                                <img src="/icons/arrow-right.svg">
+                                                <span class="action-after">Метка 1</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-content-right">
+                        <select class="select-status">
+                            <option>К выполнению</option>
+                            <option>В работе</option>
+                            <option>Выполнено</option>
+                        </select>
+                        <div class="info-container">
+                            <span class="info-header">Сведения</span>
+                            <div class="info-inner">
+                                <div class="info-tag-inner">
+                                    <span>Исполнитель</span>
+                                    <div class="tags-container">
+                                        <div class="user-div">
+                                            <img src="icons/Group%205.svg">
+                                            <span>Винисиус Джуниор dasfd asdf asdf a</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="info-tag-inner">
+                                    <span>Команда</span>
+                                    <div class="tags-container">
+                                        <span>Название команды</span>
+                                    </div>
+                                </div>
+                                <div class="info-tag-inner">
+                                    <span>Метки</span>
+                                    <div class="tags-container">
+                                        <div class="tags-tags">
+                                            <span>Метка 1</span>
+                                            <span>Метка 2</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="info-tag-inner">
+                                    <span>Доска</span>
+                                    <div class="tags-container">
+                                        <span>Доска Спринт 1</span>
+                                    </div>
+                                </div>
+                                <div class="info-tag-inner">
+                                    <span>Сложность</span>
+                                    <div class="tags-container">
+                                        <span class="difficulty">10</span>
+                                    </div>
+                                </div>
+                                <div class="info-tag-inner">
+                                    <span>Автор</span>
+                                    <div class="tags-container">
+                                        <div class="user-div">
+                                            <img src="icons/Group%205.svg">
+                                            <span>Винисиус Джуниор dasfd asdf asdf a</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="task-time-info">
+                            <div class="createdAt">
+                                <span>Создано</span>
+                                <span>4 мая 2025 г. в 11:29</span>
+                            </div>
+                            <div class="editedAt">
+                                <span>Изменено</span>
+                                <span>4 мая 2025 г. в 11:30</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>
 <script th:src="@{/js/board.js}"></script>
 </body>

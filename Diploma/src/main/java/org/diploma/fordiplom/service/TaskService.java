@@ -1,6 +1,7 @@
 package org.diploma.fordiplom.service;
 
 
+import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.entity.TaskEntity;
 import org.springframework.stereotype.Service;
@@ -16,4 +17,5 @@ public interface TaskService {
     void updateTaskLocation(Long taskId, Long sprintId);
     void updateStatus(Long taskId, String status);
     List<TaskEntity> searchTasksInSprint(String query, Long projectId, Long sprintId);
+    TaskEntity getTaskById(Long taskId);
 }

@@ -173,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Если строка поиска пуста — перезагружаем все задачи
             if (!query) {
-                console.log("Строка поиска пуста — загружаем все задачи снова");
                 const columns = document.querySelectorAll(".kanban-column");
                 columns.forEach(column => {
                     const container = column.querySelector(".tusk-container");
@@ -184,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Если введён текст — ищем
-            console.log("Поиск начался...");
             const sprintId = await getActiveSprintId(projectId);
             if (!sprintId) return;
 
@@ -196,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const tasks = await res.json();
-                console.log("Найденные задачи:", tasks);
 
                 renderSearchResults(tasks);
             } catch (err) {
@@ -402,9 +399,10 @@ function setupCustomSelect(container) {
         });
     });
 }
+
+
+
 // Поиск по доске
-
-
 async function getActiveSprintId(projectId) {
     const res = await fetch(`/api/sprint/active/${projectId}`);
     if (!res.ok) return null;
@@ -500,6 +498,109 @@ function startSprintCountdownDisplay(startDateStr, durationInDays) {
 
     updateCountdown();
 }
+
+// работа с задачей
+document.addEventListener('click', (event) => {
+    const container = event.target.closest('.task-content');
+    if (!container) return;
+
+    const taskId = container.getAttribute('data-task-id');
+    if (!taskId) {
+        console.error('ID задачи не найден в data-task-id');
+        return;
+    }
+
+    // Загружаем задачу с сервера
+    fetch(`/api/tasks/${taskId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Не удалось загрузить задачу');
+            }
+            return response.json();
+        })
+        .then(task => {
+            // Открываем модалку с полученными данными
+            openTaskModal(task);
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Ошибка при загрузке задачи');
+        });
+});
+
+function openTaskModal(task) {
+    const template = document.getElementById('task-modal-template');
+    const modal = template.content.cloneNode(true);
+
+    const containerEl = document.getElementById('modal-container');
+    containerEl.innerHTML = '';
+    containerEl.appendChild(modal);
+
+    // Заполняем данные
+    containerEl.querySelector('.task-key-info span').textContent = task.taskKey;
+    containerEl.querySelector('.task-title-modal').textContent = task.title;
+    containerEl.querySelector('.description-container span').textContent = task.description || 'Нет описания';
+    containerEl.querySelector('.difficulty').textContent = task.priority;
+    containerEl.querySelector('.select-status').value = task.status;
+
+    const createdAt = new Date(task.createdAt).toLocaleString('ru-RU');
+    const updatedAt = new Date(task.updatedAt).toLocaleString('ru-RU');
+
+    containerEl.querySelector('.createdAt span:nth-child(2)').textContent = createdAt;
+    containerEl.querySelector('.editedAt span:nth-child(2)').textContent = updatedAt;
+
+    // Обработчик закрытия
+    containerEl.querySelector('.close-modal').addEventListener('click', () => {
+        tinymce.remove();
+        containerEl.innerHTML = '';
+    });
+
+    // Обработчики переключения комментарии / история
+    containerEl.querySelectorAll('.action-nav button').forEach(button => {
+        button.addEventListener('click', () => {
+            const target = button.getAttribute('data-target');
+            const taskAction = button.closest('.task-action');
+
+            taskAction.querySelectorAll('.activity-content .section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            const toShow = taskAction.querySelector(`.${target}`);
+            if (toShow) {
+                toShow.style.display = 'block';
+
+                if (target === 'comments-section') {
+                    initTinyMCEIfNeeded();
+                }
+            }
+        });
+    });
+
+    // Инициализация комментариев, если они сразу видны
+    initTinyMCEIfNeeded();
+
+    function initTinyMCEIfNeeded() {
+        const textarea = containerEl.querySelector('#comments');
+        if (textarea && !textarea.classList.contains('tinymce-initialized')) {
+            tinymce.init({
+                selector: '#comments',
+                menubar: false,
+                plugins: 'lists link emoticons table image media',
+                toolbar: 'undo redo | bold italic underline | forecolor backcolor | bullist numlist | link emoticons | alignleft aligncenter alignright | image table media',
+                setup: (editor) => {
+                    editor.on('init', () => {
+                        textarea.classList.add('tinymce-initialized');
+                    });
+                },
+                width: '100%',
+                height: 150,
+                resize: false,
+                placeholder: 'Напишите ваш комментарий...',
+            });
+        }
+    }
+}
+
 
 
 
