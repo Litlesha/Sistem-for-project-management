@@ -1,6 +1,7 @@
 package org.diploma.fordiplom.service.impl;
 
 import org.diploma.fordiplom.entity.DTO.SprintDTO;
+import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.SprintRequest;
 import org.diploma.fordiplom.entity.DTO.response.SprintResponse;
 import org.diploma.fordiplom.entity.ProjectEntity;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SprintServiceImpl implements SprintService {
@@ -61,7 +63,10 @@ public class SprintServiceImpl implements SprintService {
                 activeSprint.getEndDate(), activeSprint.getGoal(), activeSprint.getDuration(), activeSprint.getIsActive());
 
         // Преобразуем задачи в список DTO (если нужно)
-        sprintDTO.setTasks(tasks);  // Нужно создать соответствующий TaskDTO, если нужно преобразовать TaskEntity в DTO
+        List<TaskDTO> taskDTOs = tasks.stream()
+                .map(TaskDTO::new)
+                .collect(Collectors.toList());
+        sprintDTO.setTasks(taskDTOs);  // Нужно создать соответствующий TaskDTO, если нужно преобразовать TaskEntity в DTO
 
         return sprintDTO;
     }

@@ -18,4 +18,6 @@ public interface TaskService {
     void updateStatus(Long taskId, String status);
     List<TaskEntity> searchTasksInSprint(String query, Long projectId, Long sprintId);
     TaskEntity getTaskById(Long taskId);
+    TaskEntity updateTaskTitle(Long taskId, String taskTitle);
+    TaskEntity updateTaskDescription(Long taskId, String taskDescription);
 }

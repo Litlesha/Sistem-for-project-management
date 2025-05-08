@@ -93,7 +93,7 @@
             <div class="task-modal-container">
                 <div class="task-top-content">
                     <div class="task-key-info">
-                        <img src="icons/green-tusk-tag.svg">
+                        <img class="task-type-icon" src="" alt="Тип задачи" />
                         <span>KEYS-1</span>
                     </div>
                     <div class="task-buttons">
@@ -102,15 +102,32 @@
                 </div>
                 <div class="task-modal-wrapper">
                     <div class="task-content-left">
-                        <span class="task-title-modal">Название задачи</span>
+                        <div class="task-title-wrapper">
+                            <span class="task-title-modal">Название задачи</span>
+
+                            <div class="edit-title-controls" style="display: none;">
+                                <input type="text" class="edit-title-input">
+                                <div class="edit-title-buttons">
+                                    <button class="save-title-btn">✔</button>
+                                    <button class="cancel-title-btn">✖</button>
+                                </div>
+                            </div>
+                        </div>
                         <button type="button" class="add-file">
                             <img src="/icons/plus.svg">
                             <span>Добавить файл</span>
                         </button>
-                        <div class="description-container">
-                            <h2>Описание</h2>
-                            <span>Здесь будет описание задачи</span>
-                        </div>
+                            <div class="description-container">
+                                <h2>Описание</h2>
+                                <span class="description-text">Здесь будет описание задачи</span>
+                                <div class="edit-description-controls" style="display: none;">
+                                    <textarea class="edit-description-textarea"></textarea>
+                                    <div class="edit-description-buttons">
+                                        <button class="save-description-btn">✔</button>
+                                        <button class="cancel-description-btn">✖</button>
+                                    </div>
+                                </div>
+                            </div>
                         <div class="task-action">
                             <h2>Активность</h2>
                             <div class="action-nav">

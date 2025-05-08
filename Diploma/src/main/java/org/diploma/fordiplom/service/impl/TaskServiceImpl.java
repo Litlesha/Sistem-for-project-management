@@ -6,15 +6,22 @@ import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.entity.SprintEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
+import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.repository.SprintRepository;
 import org.diploma.fordiplom.repository.TaskRepository;
+import org.diploma.fordiplom.repository.UserRepository;
 import org.diploma.fordiplom.service.ProjectService;
 import org.diploma.fordiplom.service.SprintService;
 import org.diploma.fordiplom.service.TaskService;
+import org.diploma.fordiplom.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.config.Task;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -27,6 +34,8 @@ public class TaskServiceImpl implements TaskService {
     private ProjectService projectService;
     @Autowired
     private SprintRepository sprintRepository;
+    @Autowired
+    private UserService userService;
 
     @Override
     public TaskEntity createTask(TaskRequest request){
@@ -35,6 +44,11 @@ public class TaskServiceImpl implements TaskService {
         task.setTaskType(request.getTask_type());
         task.setTaskKey(keyGenerator(request));
         task.setStatus(request.getStatus());
+        task.setCreatedAt(Instant.now());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        UserEntity author = userService.getUserByEmail(email);
+        task.setAssignedUser(author);
         if (request.getSprintId() != null) {
             SprintEntity sprint = sprintService.getSprintById(request.getSprintId());
             task.setSprint(sprint);
@@ -115,6 +129,23 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskEntity getTaskById(Long id) {
        return taskRepository.findById(id).get();
+    }
+
+    @Override
+    public TaskEntity updateTaskTitle(Long taskId, String taskTitle) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new EntityNotFoundException("Задача не найдена с id " + taskId));
+
+        task.setTitle(taskTitle);
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public TaskEntity updateTaskDescription(Long taskId, String taskDescription) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new EntityNotFoundException("Задача не найдена с id " + taskId));
+        task.setDescription(taskDescription);
+        return taskRepository.save(task);
     }
 }
 

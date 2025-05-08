@@ -527,35 +527,59 @@ document.addEventListener('click', (event) => {
             alert('Ошибка при загрузке задачи');
         });
 });
-
+// открытие окна задачи
 function openTaskModal(task) {
     const template = document.getElementById('task-modal-template');
     const modal = template.content.cloneNode(true);
-
     const containerEl = document.getElementById('modal-container');
     containerEl.innerHTML = '';
     containerEl.appendChild(modal);
 
-    // Заполняем данные
+    fillTaskModalData(containerEl, task);
+    setupCloseModal(containerEl);
+    setupSectionSwitching(containerEl);
+    setupTitleEdit(containerEl, task);
+    initTinyMCEIfNeeded(containerEl);
+    setupDescriptionEdit(containerEl, task);
+}
+//заполнение данных задачи из бд
+function fillTaskModalData(containerEl, task) {
     containerEl.querySelector('.task-key-info span').textContent = task.taskKey;
     containerEl.querySelector('.task-title-modal').textContent = task.title;
-    containerEl.querySelector('.description-container span').textContent = task.description || 'Нет описания';
+    containerEl.querySelector('.description-container span').textContent = task.description || 'Добавьте описание';
     containerEl.querySelector('.difficulty').textContent = task.priority;
     containerEl.querySelector('.select-status').value = task.status;
 
-    const createdAt = new Date(task.createdAt).toLocaleString('ru-RU');
-    const updatedAt = new Date(task.updatedAt).toLocaleString('ru-RU');
+    containerEl.querySelector('.createdAt span:nth-child(2)').textContent = new Date(task.createdAt).toLocaleString('ru-RU');
+    containerEl.querySelector('.editedAt span:nth-child(2)').textContent = new Date(task.updatedAt).toLocaleString('ru-RU');
 
-    containerEl.querySelector('.createdAt span:nth-child(2)').textContent = createdAt;
-    containerEl.querySelector('.editedAt span:nth-child(2)').textContent = updatedAt;
+    const taskTypeIconEl = containerEl.querySelector('.task-type-icon');
+    const iconMap = {
+        task: 'icons/tusk.svg',
+        story: 'icons/history.svg',
+        bug: 'icons/bug.svg'
+    };
+    taskTypeIconEl.src = iconMap[task.taskType] || iconMap.task;
 
-    // Обработчик закрытия
+    const boardEl = containerEl.querySelector('.info-tag-inner:nth-child(4) .tags-container span');
+    if (boardEl && task.sprintName) boardEl.textContent = task.sprintName;
+
+    const authorEl = containerEl.querySelector('.info-tag-inner:nth-child(6) .tags-container .user-div span');
+    if (authorEl) {
+        authorEl.textContent = task.authorName && task.authorName.trim() !== "Не назначено"
+            ? task.authorName
+            : task.authorEmail || "Неизвестен";
+    }
+}
+// кнопка закрытия окна
+function setupCloseModal(containerEl) {
     containerEl.querySelector('.close-modal').addEventListener('click', () => {
         tinymce.remove();
         containerEl.innerHTML = '';
     });
-
-    // Обработчики переключения комментарии / история
+}
+// переключение комментариев и истории
+function setupSectionSwitching(containerEl) {
     containerEl.querySelectorAll('.action-nav button').forEach(button => {
         button.addEventListener('click', () => {
             const target = button.getAttribute('data-target');
@@ -568,38 +592,131 @@ function openTaskModal(task) {
             const toShow = taskAction.querySelector(`.${target}`);
             if (toShow) {
                 toShow.style.display = 'block';
-
                 if (target === 'comments-section') {
-                    initTinyMCEIfNeeded();
+                    initTinyMCEIfNeeded(containerEl);
                 }
             }
         });
     });
+}
+// меняем название задачи
+function setupTitleEdit(containerEl, task) {
+    const titleSpan = containerEl.querySelector('.task-title-modal');
+    const editControls = containerEl.querySelector('.edit-title-controls');
+    const inputEl = editControls.querySelector('.edit-title-input');
+    const saveBtn = editControls.querySelector('.save-title-btn');
+    const cancelBtn = editControls.querySelector('.cancel-title-btn');
 
-    // Инициализация комментариев, если они сразу видны
-    initTinyMCEIfNeeded();
+    titleSpan.addEventListener('click', () => {
+        titleSpan.style.display = 'inline-block';
+        requestAnimationFrame(() => {
+            const spanRect = titleSpan.getBoundingClientRect();
+            inputEl.style.width = spanRect.width + 'px';
+            inputEl.value = titleSpan.textContent.trim();
+            titleSpan.style.display = 'none';
+            editControls.style.display = 'block';
+            inputEl.focus();
+        });
+    });
 
-    function initTinyMCEIfNeeded() {
-        const textarea = containerEl.querySelector('#comments');
-        if (textarea && !textarea.classList.contains('tinymce-initialized')) {
-            tinymce.init({
-                selector: '#comments',
-                menubar: false,
-                plugins: 'lists link emoticons table image media',
-                toolbar: 'undo redo | bold italic underline | forecolor backcolor | bullist numlist | link emoticons | alignleft aligncenter alignright | image table media',
-                setup: (editor) => {
-                    editor.on('init', () => {
-                        textarea.classList.add('tinymce-initialized');
-                    });
-                },
-                width: '100%',
-                height: 150,
-                resize: false,
-                placeholder: 'Напишите ваш комментарий...',
-            });
+    saveBtn.addEventListener('click', async () => {
+        const newTitle = inputEl.value.trim();
+        if (!newTitle || newTitle === task.title) {
+            cancelEdit();
+            return;
         }
+
+        try {
+            const response = await fetch(`/api/tasks/${task.id}/title`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: newTitle })
+            });
+
+            if (!response.ok) throw new Error('Ошибка при обновлении названия');
+            titleSpan.textContent = newTitle;
+            task.title = newTitle;
+        } catch (err) {
+            console.error(err);
+            alert('Не удалось обновить название задачи');
+        } finally {
+            cancelEdit();
+        }
+    });
+
+    cancelBtn.addEventListener('click', cancelEdit);
+
+    function cancelEdit() {
+        editControls.style.display = 'none';
+        titleSpan.style.display = 'inline-block';
     }
 }
+// инициализация tinyMCE
+function initTinyMCEIfNeeded(containerEl) {
+    const textarea = containerEl.querySelector('#comments');
+    if (textarea && !textarea.classList.contains('tinymce-initialized')) {
+        tinymce.init({
+            selector: '#comments',
+            menubar: false,
+            plugins: 'lists link emoticons table image media',
+            toolbar: 'undo redo | bold italic underline | forecolor backcolor | bullist numlist | link emoticons | alignleft aligncenter alignright | image table media',
+            setup: editor => {
+                editor.on('init', () => textarea.classList.add('tinymce-initialized'));
+            },
+            width: '100%',
+            height: 150,
+            resize: false,
+            placeholder: 'Напишите ваш комментарий...',
+        });
+    }
+}
+// Редактирование описания
+function setupDescriptionEdit(containerEl, task) {
+    const descriptionSpan = containerEl.querySelector('.description-text');
+    const editControls = containerEl.querySelector('.edit-description-controls');
+    const textarea = editControls.querySelector('.edit-description-textarea');
+    const saveBtn = editControls.querySelector('.save-description-btn');
+    const cancelBtn = editControls.querySelector('.cancel-description-btn');
+
+    // Переход в режим редактирования
+    descriptionSpan.addEventListener('click', () => {
+        textarea.value = task.description || '';
+        descriptionSpan.style.display = 'none';
+        editControls.style.display = 'block';
+        textarea.focus();
+    });
+
+    // Сохранение описания
+    saveBtn.addEventListener('click', async () => {
+        const newDescription = textarea.value.trim();
+        try {
+            const response = await fetch(`/api/tasks/${task.id}/description`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description: newDescription })
+            });
+
+            if (!response.ok) throw new Error('Ошибка при обновлении описания');
+
+            task.description = newDescription;
+            descriptionSpan.textContent = newDescription || 'Добавьте описание';
+        } catch (err) {
+            console.error(err);
+            alert('Не удалось обновить описание задачи');
+        } finally {
+            editControls.style.display = 'none';
+            descriptionSpan.style.display = 'inline-block';
+        }
+    });
+
+
+    // Отмена редактирования
+    cancelBtn.addEventListener('click', () => {
+        editControls.style.display = 'none';
+        descriptionSpan.style.display = 'inline-block';
+    });
+}
+
 
 
 

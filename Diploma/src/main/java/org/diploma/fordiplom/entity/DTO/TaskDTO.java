@@ -3,7 +3,6 @@ package org.diploma.fordiplom.entity.DTO;
 import org.diploma.fordiplom.entity.TaskEntity;
 
 import java.security.Timestamp;
-
 public class TaskDTO {
     private Long id;
     private String title;
@@ -27,6 +26,9 @@ public class TaskDTO {
         this.priority = priority;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public TaskDTO(TaskEntity taskEntity) {
     }
 
     public Timestamp getUpdatedAt() {

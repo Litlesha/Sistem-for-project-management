@@ -1,10 +1,10 @@
 package org.diploma.fordiplom.controller;
 
 
+import jakarta.validation.Valid;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
-import org.diploma.fordiplom.entity.DTO.request.TaskLocationUpdateRequest;
-import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
-import org.diploma.fordiplom.entity.DTO.request.TaskStatusUpdateRequest;
+import org.diploma.fordiplom.entity.DTO.request.*;
+import org.diploma.fordiplom.entity.DTO.response.TaskResponseDTO;
 import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,5 +103,19 @@ public class TaskController {
     public ResponseEntity<TaskEntity> getTaskById(@PathVariable Long id) {
         TaskEntity task = taskService.getTaskById(id);
         return ResponseEntity.ok(task);
+    }
+    @PutMapping("/api/tasks/{id}/title")
+    public ResponseEntity<TaskResponseDTO> updateTaskTitle(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateTaskTitleRequest request
+    ) {
+        TaskEntity updatedTask = taskService.updateTaskTitle(id, request.getTitle());
+        return ResponseEntity.ok(new TaskResponseDTO(updatedTask));
+    }
+    @PutMapping("/api/tasks/{id}/description")
+    public ResponseEntity<TaskResponseDTO> updateTaskDescription(@PathVariable Long id,
+                                                                 @RequestBody EditDescriptionRequest request){
+        TaskEntity updatedTask = taskService.updateTaskDescription(id, request.getDescription());
+        return ResponseEntity.ok(new TaskResponseDTO(updatedTask));
     }
 }
