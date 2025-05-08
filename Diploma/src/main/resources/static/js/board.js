@@ -534,13 +534,31 @@ function openTaskModal(task) {
     const containerEl = document.getElementById('modal-container');
     containerEl.innerHTML = '';
     containerEl.appendChild(modal);
-
+    containerEl.setAttribute('data-task-id', task.id);
     fillTaskModalData(containerEl, task);
     setupCloseModal(containerEl);
     setupSectionSwitching(containerEl);
     setupTitleEdit(containerEl, task);
     initTinyMCEIfNeeded(containerEl);
     setupDescriptionEdit(containerEl, task);
+    loadComments(task.id);
+    const submitBtn = containerEl.querySelector('#submit-comment-btn');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', () => {
+            const taskId = containerEl.getAttribute('data-task-id');
+            console.log('Task ID:', taskId);
+            submitComment(taskId); // Отправка комментария при клике
+        });
+    }
+    const commentsSection = containerEl.querySelector('.comments-section');
+    const historySection = containerEl.querySelector('.history-section');
+    if (commentsSection && historySection) {
+        commentsSection.style.display = 'block';
+        historySection.style.display = 'none';
+    }
+
+    const commentsBtn = containerEl.querySelector('button[data-target="comments-section"]');
+    if (commentsBtn) commentsBtn.classList.add('active');
 }
 //заполнение данных задачи из бд
 function fillTaskModalData(containerEl, task) {
@@ -654,14 +672,17 @@ function setupTitleEdit(containerEl, task) {
 // инициализация tinyMCE
 function initTinyMCEIfNeeded(containerEl) {
     const textarea = containerEl.querySelector('#comments');
+    const taskId = containerEl.getAttribute('data-task-id');
+
     if (textarea && !textarea.classList.contains('tinymce-initialized')) {
         tinymce.init({
-            selector: '#comments',
+            target: textarea, // безопаснее использовать target, чтобы не конфликтовать с другими
             menubar: false,
             plugins: 'lists link emoticons table image media',
             toolbar: 'undo redo | bold italic underline | forecolor backcolor | bullist numlist | link emoticons | alignleft aligncenter alignright | image table media',
             setup: editor => {
                 editor.on('init', () => textarea.classList.add('tinymce-initialized'));
+
             },
             width: '100%',
             height: 150,
@@ -716,6 +737,99 @@ function setupDescriptionEdit(containerEl, task) {
         descriptionSpan.style.display = 'inline-block';
     });
 }
+
+
+//работа с комментариями
+async function submitComment(taskId) {
+    const editor = tinymce.get('comments');  // Получаем редактор TinyMCE
+    const text = editor.getContent();  // Получаем содержимое редактора
+
+    if (!text.trim()) return;  // Если комментарий пустой, не отправляем
+
+    const response = await fetch(`/api/tasks/${taskId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })  // Отправляем только текст комментария
+    });
+
+    if (response.ok) {
+        const comment = await response.json();
+        console.log(comment);// Получаем комментарий с сервера
+        appendComment(comment);  // Добавляем комментарий на страницу
+        editor.setContent('');  // Очищаем редактор после отправки
+    } else {
+        alert('Ошибка при отправке комментария!');
+    }
+}
+
+async function loadComments(taskId) {
+    const response = await fetch(`/api/tasks/${taskId}/comments/active`);
+    if (response.ok) {
+        const comments = await response.json();
+        const list = document.querySelector('.comments-section .comments-list');
+        list.innerHTML = '';  // Очищаем комментарии
+        comments.forEach(comment => {
+            console.log(comment);  // Логируем каждый комментарий
+            appendComment(comment);
+        });
+    } else {
+        alert('Ошибка при загрузке комментариев!');
+    }
+}
+
+function appendComment(comment) {
+    const list = document.querySelector('.comments-section .comments-list');  // Теперь сюда вставляем
+    if (!comment.author) {
+        console.error("Author is missing in the comment:", comment);
+        return;
+    }
+
+
+    // Преобразуем строку даты в объект Date
+    const createdAt = new Date(comment.createdAt);
+
+    // Форматируем дату и время для отображения
+    const formattedDate = createdAt.toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+
+    const formattedTime = createdAt.toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    const commentBlock = document.createElement('div');
+    commentBlock.classList.add('comment-container');
+
+    commentBlock.innerHTML = `
+        <div class="section-grid section-photo">
+            <img src="icons/Group%205.svg" alt="Avatar">
+        </div>
+        <div class="section-grid section-void"></div>
+        <div class="section-grid section-comment">
+            <div class="sender-info">
+                <span class="sender-name">${comment.author.username || comment.author.email}</span>
+                <span>${formattedDate} в ${formattedTime}</span>
+            </div>
+            <div class="comment-message">
+                ${comment.text}
+            </div>
+        </div>
+        <div class="section-grid section-actions">
+            <button class="comment-btn edit">Изменить</button>
+            <button class="comment-btn delete">Удалить</button>
+        </div>
+    `;
+
+    // Вставляем новый комментарий в начало списка
+    list.insertBefore(commentBlock, list.firstChild);
+}
+
+
+
+
 
 
 
