@@ -10,6 +10,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -61,5 +63,12 @@ public class TaskEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
     private ProjectEntity project;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "task_tag", schema = "diploma",
+            joinColumns = @JoinColumn(name = "task_id", referencedColumnName = "id_tusk"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id_tag")
+    )
+    private Set<TagEntity> tags = new HashSet<>();
 
 }

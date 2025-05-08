@@ -1454,6 +1454,7 @@ menu, ol, ul {
     transition: 0.2s ease-in;
     border-radius: 5px;
     padding-block: 5px;
+    min-height: 25px;
 
 }
 .tags-container:hover{
@@ -1486,21 +1487,115 @@ menu, ol, ul {
     gap: 5px;
     flex-wrap: wrap;
 }
-.tags-tags span{
+.tag-item{
+    position: relative;  /* Для позиционирования крестика относительно тега */
+    display: inline-block;
     padding: 2px;
     transition: 0.2s ease-in;
     border-radius: 5px;
-    cursor: pointer;
+
 }
-.tags-tags span:hover{
+.tag-item:hover{
+    background-color: white;
+    border: 1px solid black;
+}
+.tag-remove-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+    font-size: 16px;
+    display: none; /* Скрыт по умолчанию */
+    border-radius: 5px;
+    transition: 0.2s ease-in;
+}
+.tag-remove-btn:hover{
     background-color: #C6C6C6;
 }
+.tag-container {
+    display: inline-flex;     /* Все метки расположены в одну строку */
+    flex-wrap: wrap;          /* Метки будут переноситься на новую строку при необходимости */
+    gap: 5px;
+}
+.tag-item {
+    display: inline-flex;     /* Чтобы метка и крестик располагались в одной строке */
+    align-items: center;      /* Выровнять элементы по вертикали */
+    padding-right: 15px;      /* Оставляем место справа для крестика */
+    cursor: pointer;         /* Для удобства кликабельности */
+    position: relative;       /* Для корректного позиционирования крестика */
+}
+.tag-item:hover .tag-remove-btn {
+    display: inline;  /* Показываем крестик при наведении */
+}
+
+.tag-input {
+    padding: 5px;
+    border-radius: 5px;
+    outline: none;
+    border: 1px solid #3290ec;
+}
+
+.tag-search-results {
+    margin-top: 10px;
+    max-height: 100px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+
+.tag-search-results div {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.tag-search-results div:hover {
+    background-color: #f0f0f0;
+}
+
 .difficulty{
     padding: 2px;
     border-radius: 5px;
     background-color: #D9D9D9;
+    cursor: pointer;
+}
+.difficulty-editor {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    width: 100%;
+}
+.difficulty-actions {
+    position: absolute;
+    right: 10px;
+    bottom: -40px;
+    margin-top: 5px;
+    display: none;
+    gap: 5px;
+    background-color: white;
+    padding: 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 10;
 }
 
+.difficulty-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+}
+
+.difficulty-input:focus {
+    border: 1px solid #3290ec;
+    outline: none;
+}
+
+.difficulty-actions button {
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
 .task-time-info{
     display: flex;
     flex-direction: column;

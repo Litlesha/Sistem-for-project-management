@@ -537,6 +537,10 @@ function openTaskModal(task) {
     containerEl.setAttribute('data-task-id', task.id);
     fillTaskModalData(containerEl, task);
     setupCloseModal(containerEl);
+    const difficultyBlock = containerEl.querySelector('.difficulty-block');
+    if (difficultyBlock) {
+        initDifficultyEditor(difficultyBlock,task);
+    }
     setupSectionSwitching(containerEl);
     setupTitleEdit(containerEl, task);
     initTinyMCEIfNeeded(containerEl);
@@ -546,7 +550,6 @@ function openTaskModal(task) {
     if (submitBtn) {
         submitBtn.addEventListener('click', () => {
             const taskId = containerEl.getAttribute('data-task-id');
-            console.log('Task ID:', taskId);
             submitComment(taskId); // Отправка комментария при клике
         });
     }
@@ -559,6 +562,8 @@ function openTaskModal(task) {
 
     const commentsBtn = containerEl.querySelector('button[data-target="comments-section"]');
     if (commentsBtn) commentsBtn.classList.add('active');
+    initializeTags(containerEl);
+    loadTagsForTask(task.id, containerEl);
 }
 //заполнение данных задачи из бд
 function fillTaskModalData(containerEl, task) {
@@ -580,8 +585,7 @@ function fillTaskModalData(containerEl, task) {
     taskTypeIconEl.src = iconMap[task.taskType] || iconMap.task;
 
     const boardEl = containerEl.querySelector('.info-tag-inner:nth-child(4) .tags-container span');
-    if (boardEl && task.sprintName) boardEl.textContent = task.sprintName;
-
+    if (boardEl && task.sprintName)  boardEl.textContent = task.sprintName;
     const authorEl = containerEl.querySelector('.info-tag-inner:nth-child(6) .tags-container .user-div span');
     if (authorEl) {
         authorEl.textContent = task.authorName && task.authorName.trim() !== "Не назначено"
@@ -737,8 +741,66 @@ function setupDescriptionEdit(containerEl, task) {
         descriptionSpan.style.display = 'inline-block';
     });
 }
+//Редактирование сложности
+function initDifficultyEditor(containerEl,task) {
+    const difficultyEl = containerEl.querySelector('.difficulty');
+    const difficultyEditor = containerEl.querySelector('.difficulty-editor');
+    const difficultyInput = containerEl.querySelector('.difficulty-input');
+    const saveButton = containerEl.querySelector('.save-difficulty');
+    const cancelButton = containerEl.querySelector('.cancel-difficulty');
+    const tagsContainer = containerEl.querySelector('.tags-container');
+    const actionsContainer = containerEl.querySelector('.difficulty-actions');
 
+    // Сброс состояния
+    difficultyEditor.style.display = 'none';
+    actionsContainer.style.display = 'none';
+    difficultyEl.style.display = 'inline';
 
+    // Клик по .tags-container (именно сложности)
+    tagsContainer.addEventListener('click', function () {
+        if (difficultyEditor.style.display === 'none') {
+            difficultyInput.value = difficultyEl.textContent.trim();
+            difficultyEl.style.display = 'none';
+            difficultyEditor.style.display = 'flex';
+            actionsContainer.style.display = 'flex';
+            difficultyInput.focus();
+        }
+    });
+
+    saveButton.addEventListener('click', function (event) {
+        event.stopPropagation();
+        const newPriority = difficultyInput.value;
+
+        fetch(`/api/tasks/${task.id}/priority`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ priority: newPriority })
+        })
+            .then(response => response.json())
+            .then(data => {
+                difficultyEl.textContent = data.priority;
+                difficultyEl.style.display = 'inline';
+                difficultyEditor.style.display = 'none';
+                actionsContainer.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error updating priority:', error);
+                alert('Не удалось обновить приоритет');
+            });
+    });
+
+    cancelButton.addEventListener('click', function (event) {
+        event.stopPropagation();
+        difficultyEditor.style.display = 'none';
+        actionsContainer.style.display = 'none';
+        difficultyEl.style.display = 'inline';
+    });
+
+    difficultyInput.addEventListener('click', e => e.stopPropagation());
+    difficultyEditor.addEventListener('click', e => e.stopPropagation());
+}
 //работа с комментариями
 async function submitComment(taskId) {
     const editor = tinymce.get('comments');  // Получаем редактор TinyMCE
@@ -754,7 +816,6 @@ async function submitComment(taskId) {
 
     if (response.ok) {
         const comment = await response.json();
-        console.log(comment);// Получаем комментарий с сервера
         appendComment(comment);  // Добавляем комментарий на страницу
         editor.setContent('');  // Очищаем редактор после отправки
     } else {
@@ -769,7 +830,6 @@ async function loadComments(taskId) {
         const list = document.querySelector('.comments-section .comments-list');
         list.innerHTML = '';  // Очищаем комментарии
         comments.forEach(comment => {
-            console.log(comment);  // Логируем каждый комментарий
             appendComment(comment);
         });
     } else {
@@ -827,7 +887,124 @@ function appendComment(comment) {
     list.insertBefore(commentBlock, list.firstChild);
 }
 
+//Работа с метками
+function initializeTags(containerEl) {
+    const tagsContainer = containerEl.querySelector('.task-tags-container');
+    const tagContainer = tagsContainer.querySelector('.tags-tags'); // ОДИН контейнер
+    const tagInput = tagsContainer.querySelector('.tag-input');
+    const tagSearchResults = tagsContainer.querySelector('.tag-search-results');
 
+    // Показать поле ввода
+    tagsContainer.addEventListener('click', function () {
+        if (tagInput.style.display === 'none') {
+            tagInput.style.display = 'block';
+            tagInput.focus();
+        }
+    });
+
+    // Добавление по Enter
+    tagInput.addEventListener('keypress', async function (event) {
+        if (event.key === 'Enter' && tagInput.value.trim() !== '') {
+            await addTag(tagInput.value.trim(), tagContainer);
+            tagInput.value = '';
+            tagInput.style.display = 'none';
+        }
+    });
+
+    // Поиск
+    tagInput.addEventListener('input', async function () {
+        const searchTerm = tagInput.value.trim();
+        if (searchTerm.length > 0) {
+            const response = await fetch(`/api/tags/search?query=${searchTerm}`);
+            const tags = await response.json();
+            tagSearchResults.innerHTML = '';
+            tags.forEach(tag => {
+                const tagDiv = document.createElement('div');
+                tagDiv.textContent = tag.name;
+                tagDiv.addEventListener('click', async () => {
+                    await addTag(tag.name, tagContainer);
+                    tagInput.value = '';
+                    tagSearchResults.style.display = 'none';
+                });
+                tagSearchResults.appendChild(tagDiv);
+            });
+            tagSearchResults.style.display = 'block';
+        } else {
+            tagSearchResults.style.display = 'none';
+        }
+    });
+}
+
+async function addTag(tagName, tagContainer) {
+    const taskId = document.getElementById('modal-container').getAttribute('data-task-id');
+    const response = await fetch(`/api/tasks/${taskId}/tags`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: tagName })
+    });
+
+    if (response.ok) {
+        const newTag = await response.json();
+        const tagSpan = createTagElement(newTag);
+        tagContainer.appendChild(tagSpan);
+    } else {
+        console.error('Не удалось добавить метку');
+    }
+}
+
+function createTagElement(tag) {
+    const tagItem = document.createElement('span');
+    tagItem.classList.add('tag-item');
+    tagItem.textContent = tag.name;
+
+    const removeButton = document.createElement('span');
+    removeButton.textContent = '×';
+    removeButton.classList.add('tag-remove-btn');
+    removeButton.style.display = 'none';
+
+    tagItem.appendChild(removeButton);
+
+    tagItem.addEventListener('mouseenter', () => {
+        removeButton.style.display = 'inline';
+    });
+
+    tagItem.addEventListener('mouseleave', () => {
+        removeButton.style.display = 'none';
+    });
+
+    removeButton.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await removeTag(tag);
+        tagItem.remove();
+    });
+
+    return tagItem;
+}
+async function removeTag(tag) {
+    const taskId = document.getElementById('modal-container').getAttribute('data-task-id');
+    await fetch(`/api/tasks/${taskId}/tags/${tag.id}`, {
+        method: 'DELETE'
+    });
+}
+async function loadTagsForTask(taskId, containerEl) {
+    const tagContainer = containerEl.querySelector('.tags-tags');
+    if (!tagContainer) return;
+
+    try {
+        const response = await fetch(`/api/tasks/${taskId}/tags`);
+        if (response.ok) {
+            const tags = await response.json();
+            tags.forEach(tag => {
+                const tagElement = createTagElement(tag);
+                tagContainer.appendChild(tagElement);
+            });
+        } else {
+            console.error('Ошибка при получении меток');
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке меток:', error);
+    }
+}
 
 
 

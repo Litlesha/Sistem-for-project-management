@@ -2,12 +2,16 @@ package org.diploma.fordiplom.service.impl;
 
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.diploma.fordiplom.entity.DTO.TagDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.entity.SprintEntity;
+import org.diploma.fordiplom.entity.TagEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.repository.SprintRepository;
+import org.diploma.fordiplom.repository.TagRepository;
 import org.diploma.fordiplom.repository.TaskRepository;
 import org.diploma.fordiplom.repository.UserRepository;
 import org.diploma.fordiplom.service.ProjectService;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -36,6 +41,8 @@ public class TaskServiceImpl implements TaskService {
     private SprintRepository sprintRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private TagRepository tagRepository;
 
     @Override
     public TaskEntity createTask(TaskRequest request){
@@ -146,6 +153,53 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new EntityNotFoundException("Задача не найдена с id " + taskId));
         task.setDescription(taskDescription);
         return taskRepository.save(task);
+    }
+
+    public TaskEntity updateTaskPriority(Long taskId, String newPriority) {
+        TaskEntity task = getTaskById(taskId);
+        task.setPriority(newPriority);
+        task.setUpdatedAt(Instant.now());
+        return taskRepository.save(task);
+    }
+    @Transactional
+    public TagDTO addTagToTask(Long taskId, TagDTO tagDTO) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        TagEntity tagEntity = new TagEntity();
+        tagEntity.setName(tagDTO.getName());
+        tagEntity = tagRepository.save(tagEntity);
+
+        // Добавляем метку в задачу
+        task.getTags().add(tagEntity);
+        taskRepository.save(task);
+
+        return new TagDTO(tagEntity.getId(), tagEntity.getName());
+    }
+
+    // Метод для удаления метки из задачи
+    @Transactional
+    public void removeTagFromTask(Long taskId, Long tagId) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        TagEntity tagEntity = tagRepository.findById(tagId)
+                .orElseThrow(() -> new RuntimeException("Tag not found"));
+
+        if (task.getTags().contains(tagEntity)) {
+            task.getTags().remove(tagEntity);
+            taskRepository.save(task);
+        }
+    }
+
+    // Метод для получения всех меток задачи
+    public List<TagDTO> getTagsForTask(Long taskId) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        return task.getTags().stream()
+                .map(tag -> new TagDTO(tag.getId(), tag.getName()))
+                .collect(Collectors.toList());
     }
 }
 

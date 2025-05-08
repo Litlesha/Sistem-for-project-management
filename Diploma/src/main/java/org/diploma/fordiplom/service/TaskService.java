@@ -1,6 +1,7 @@
 package org.diploma.fordiplom.service;
 
 
+import org.diploma.fordiplom.entity.DTO.TagDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.entity.TaskEntity;
@@ -20,4 +21,8 @@ public interface TaskService {
     TaskEntity getTaskById(Long taskId);
     TaskEntity updateTaskTitle(Long taskId, String taskTitle);
     TaskEntity updateTaskDescription(Long taskId, String taskDescription);
+    TaskEntity updateTaskPriority(Long taskId, String newPriority);
+    List<TagDTO> getTagsForTask(Long taskId);
+    TagDTO addTagToTask(Long taskId, TagDTO tagDTO);
+    void removeTagFromTask(Long taskId, Long tagId);
 }

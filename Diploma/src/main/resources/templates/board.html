@@ -200,12 +200,17 @@
                                 </div>
                                 <div class="info-tag-inner">
                                     <span>Метки</span>
-                                    <div class="tags-container">
+                                    <div class="tags-container task-tags-container">
                                         <div class="tags-tags">
-                                            <span>Метка 1</span>
-                                            <span>Метка 2</span>
                                         </div>
-                                    </div>
+                                        <input class="tag-input" placeholder="Введите метку" style="display: none;">
+                                        <div class="tag-search-results" style="display: none;"></div>
+<!--                                    </div>-->
+<!--                                    <div class="task-tags-container">-->
+<!--                                        <span class="tag-container"></span> &lt;!&ndash; должен быть один &ndash;&gt;-->
+<!--                                        <input class="tag-input" placeholder="Введите метку" style="display: none;">-->
+<!--                                        <div class="tag-search-results" style="display: none;"></div>-->
+<!--                                    </div>-->
                                 </div>
                                 <div class="info-tag-inner">
                                     <span>Доска</span>
@@ -213,10 +218,17 @@
                                         <span>Доска Спринт 1</span>
                                     </div>
                                 </div>
-                                <div class="info-tag-inner">
+                                <div class="info-tag-inner difficulty-block" style="position: relative;">
                                     <span>Сложность</span>
                                     <div class="tags-container">
                                         <span class="difficulty">10</span>
+                                        <div class="difficulty-editor">
+                                            <input type="number" min="0" class="difficulty-input" />
+                                        </div>
+                                    </div>
+                                    <div class="difficulty-actions">
+                                        <button class="save-difficulty">✔</button>
+                                        <button class="cancel-difficulty">×</button>
                                     </div>
                                 </div>
                                 <div class="info-tag-inner">
