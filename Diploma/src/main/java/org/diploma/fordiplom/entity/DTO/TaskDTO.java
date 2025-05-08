@@ -1,8 +1,15 @@
 package org.diploma.fordiplom.entity.DTO;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.diploma.fordiplom.entity.TaskEntity;
 
-import java.security.Timestamp;
+import java.time.Instant;
+
+import java.time.Instant;
+
+@Getter
+@Setter
 public class TaskDTO {
     private Long id;
     private String title;
@@ -12,10 +19,12 @@ public class TaskDTO {
     private String taskKey;
     private String description;
     private String priority;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
-
-    public TaskDTO(Long id, String title, Long sprintId, String taskType, String status, String taskKey, String description, String priority, Timestamp createdAt, Timestamp updatedAt) {
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String authorName;
+    private String boardName;
+    private String sprintName;
+    public TaskDTO(Long id, String title, Long sprintId, String taskType, String status, String taskKey, String description, String priority, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.title = title;
         this.sprintId = sprintId;
@@ -27,58 +36,6 @@ public class TaskDTO {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
-    public TaskDTO(TaskEntity taskEntity) {
-    }
-
-    public Timestamp getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Timestamp updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getPriority() {
-        return priority;
-    }
-
-    public void setPriority(String priority) {
-        this.priority = priority;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getTaskType() {
-        return taskType;
-    }
-
-    public void setTaskType(String taskType) {
-        this.taskType = taskType;
-    }
-
-    public String getTaskKey() {
-        return taskKey;
-    }
-
-    public void setTaskKey(String taskKey) {
-        this.taskKey = taskKey;
-    }
-
     public TaskDTO(Long id, String title, Long sprintId, String taskKey, String taskType, String status) {
         this.id = id;
         this.title = title;
@@ -88,35 +45,23 @@ public class TaskDTO {
         this.Status = status;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public TaskDTO(TaskEntity taskEntity) {
+        this.id = taskEntity.getId();
+        this.title = taskEntity.getTitle();
+        this.sprintId = taskEntity.getSprint() != null ? taskEntity.getSprint().getId() : null;
+        this.taskType = taskEntity.getTaskType();
+        this.Status = taskEntity.getStatus();
+        this.taskKey = taskEntity.getTaskKey();
+        this.description = taskEntity.getDescription();
+        this.priority = taskEntity.getPriority();
+        this.createdAt = taskEntity.getCreatedAt();
+        this.updatedAt = taskEntity.getUpdatedAt();
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Long getSprintId() {
-        return sprintId;
-    }
-
-    public void setSprintId(Long sprintId) {
-        this.sprintId = sprintId;
-    }
-
-    public String getStatus() {
-        return Status;
-    }
-
-    public void setStatus(String status) {
-        Status = status;
+        if (taskEntity.getAssignedUser() != null) {
+            this.authorName = (taskEntity.getAssignedUser().getUsername() != null && !taskEntity.getAssignedUser().getUsername().isEmpty())
+                    ? taskEntity.getAssignedUser().getUsername()
+                    : taskEntity.getAssignedUser().getEmail();
+        }
+        this.sprintName = taskEntity.getSprint() != null ? taskEntity.getSprint().getSprintName() : null;
     }
 }
