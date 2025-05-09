@@ -42,7 +42,7 @@ formProject.addEventListener("submit", async (e) => {
         const result = await response.json();
         console.log("Проект создан:", result);
 
-        window.location.href = `/project?id=${result.id_project}`;
+        window.location.href = `/project?id=${result.id}`;
     } catch (error) {
         console.error("Ошибка при отправке запроса:", error);
         alert("Ошибка при создании проекта: " + error.message);

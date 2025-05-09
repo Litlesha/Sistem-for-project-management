@@ -1495,9 +1495,9 @@ menu, ol, ul {
     border-radius: 5px;
 
 }
-.tag-item:hover{
+.task-tags-container.editing .tag-item:hover {
     background-color: white;
-    border: 1px solid black;
+    border: 1px solid #3290ec;
 }
 .tag-remove-btn {
     position: absolute;
@@ -1509,9 +1509,9 @@ menu, ol, ul {
     border-radius: 5px;
     transition: 0.2s ease-in;
 }
-.tag-remove-btn:hover{
-    background-color: #C6C6C6;
-}
+/*.tag-remove-btn:hover{*/
+/*    background-color: #C6C6C6;*/
+/*}*/
 .tag-container {
     display: inline-flex;     /* Все метки расположены в одну строку */
     flex-wrap: wrap;          /* Метки будут переноситься на новую строку при необходимости */
@@ -1520,26 +1520,78 @@ menu, ol, ul {
 .tag-item {
     display: inline-flex;     /* Чтобы метка и крестик располагались в одной строке */
     align-items: center;      /* Выровнять элементы по вертикали */
-    padding-right: 15px;      /* Оставляем место справа для крестика */
-    cursor: pointer;         /* Для удобства кликабельности */
+    padding-right: 15px;      /* Оставляем место справа для крестика */ /* Для удобства кликабельности */
     position: relative;       /* Для корректного позиционирования крестика */
 }
-.tag-item:hover .tag-remove-btn {
-    display: inline;  /* Показываем крестик при наведении */
-}
-
-.tag-input {
-    padding: 5px;
-    border-radius: 5px;
-    outline: none;
+/*.tag-item:hover .tag-remove-btn {*/
+/*    display: inline;  !* Показываем крестик при наведении *!*/
+/*}*/
+.task-tags-container.editing .tag-item:hover {
+    background-color: white;
     border: 1px solid #3290ec;
 }
 
+.task-tags-container.editing .tag-item:hover .tag-remove-btn {
+    display: inline;
+}
+
+.editing-tags-input {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    min-height: 40px;
+    width: 100%;
+    cursor: text;
+}
+
+.editing-tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.task-tags-container:not(.editing) .tag-remove-btn {
+    display: none !important;
+}
+.editing-tags-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+.tag-input-wrapper {
+    position: relative; /* Родитель для абсолютного позиционирования */
+    width: 100%;
+}
+.tag-input {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 5px;
+    border-radius: 5px;
+    width: 100%;
+    gap: 5px;
+    min-height: 40px;
+    outline: none;
+    border: 1px solid #3290ec;
+    min-width: 100px;
+    font-size: 14px;
+    position: relative;
+}
 .tag-search-results {
-    margin-top: 10px;
-    max-height: 100px;
+    position: absolute;
+    top: 100%; /* сразу под input */
+    left: 0;
+    width: 100%;
+    margin-top: 4px; /* небольшой отступ */
+    max-height: 150px;
     overflow-y: auto;
+    border-radius: 5px;
     border: 1px solid #ddd;
+    background-color: white;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .tag-search-results div {
@@ -1659,4 +1711,73 @@ menu, ol, ul {
 .actions-show img{
     width: 20px;
     height: 20px;
+}
+.modal-add-team-wrapper{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* затемнение */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* поверх всего */
+}
+
+
+.team-suggestion {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.team-suggestion:hover {
+    background-color: #f0f0f0;
+}
+.close{
+    display: flex;
+    justify-content: flex-end;
+}
+.close span{
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding-inline: 2px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.close span:hover{
+    background-color: #DCDFE4;
+}
+.createTeamForm{
+    display: flex;
+    flex-direction: column;
+}
+.button-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.team-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+#teamName {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.team-suggestions {
+    position: absolute;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 10;
+    border-radius: 5px;
 }

@@ -158,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadActiveSprint(projectId);
         loadSprintInfo(projectId);
     }
-
     const searchInput = document.querySelector(".search-input-board");
     let searchTimeout = null;
 
@@ -890,63 +889,120 @@ function appendComment(comment) {
 //Работа с метками
 function initializeTags(containerEl) {
     const tagsContainer = containerEl.querySelector('.task-tags-container');
-    const tagContainer = tagsContainer.querySelector('.tags-tags'); // ОДИН контейнер
+    const viewContainer = tagsContainer.querySelector('.tags-tags');
+    const editInputWrapper = tagsContainer.querySelector('.editing-tags-input');
+    const editTagContainer = tagsContainer.querySelector('.editing-tags-wrapper');
     const tagInput = tagsContainer.querySelector('.tag-input');
     const tagSearchResults = tagsContainer.querySelector('.tag-search-results');
 
-    // Показать поле ввода
-    tagsContainer.addEventListener('click', function () {
-        if (tagInput.style.display === 'none') {
-            tagInput.style.display = 'block';
-            tagInput.focus();
-        }
+    tagsContainer.addEventListener('click', async () => {
+        if (tagsContainer.classList.contains('editing')) return;
+
+        tagsContainer.classList.add('editing');
+        viewContainer.style.display = 'none';
+        editInputWrapper.style.display = 'flex';
+        tagInput.focus();
+
+        const taskId = document.getElementById('modal-container').getAttribute('data-task-id');
+        const response = await fetch(`/api/tasks/${taskId}/tags`);
+        const tags = await response.json(); // используем json() вместо text() для прямого получения объекта
+        tags.forEach(tag => {
+            const tagEl = createEditableTagElement(tag, editTagContainer);
+            editTagContainer.appendChild(tagEl);
+        });
     });
 
-    // Добавление по Enter
-    tagInput.addEventListener('keypress', async function (event) {
-        if (event.key === 'Enter' && tagInput.value.trim() !== '') {
-            await addTag(tagInput.value.trim(), tagContainer);
+    document.addEventListener('click', function (e) {
+        if (!tagsContainer.contains(e.target)) {
+            tagsContainer.classList.remove('editing');
+            viewContainer.style.display = 'flex';
+            editInputWrapper.style.display = 'none';
+            tagSearchResults.style.display = 'none';
             tagInput.value = '';
-            tagInput.style.display = 'none';
+            editTagContainer.innerHTML = '';
+            updateTagsDisplay(); // Обновляем список меток, когда снимаем выделение
         }
     });
 
-    // Поиск
     tagInput.addEventListener('input', async function () {
         const searchTerm = tagInput.value.trim();
         if (searchTerm.length > 0) {
             const response = await fetch(`/api/tags/search?query=${searchTerm}`);
             const tags = await response.json();
+            // Получаем уже выбранные метки
+            const selectedTags = Array.from(editTagContainer.querySelectorAll('.tag-item'))
+                .map(el => el.textContent.replace('×', '').trim());
+
             tagSearchResults.innerHTML = '';
-            tags.forEach(tag => {
-                const tagDiv = document.createElement('div');
-                tagDiv.textContent = tag.name;
-                tagDiv.addEventListener('click', async () => {
-                    await addTag(tag.name, tagContainer);
-                    tagInput.value = '';
-                    tagSearchResults.style.display = 'none';
+
+            tags
+                .filter(tag => !selectedTags.includes(tag.name)) // исключаем уже выбранные
+                .forEach(tag => {
+                    const tagDiv = document.createElement('div');
+                    tagDiv.textContent = tag.name;
+                    tagDiv.classList.add('search-result-item');
+                    tagDiv.addEventListener('click', async () => {
+                        await addTag(tag.name, editTagContainer);
+                        tagInput.value = '';
+                        tagSearchResults.style.display = 'none';
+                        updateTagsDisplay();
+                    });
+                    tagSearchResults.appendChild(tagDiv);
                 });
-                tagSearchResults.appendChild(tagDiv);
-            });
+
             tagSearchResults.style.display = 'block';
         } else {
             tagSearchResults.style.display = 'none';
         }
     });
+
+    tagInput.addEventListener('keypress', async function (event) {
+        if (event.key === 'Enter' && tagInput.value.trim() !== '') {
+            await addTag(tagInput.value.trim(), editTagContainer);
+            tagInput.value = '';
+            updateTagsDisplay(); // Обновляем метки после добавления
+        }
+    });
+}
+
+function createEditableTagElement(tag) {
+    const tagItem = document.createElement('span');
+    tagItem.classList.add('tag-item');
+    tagItem.textContent = tag.name;
+
+    const removeButton = document.createElement('span');
+    removeButton.textContent = '×';
+    removeButton.classList.add('tag-remove-btn');
+
+    removeButton.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await removeTag(tag);
+        tagItem.remove();
+        updateTagsDisplay(); // Обновляем список меток после удаления
+    });
+
+    tagItem.appendChild(removeButton);
+    return tagItem;
 }
 
 async function addTag(tagName, tagContainer) {
     const taskId = document.getElementById('modal-container').getAttribute('data-task-id');
+
+    // Проверка: уже есть такая метка в DOM?
+    const existingTags = Array.from(tagContainer.querySelectorAll('.tag-item'));
+    const tagAlreadyExists = existingTags.some(el => el.textContent.replace('×', '').trim() === tagName.trim());
+    if (tagAlreadyExists) return; // Не добавляем дубликат
+
     const response = await fetch(`/api/tasks/${taskId}/tags`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: tagName })
     });
-
     if (response.ok) {
         const newTag = await response.json();
         const tagSpan = createTagElement(newTag);
         tagContainer.appendChild(tagSpan);
+        updateTagsDisplay();
     } else {
         console.error('Не удалось добавить метку');
     }
@@ -960,14 +1016,17 @@ function createTagElement(tag) {
     const removeButton = document.createElement('span');
     removeButton.textContent = '×';
     removeButton.classList.add('tag-remove-btn');
-    removeButton.style.display = 'none';
 
+    // Скрыт по умолчанию, только если родитель редактируется
+    removeButton.style.display = 'none';
     tagItem.appendChild(removeButton);
 
+    // Показывать крестик только если редактируем
     tagItem.addEventListener('mouseenter', () => {
-        removeButton.style.display = 'inline';
+        if (tagItem.closest('.task-tags-container')?.classList.contains('editing')) {
+            removeButton.style.display = 'inline';
+        }
     });
-
     tagItem.addEventListener('mouseleave', () => {
         removeButton.style.display = 'none';
     });
@@ -976,16 +1035,43 @@ function createTagElement(tag) {
         e.stopPropagation();
         await removeTag(tag);
         tagItem.remove();
+        updateTagsDisplay(); // Обновляем список меток после удаления
     });
 
     return tagItem;
 }
+
 async function removeTag(tag) {
     const taskId = document.getElementById('modal-container').getAttribute('data-task-id');
     await fetch(`/api/tasks/${taskId}/tags/${tag.id}`, {
         method: 'DELETE'
     });
 }
+
+async function updateTagsDisplay() {
+    const taskId = document.getElementById('modal-container')?.getAttribute('data-task-id');
+    const tagsContainer = document.querySelector('.task-tags-container');
+    if (!tagsContainer) return; // контейнер уже удалён
+
+    const tagContainer = tagsContainer.querySelector('.tags-tags');
+    if (!tagContainer) return;
+
+    try {
+        const response = await fetch(`/api/tasks/${taskId}/tags`);
+        if (!response.ok) return;
+
+        const tags = await response.json();
+        tagContainer.innerHTML = '';
+
+        tags.forEach(tag => {
+            const tagElement = createTagElement(tag);
+            tagContainer.appendChild(tagElement);
+        });
+    } catch (err) {
+        console.error('Ошибка при обновлении меток:', err);
+    }
+}
+
 async function loadTagsForTask(taskId, containerEl) {
     const tagContainer = containerEl.querySelector('.tags-tags');
     if (!tagContainer) return;
@@ -993,7 +1079,7 @@ async function loadTagsForTask(taskId, containerEl) {
     try {
         const response = await fetch(`/api/tasks/${taskId}/tags`);
         if (response.ok) {
-            const tags = await response.json();
+            const tags = await response.json(); // используем json(), чтобы сразу получить объект
             tags.forEach(tag => {
                 const tagElement = createTagElement(tag);
                 tagContainer.appendChild(tagElement);
@@ -1006,6 +1092,130 @@ async function loadTagsForTask(taskId, containerEl) {
     }
 }
 
+//Добавление участников в проект
+function openTeamModal() {
+    document.getElementById("teamModal").style.display = "block";
+}
+
+function closeTeamModal() {
+    document.getElementById("teamModal").style.display = "none";
+}
+
+async function addTeam(event) {
+    event.preventDefault(); // Останавливаем отправку формы
+
+    const teamName = document.getElementById("teamName").value;
+
+    // Проверяем, что команда выбрана
+    if (!teamName) {
+        alert("Пожалуйста, выберите команду.");
+        return;
+    }
+
+    // Получаем ID проекта из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+
+    if (!projectId) {
+        alert("ID проекта не найден в URL.");
+        return;
+    }
+
+    // Находим команду по имени
+    const response = await fetch(`/api/teams/search?query=${teamName}`);
+    const teams = await response.json();
+
+    if (teams.length === 0) {
+        alert("Команда не найдена.");
+        return;
+    }
+
+    const teamId = teams[0].id_team; // Получаем ID выбранной команды
+    console.log("Project ID:", projectId);
+    console.log("Team ID:", teamId);
+    // Добавляем команду в проект
+    const addTeamResponse = await fetch("/api/projects/addTeamToProject", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            projectId: projectId,
+            teamId: teamId
+        })
+    });
+    if (addTeamResponse.ok) {
+        closeTeamModal();
+    } else {
+        alert("Произошла ошибка при добавлении команды.");
+    }
+}
+async function searchTeams() {
+    const input = document.getElementById("teamName");
+    const query = input.value.trim();
+
+    const suggestionsContainer = document.getElementById("teamSuggestions");
+    suggestionsContainer.innerHTML = ""; // Очищаем старые предложения
+
+    if (!query) {
+        suggestionsContainer.style.display = "none";
+        return;
+    }
+
+    const projectId = getProjectIdFromUrl();  // Предположим, что функция для получения ID проекта есть
+
+    try {
+        // Получаем команды, уже добавленные в проект
+        const projectTeamsResponse = await fetch(`/api/projects/${projectId}/teams`);
+        if (!projectTeamsResponse.ok) {
+            throw new Error("Ошибка при получении команд проекта");
+        }
+
+        const projectTeams = await projectTeamsResponse.json();
+        const projectTeamIds = projectTeams.map(team => team.id_team);  // Получаем список ID команд проекта
+
+        // Поиск команд по запросу
+        const response = await fetch(`/api/teams/search?query=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+            throw new Error("Ошибка при поиске команд");
+        }
+
+        const teams = await response.json();
+
+        if (teams.length === 0) {
+            suggestionsContainer.style.display = "none";
+            return;
+        }
+
+        // Отфильтровываем команды, которые уже добавлены в проект
+        const availableTeams = teams.filter(team => !projectTeamIds.includes(team.id_team));
+
+        if (availableTeams.length === 0) {
+            suggestionsContainer.style.display = "none";
+            return;
+        }
+
+        // Отображаем оставшиеся команды
+        availableTeams.forEach(team => {
+            const div = document.createElement("div");
+            div.className = "team-suggestion";
+            div.textContent = team.team_name;
+            div.addEventListener("click", () => {
+                input.value = team.team_name;
+                suggestionsContainer.style.display = "none";
+            });
+            suggestionsContainer.appendChild(div);
+        });
+
+        suggestionsContainer.style.display = "block";
+    } catch (err) {
+        console.error("Ошибка поиска команд:", err);
+    }
+}
+function cancelTeamInput() {
+    document.getElementById("teamName").value = "";
+    document.getElementById("teamSuggestions").style.display = "none";
+}
 
 
 

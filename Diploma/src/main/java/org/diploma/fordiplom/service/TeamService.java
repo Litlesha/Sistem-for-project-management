@@ -19,4 +19,6 @@ public interface TeamService {
     void addMembers(Long teamId, List<String> emails);
     void leaveTeam(Long teamId, UserEntity user);
     void deleteTeam(Long teamId);
+    List<TeamEntity> searchTeams(String teamName);
+
 }

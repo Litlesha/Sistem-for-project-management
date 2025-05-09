@@ -42,4 +42,15 @@ public class ProjectEntity {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<UserEntity> users = new HashSet<>();
+    @ManyToMany
+    @JsonIgnore
+    @JoinTable(
+            name = "project_team",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "team_id")
+    )
+    private Set<TeamEntity> teams = new HashSet<>();
+    public void addUsersFromTeam(TeamEntity team) {
+        this.users.addAll(team.getEmails());
+    }
 }

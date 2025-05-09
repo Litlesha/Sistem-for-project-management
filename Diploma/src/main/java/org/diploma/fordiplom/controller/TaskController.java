@@ -6,6 +6,7 @@ import org.diploma.fordiplom.entity.DTO.TagDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.*;
 import org.diploma.fordiplom.entity.DTO.response.TaskResponseDTO;
+import org.diploma.fordiplom.entity.TagEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,11 +67,12 @@ public class TaskController {
     }
 
     @GetMapping("/api/sprint/{sprintId}/search")
-    public ResponseEntity<List<TaskEntity>> searchTasksInSprint(
+    public ResponseEntity<List<TaskDTO>> searchTasksInSprint(
             @PathVariable Long sprintId,
             @RequestParam Long projectId,
             @RequestParam String query) {
-        List<TaskEntity> tasks = taskService.searchTasksInSprint(query, projectId, sprintId);
+        // Получаем список TaskDTO от сервиса
+        List<TaskDTO> tasks = taskService.searchTasksInSprint(query, projectId, sprintId);
         return ResponseEntity.ok(tasks);
     }
 
@@ -136,5 +138,9 @@ public class TaskController {
     public ResponseEntity<List<TagDTO>> getTags(@PathVariable Long taskId) {
         List<TagDTO> tags = taskService.getTagsForTask(taskId);
         return ResponseEntity.ok(tags);
+    }
+    @GetMapping("/api/tags/search")
+    public List<TagDTO> searchTags(@RequestParam String query) {
+        return taskService.searchTags(query);
     }
 }

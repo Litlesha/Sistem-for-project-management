@@ -30,14 +30,38 @@
                 <div class="top-bar">
                     <div class="search-bar">
                         <div class="search-field">
-                            <img src="/icons/search.svg" alt="Поиск" class="search-icon">
+                            <img src="/icons/search.svg" alt="Поиск" class="search-icon" >
                                 <input type="text" class="search-input search-input-board" placeholder="Поиск">
                         </div>
                     </div>
                     <div class="participants-icons">
                         <button class="add-participant-btn">
-                            <img src="/icons/addUser.svg" alt="Добавить участника" class="add-icon">
+                            <img src="/icons/addUser.svg" alt="Добавить участника" class="add-icon" onclick="openTeamModal()">
                         </button>
+                        <div id="teamModal" class="modal" style="display: none;">
+                            <div class="modal-add-team-wrapper">
+                                <div class="modal-content">
+                                    <div class="close" onclick="closeTeamModal()">
+                                        <span>&times;</span>
+                                    </div>
+                                    <h2>Добавить команду в проект</h2>
+                                    <form id="createTeamForm" class="createTeamForm" onsubmit="addTeam(event)">
+                                        <div class="team-input-wrapper">
+                                            <label for="teamName">Название команды:</label>
+                                            <input type="text" id="teamName" name="teamName" placeholder="Начните вводить название команды" oninput="searchTeams()" required>
+                                            <div id="teamSuggestions" class="team-suggestions" style="display: none;">
+                                                <!-- Здесь будут отображаться команды -->
+                                            </div>
+                                        </div>
+
+                                        <div class="button-wrapper">
+                                            <button type="submit" class="submit-btn">Добавить команду</button>
+                                            <button type="button" class="cancel-btn" onclick="cancelTeamInput()">Отмена</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="filters">
                         <select class="filter-select">
@@ -201,16 +225,17 @@
                                 <div class="info-tag-inner">
                                     <span>Метки</span>
                                     <div class="tags-container task-tags-container">
-                                        <div class="tags-tags">
+                                        <div class="tags-tags"></div> <!-- обычный режим -->
+
+                                        <div class="editing-tags-input" style="display: none; position: relative;">
+                                            <!-- редактируемые метки здесь -->
+                                            <div class="editing-tags-wrapper">
+                                                <!-- Метки рендерим сюда -->
+                                            </div>
+                                            <input class="tag-input" placeholder="Введите метку">
+                                            <div class="tag-search-results" style="display: none;"></div>
                                         </div>
-                                        <input class="tag-input" placeholder="Введите метку" style="display: none;">
-                                        <div class="tag-search-results" style="display: none;"></div>
-<!--                                    </div>-->
-<!--                                    <div class="task-tags-container">-->
-<!--                                        <span class="tag-container"></span> &lt;!&ndash; должен быть один &ndash;&gt;-->
-<!--                                        <input class="tag-input" placeholder="Введите метку" style="display: none;">-->
-<!--                                        <div class="tag-search-results" style="display: none;"></div>-->
-<!--                                    </div>-->
+                                    </div>
                                 </div>
                                 <div class="info-tag-inner">
                                     <span>Доска</span>

@@ -24,16 +24,19 @@ import java.util.Set;
 public class TeamEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Name("id_team")
+    @Column(name = "id_team")
     private long id_team;
-    @Column(name="team_name", nullable = false)
+
+    @Column(name = "team_name", nullable = false)
     private String team_name;
+
     @Column(name = "description")
     private String description;
+
     @Column(name = "teamImgPath")
     private String teamImgPath;
+
     @ManyToMany(fetch = FetchType.EAGER)
-//    @JsonManagedReference
     @JoinTable(
             name = "team_user",
             joinColumns = @JoinColumn(name = "team_id"),

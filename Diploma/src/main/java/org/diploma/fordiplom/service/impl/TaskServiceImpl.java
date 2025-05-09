@@ -13,16 +13,13 @@ import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.repository.SprintRepository;
 import org.diploma.fordiplom.repository.TagRepository;
 import org.diploma.fordiplom.repository.TaskRepository;
-import org.diploma.fordiplom.repository.UserRepository;
 import org.diploma.fordiplom.service.ProjectService;
 import org.diploma.fordiplom.service.SprintService;
 import org.diploma.fordiplom.service.TaskService;
 import org.diploma.fordiplom.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.config.Task;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -129,8 +126,14 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus(status);
         taskRepository.save(task);
     }
-    public List<TaskEntity> searchTasksInSprint(String query, Long projectId, Long sprintId) {
-        return taskRepository.searchInSprint(query, projectId, sprintId);
+    public List<TaskDTO> searchTasksInSprint(String query, Long projectId, Long sprintId) {
+        // Получаем список задач из репозитория
+        List<TaskEntity> tasks = taskRepository.searchInSprint(query, projectId, sprintId);
+
+        // Преобразуем список TaskEntity в TaskDTO
+        return tasks.stream()
+                .map(TaskDTO::new)  // Используем конструктор TaskDTO, который принимает TaskEntity
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -163,36 +166,62 @@ public class TaskServiceImpl implements TaskService {
     }
     @Transactional
     public TagDTO addTagToTask(Long taskId, TagDTO tagDTO) {
+        // Найти задачу по ID
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
-        TagEntity tagEntity = new TagEntity();
-        tagEntity.setName(tagDTO.getName());
-        tagEntity = tagRepository.save(tagEntity);
+        // Найти метку по имени (если она уже существует)
+        TagEntity tagEntity = tagRepository.findByName(tagDTO.getName())
+                .orElse(null);
 
-        // Добавляем метку в задачу
-        task.getTags().add(tagEntity);
-        taskRepository.save(task);
+        if (tagEntity == null) {
+            // Если метка не существует в базе данных, создаём новую
+            tagEntity = new TagEntity();
+            tagEntity.setName(tagDTO.getName());
+            tagEntity = tagRepository.save(tagEntity);
+        }
 
+        // Добавляем метку в задачу, если её ещё нет в связях
+        if (!task.getTags().contains(tagEntity)) {
+            task.getTags().add(tagEntity);
+            taskRepository.save(task);
+        }
+
+        // Возвращаем DTO метки
         return new TagDTO(tagEntity.getId(), tagEntity.getName());
     }
+
 
     // Метод для удаления метки из задачи
     @Transactional
     public void removeTagFromTask(Long taskId, Long tagId) {
+        // Найти задачу по ID
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
+        // Найти метку по ID
         TagEntity tagEntity = tagRepository.findById(tagId)
                 .orElseThrow(() -> new RuntimeException("Tag not found"));
 
+        // Удаляем метку из задачи
         if (task.getTags().contains(tagEntity)) {
             task.getTags().remove(tagEntity);
             taskRepository.save(task);
         }
     }
 
+    @Override
+    public List<TagDTO> searchTags(String query) {
+        List<TagEntity> tagEntities = tagRepository.findByNameContainingIgnoreCase(query);
+
+        // Преобразуем сущности в DTO
+        return tagEntities.stream()
+                .map(tag -> new TagDTO(tag.getId(), tag.getName()))
+                .collect(Collectors.toList());
+    }
+
     // Метод для получения всех меток задачи
+    @Override
     public List<TagDTO> getTagsForTask(Long taskId) {
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));

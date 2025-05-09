@@ -1,11 +1,14 @@
 package org.diploma.fordiplom.controller;
 
+import org.diploma.fordiplom.entity.DTO.TeamDTO;
+import org.diploma.fordiplom.entity.DTO.request.AddTeamToProjectRequest;
 import org.diploma.fordiplom.entity.DTO.request.ProjectRequest;
 import org.diploma.fordiplom.entity.ProjectEntity;
 import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.service.ProjectService;
 import org.diploma.fordiplom.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +54,28 @@ public class ProjectController {
             throw new IllegalArgumentException("User not found");
         }
         return projectService.getProjectsByUserEmail(currentUserEmail);
+    }
+    @PostMapping("/api/projects/addTeamToProject")
+    public ResponseEntity<String> addTeamToProject(@RequestBody AddTeamToProjectRequest request) {
+        try {
+            System.out.println("Проект ID: " + request.getProjectId());
+            System.out.println("Команда ID: " + request.getTeamId());
+            // Вызываем сервисный метод для добавления команды в проект
+            projectService.addTeamToProject(request.getProjectId(), request.getTeamId());
+            return ResponseEntity.ok("Команда успешно добавлена в проект");
+        } catch (RuntimeException e) {
+            // Обработка ошибок, если проект или команда не найдены
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Проект или команда не найдены");
+        }
+    }
+    @GetMapping("/api/projects/{projectId}/teams")
+    public ResponseEntity<List<TeamDTO>> getTeamsByProjectId(@PathVariable Long projectId) {
+        try {
+            List<TeamDTO> teams = projectService.getTeamsByProjectId(projectId);
+            return ResponseEntity.ok(teams);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }
 

@@ -131,6 +131,11 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public List<TeamEntity> searchTeams(String teamName) {
+        return teamRepository.findByTeamNameContainingIgnoreCase(teamName);
+    }
+
+    @Override
     public List<TeamEntity> getUserTeams(String email){return teamRepository.findByEmail(email);}
 
 

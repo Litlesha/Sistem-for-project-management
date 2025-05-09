@@ -1,18 +1,24 @@
 package org.diploma.fordiplom.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.diploma.fordiplom.entity.DTO.TeamDTO;
 import org.diploma.fordiplom.entity.ProjectEntity;
+import org.diploma.fordiplom.entity.TeamEntity;
 import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.repository.ProjectRepository;
 import org.diploma.fordiplom.service.ProjectService;
+import org.diploma.fordiplom.service.TeamService;
 import org.diploma.fordiplom.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.diploma.fordiplom.entity.DTO.request.ProjectRequest;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -20,8 +26,8 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectRepository projectRepository;
     @Autowired
     private UserService userService;
-
-    private ProjectEntity projectEntity;
+    @Autowired
+    private TeamService teamService;
 
     public ProjectEntity createProject(ProjectRequest request, String creatorEmail) {
         UserEntity creator = userService.getUserByEmail(creatorEmail);
@@ -49,6 +55,28 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectEntity project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
         return project.getKey();
+    }
+
+    @Override
+    @Transactional
+    public void addTeamToProject(Long projectId, Long teamId) {
+            ProjectEntity project = projectRepository.findById(projectId)
+                    .orElseThrow(() -> new RuntimeException("Project not found"));
+            TeamEntity team = teamService.getTeamById(teamId);
+            project.getTeams().add(team);
+            project.addUsersFromTeam(team);
+
+            projectRepository.save(project);
+        }
+
+    @Override
+    public List<TeamDTO> getTeamsByProjectId(Long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        return project.getTeams().stream()
+                .map(team -> new TeamDTO(team.
+                        getId_team(), team.getTeam_name()))
+                .collect(Collectors.toList());
     }
 
 
