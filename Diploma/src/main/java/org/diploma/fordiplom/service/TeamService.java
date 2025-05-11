@@ -20,5 +20,5 @@ public interface TeamService {
     void leaveTeam(Long teamId, UserEntity user);
     void deleteTeam(Long teamId);
     List<TeamEntity> searchTeams(String teamName);
-
+    List<UserEntity> getUsersForTeam(Long teamId);
 }

@@ -2,13 +2,17 @@ package org.diploma.fordiplom.controller;
 
 
 import jakarta.validation.Valid;
+import org.diploma.fordiplom.entity.DTO.ProjectDTO;
 import org.diploma.fordiplom.entity.DTO.TagDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.*;
 import org.diploma.fordiplom.entity.DTO.response.TaskResponseDTO;
 import org.diploma.fordiplom.entity.TagEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
+import org.diploma.fordiplom.entity.UserEntity;
+import org.diploma.fordiplom.service.ProjectService;
 import org.diploma.fordiplom.service.TaskService;
+import org.diploma.fordiplom.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +26,10 @@ import java.util.stream.Collectors;
 public class TaskController {
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private ProjectService projectService;
+    @Autowired
+    private TeamService teamService;
     @PostMapping(path = "/create_task", consumes = MediaType.APPLICATION_JSON_VALUE)
     public TaskEntity createNewTask(@RequestBody TaskRequest task) {
         return taskService.createTask(task);
@@ -143,4 +151,24 @@ public class TaskController {
     public List<TagDTO> searchTags(@RequestParam String query) {
         return taskService.searchTags(query);
     }
+    @GetMapping("/api/tasks/{taskId}/project")
+    public ResponseEntity<ProjectDTO> getProjectByTaskId(@PathVariable Long taskId) {
+        try {
+            ProjectDTO project = projectService.getProjectByTaskId(taskId);
+            return ResponseEntity.ok(project);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    @PutMapping("/api/tasks/{taskId}/team/{teamId}")
+    public ResponseEntity<Void> assignTeamToTask(@PathVariable Long taskId, @PathVariable Long teamId) {
+        taskService.assignTeam(taskId, teamId);
+        return ResponseEntity.ok().build();
+    }
+    @PutMapping("/api/tasks/{taskId}/executor/{userId}")
+    public ResponseEntity<?> assignExecutor(@PathVariable Long taskId, @PathVariable Long userId) {
+        taskService.assignExecutor(taskId, userId);
+        return ResponseEntity.ok().build();
+    }
+
 }

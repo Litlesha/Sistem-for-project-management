@@ -1781,3 +1781,33 @@ menu, ol, ul {
     z-index: 10;
     border-radius: 5px;
 }
+
+.team-container {
+    position: relative; /* Чтобы правильно позиционировать результаты поиска */
+}
+.user-container{
+    position: relative;
+}
+.search-results {
+    display: none;
+    position: absolute;
+    top: 100%; /* Позиционируем список сразу под контейнером */
+    left: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 5px;
+}
+
+.search-results .search-result-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.search-results .search-result-item:hover {
+    background-color: #f1f1f1;
+}

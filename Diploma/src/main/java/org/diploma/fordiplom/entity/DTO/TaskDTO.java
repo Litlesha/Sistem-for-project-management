@@ -24,6 +24,8 @@ public class TaskDTO {
     private String authorName;
     private String boardName;
     private String sprintName;
+    private TeamDTO team;
+    private String executorName;
     public TaskDTO(Long id, String title, Long sprintId, String taskType, String status, String taskKey, String description, String priority, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.title = title;
@@ -57,11 +59,18 @@ public class TaskDTO {
         this.createdAt = taskEntity.getCreatedAt();
         this.updatedAt = taskEntity.getUpdatedAt();
 
+
         if (taskEntity.getAssignedUser() != null) {
             this.authorName = (taskEntity.getAssignedUser().getUsername() != null && !taskEntity.getAssignedUser().getUsername().isEmpty())
                     ? taskEntity.getAssignedUser().getUsername()
                     : taskEntity.getAssignedUser().getEmail();
         }
         this.sprintName = taskEntity.getSprint() != null ? taskEntity.getSprint().getSprintName() : null;
+        this.team = taskEntity.getTeam() != null ? new TeamDTO(taskEntity.getTeam()) : null;
+        if (taskEntity.getExecutor() != null) {
+            this.executorName = taskEntity.getExecutor().getUsername() != null
+                    ? taskEntity.getExecutor().getUsername()
+                    : taskEntity.getExecutor().getEmail();
+        }
     }
 }

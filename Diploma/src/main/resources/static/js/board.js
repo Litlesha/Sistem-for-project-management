@@ -534,6 +534,10 @@ function openTaskModal(task) {
     containerEl.innerHTML = '';
     containerEl.appendChild(modal);
     containerEl.setAttribute('data-task-id', task.id);
+    // const assignedUserDiv = containerEl.querySelector('.assigned-user');
+    // if (assignedUserDiv && task.executorName) {
+    //     assignedUserDiv.textContent = `Исполнитель: ${task.executorName}`;
+    // }
     fillTaskModalData(containerEl, task);
     setupCloseModal(containerEl);
     const difficultyBlock = containerEl.querySelector('.difficulty-block');
@@ -544,6 +548,8 @@ function openTaskModal(task) {
     setupTitleEdit(containerEl, task);
     initTinyMCEIfNeeded(containerEl);
     setupDescriptionEdit(containerEl, task);
+    initializeTeamSelection(containerEl, task);
+    initializeExecutorSelection(containerEl, task);
     loadComments(task.id);
     const submitBtn = containerEl.querySelector('#submit-comment-btn');
     if (submitBtn) {
@@ -563,6 +569,10 @@ function openTaskModal(task) {
     if (commentsBtn) commentsBtn.classList.add('active');
     initializeTags(containerEl);
     loadTagsForTask(task.id, containerEl);
+    // const executorContainer = containerEl.querySelector('.executor-container');
+    // if (task.team && task.team.id_team && executorContainer) {
+    //     loadUsersForTeam(task.team.id_team, executorContainer, task.id);
+    // }
 }
 //заполнение данных задачи из бд
 function fillTaskModalData(containerEl, task) {
@@ -1076,21 +1086,34 @@ async function loadTagsForTask(taskId, containerEl) {
     const tagContainer = containerEl.querySelector('.tags-tags');
     if (!tagContainer) return;
 
+    tagContainer.innerHTML = ''; // Очищаем контейнер перед загрузкой
+
     try {
         const response = await fetch(`/api/tasks/${taskId}/tags`);
         if (response.ok) {
-            const tags = await response.json(); // используем json(), чтобы сразу получить объект
+            const tags = await response.json();
+            if (tags.length === 0) {
+                const noTagsEl = document.createElement('span');
+                noTagsEl.textContent = 'Нет';
+                noTagsEl.style.color = '#888'; // Серый цвет
+                noTagsEl.style.fontSize = '12px'; // Меньший шрифт
+                tagContainer.appendChild(noTagsEl);
+                return;
+            }
             tags.forEach(tag => {
                 const tagElement = createTagElement(tag);
                 tagContainer.appendChild(tagElement);
             });
         } else {
             console.error('Ошибка при получении меток');
+            tagContainer.textContent = 'Ошибка загрузки';
         }
     } catch (error) {
         console.error('Ошибка при загрузке меток:', error);
+        tagContainer.textContent = 'Ошибка загрузки';
     }
 }
+
 
 //Добавление участников в проект
 function openTeamModal() {
@@ -1215,6 +1238,153 @@ async function searchTeams() {
 function cancelTeamInput() {
     document.getElementById("teamName").value = "";
     document.getElementById("teamSuggestions").style.display = "none";
+}
+
+function initializeTeamSelection(containerEl, task) {
+    const teamContainer = containerEl.querySelector('.team-tags-container');
+    const teamSearchResults = containerEl.querySelector('.team-search-results');
+    const taskId = document.getElementById('modal-container')?.getAttribute('data-task-id');
+
+    if (!taskId) {
+        console.error('Ошибка: taskId не найден');
+        return;
+    }
+
+    // ВСТАВЛЯЕМ НАЗВАНИЕ ТЕКУЩЕЙ КОМАНДЫ ЕСЛИ ЕСТЬ
+    if (task.team.team_name) {
+        teamContainer.textContent = task.team.team_name;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+    if (!projectId) {
+        console.error('Ошибка: projectId не найден в URL');
+        return;
+    }
+
+    teamContainer.addEventListener('click', async () => {
+        if (teamSearchResults.style.display === 'flex') {
+            teamSearchResults.style.display = 'none';
+        } else {
+            try {
+                const response = await fetch(`/api/projects/${projectId}/teams`);
+                const teams = await response.json();
+
+                if (!Array.isArray(teams)) {
+                    console.error('Ошибка: данные о командах не являются массивом');
+                    return;
+                }
+
+                teamSearchResults.innerHTML = '';
+
+                teams.forEach(team => {
+                    const teamDiv = document.createElement('div');
+                    teamDiv.textContent = team.team_name;
+                    teamDiv.classList.add('search-result-item');
+
+                    teamDiv.addEventListener('click', async () => {
+                        // Отображаем сразу выбранную команду
+                        teamContainer.textContent = team.team_name;
+                        teamSearchResults.style.display = 'none';
+
+                        // Отправляем PUT-запрос для привязки команды
+                        const assignResponse = await fetch(`/api/tasks/${taskId}/team/${team.id_team}`, {
+                            method: 'PUT'
+                        });
+
+                        if (!assignResponse.ok) {
+                            console.error('Ошибка при прикреплении команды');
+                        } else {
+                            // Обновляем локальную переменную task
+                            task.teamName = team.team_name;
+                        }
+                    });
+
+                    teamSearchResults.appendChild(teamDiv);
+                });
+
+                teamSearchResults.style.display = 'block';
+            } catch (error) {
+                console.error('Ошибка загрузки команд:', error);
+            }
+        }
+    });
+
+    // Закрытие выпадающего списка при клике вне области
+    document.addEventListener('click', (e) => {
+        if (!teamContainer.contains(e.target)) {
+            teamSearchResults.style.display = 'none';
+        }
+    });
+}
+
+
+// Прикрепить к задаче пользователя
+function initializeExecutorSelection(containerEl, task) {
+    const executorContainer = containerEl.querySelector('.executor-container');
+    const executorSearchResults = containerEl.querySelector('.executor-search-results');
+    const taskId = task.id;
+
+    // Отображаем выбранного исполнителя при загрузке страницы
+    const assignedUserDiv = containerEl.querySelector('.assigned-user');
+    if (task.executorName) {
+        assignedUserDiv.textContent = task.executorName; // Если исполнитель уже выбран, отображаем его
+    } else {
+        assignedUserDiv.textContent = 'Нет'; // Если исполнитель не выбран
+    }
+
+    executorContainer.addEventListener('click', async () => {
+        if (executorSearchResults.style.display === 'block') {
+            executorSearchResults.style.display = 'none';
+        } else {
+            try {
+                const response = await fetch(`/api/teams/${task.team.id_team}/users`);
+                const users = await response.json();
+
+                if (!Array.isArray(users)) {
+                    console.error('Ошибка: данные о пользователях не массив');
+                    return;
+                }
+
+                executorSearchResults.innerHTML = '';
+
+                users.forEach(user => {
+                    const userDiv = document.createElement('div');
+                    userDiv.textContent = user.email;
+                    userDiv.classList.add('search-result-item');
+
+                    userDiv.addEventListener('click', async () => {
+                        // Отображаем выбранного пользователя
+                        assignedUserDiv.textContent = `${user.email}`;
+                        executorSearchResults.style.display = 'none';
+
+                        // Назначаем исполнителя
+                        const assignResponse = await fetch(`/api/tasks/${taskId}/executor/${user.id_user}`, {
+                            method: 'PUT'
+                        });
+
+                        if (!assignResponse.ok) {
+                            console.error('Ошибка при назначении исполнителя');
+                        } else {
+                            task.executorName = user.email; // Обновляем локальную переменную task
+                        }
+                    });
+
+                    executorSearchResults.appendChild(userDiv);
+                });
+
+                executorSearchResults.style.display = 'block';
+            } catch (error) {
+                console.error('Ошибка загрузки исполнителей:', error);
+            }
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!executorContainer.contains(e.target)) {
+            executorSearchResults.style.display = 'none';
+        }
+    });
 }
 
 

@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Map;
+
 @RestController
 public class CommentController {
     @Autowired
     private  CommentService commentService;
 
     @GetMapping("/api/tasks/{taskId}/comments/active")
-    public List<CommentEntity> getComments(@PathVariable Long taskId) {
+    public List<CommentDTO> getComments(@PathVariable Long taskId) {
         return commentService.getCommentsByTaskId(taskId);
     }
 

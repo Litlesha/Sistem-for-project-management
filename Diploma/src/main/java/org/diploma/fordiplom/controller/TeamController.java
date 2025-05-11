@@ -131,4 +131,9 @@ public class TeamController {
         List<TeamEntity> teams = teamService.searchTeams(query);
         return ResponseEntity.ok(teams);  // Возвращаем найденные команды
     }
+    @GetMapping("/api/teams/{teamId}/users")
+    public ResponseEntity<List<UserEntity>> getUsersForTeam(@PathVariable Long teamId) {
+        List<UserEntity> users = teamService.getUsersForTeam(teamId);
+        return ResponseEntity.ok(users); // Возвращаем список пользователей
+    }
 }

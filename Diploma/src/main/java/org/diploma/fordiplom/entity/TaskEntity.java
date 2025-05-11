@@ -56,7 +56,9 @@ public class TaskEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "assigned_user_id")
     private UserEntity assignedUser;
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "executor_user_id") // новое поле
+    private UserEntity executor;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sprint_id")
     private SprintEntity sprint;
@@ -70,5 +72,7 @@ public class TaskEntity {
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id_tag")
     )
     private Set<TagEntity> tags = new HashSet<>();
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "team_id") // имя столбца в таблице task
+    private TeamEntity team;
 }

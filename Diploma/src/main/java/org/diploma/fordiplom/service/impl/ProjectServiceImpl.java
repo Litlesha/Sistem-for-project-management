@@ -2,12 +2,16 @@ package org.diploma.fordiplom.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.diploma.fordiplom.entity.DTO.ProjectDTO;
 import org.diploma.fordiplom.entity.DTO.TeamDTO;
 import org.diploma.fordiplom.entity.ProjectEntity;
+import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.entity.TeamEntity;
 import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.repository.ProjectRepository;
+import org.diploma.fordiplom.repository.TaskRepository;
 import org.diploma.fordiplom.service.ProjectService;
+import org.diploma.fordiplom.service.TaskService;
 import org.diploma.fordiplom.service.TeamService;
 import org.diploma.fordiplom.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,8 @@ public class ProjectServiceImpl implements ProjectService {
     private UserService userService;
     @Autowired
     private TeamService teamService;
+    @Autowired
+    private TaskRepository taskRepository;
 
     public ProjectEntity createProject(ProjectRequest request, String creatorEmail) {
         UserEntity creator = userService.getUserByEmail(creatorEmail);
@@ -77,6 +83,19 @@ public class ProjectServiceImpl implements ProjectService {
                 .map(team -> new TeamDTO(team.
                         getId_team(), team.getTeam_name()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ProjectDTO getProjectByTaskId(Long taskId) {
+        // Находим задачу по ID
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Задача не найдена"));
+
+        // Получаем проект по ID задачи
+        ProjectEntity project = task.getProject(); // Предполагается, что у задачи есть ссылка на проект
+
+        // Создаем ProjectDTO для отправки
+        return new ProjectDTO(project.getId(), project.getName());
     }
 
 

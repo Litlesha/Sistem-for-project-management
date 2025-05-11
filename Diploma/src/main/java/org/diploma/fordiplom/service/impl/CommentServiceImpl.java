@@ -3,6 +3,7 @@ package org.diploma.fordiplom.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.diploma.fordiplom.entity.CommentEntity;
+import org.diploma.fordiplom.entity.DTO.CommentDTO;
 import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.repository.CommentRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -26,8 +28,12 @@ public class CommentServiceImpl implements CommentService {
     private TaskRepository taskRepository;
 
     @Override
-    public List<CommentEntity> getCommentsByTaskId(Long taskId) {
-        return commentRepository.findByTaskIdOrderByCreatedAtDesc(taskId);
+    public List<CommentDTO> getCommentsByTaskId(Long taskId) {
+        List<CommentEntity> comments = commentRepository.findByTaskIdOrderByCreatedAtDesc(taskId);
+        // Преобразуем сущности в DTO
+        return comments.stream()
+                .map(CommentDTO::new)
+                .collect(Collectors.toList());
     }
 
     @Override

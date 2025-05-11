@@ -7,6 +7,7 @@ import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.entity.TagEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
+import org.diploma.fordiplom.entity.UserEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,4 +29,7 @@ public interface TaskService {
     TagDTO addTagToTask(Long taskId, TagDTO tagDTO);
     void removeTagFromTask(Long taskId, Long tagId);
     List<TagDTO> searchTags(String query);
+    void assignTeam(Long taskId, Long teamId);
+    void assignExecutor(Long taskId, Long userId);
+
 }

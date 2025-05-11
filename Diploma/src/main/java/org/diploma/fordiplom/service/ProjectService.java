@@ -1,5 +1,6 @@
 package org.diploma.fordiplom.service;
 
+import org.diploma.fordiplom.entity.DTO.ProjectDTO;
 import org.diploma.fordiplom.entity.DTO.TeamDTO;
 import org.diploma.fordiplom.entity.DTO.request.ProjectRequest;
 import org.diploma.fordiplom.entity.ProjectEntity;
@@ -16,4 +17,5 @@ public interface ProjectService {
     String getProjectKey(Long id);
     void addTeamToProject(Long projectId, Long teamId);
     List<TeamDTO> getTeamsByProjectId(Long projectId);
+    ProjectDTO getProjectByTaskId(Long taskId);
 }

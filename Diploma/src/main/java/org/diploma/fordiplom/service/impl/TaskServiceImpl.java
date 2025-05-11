@@ -3,16 +3,11 @@ package org.diploma.fordiplom.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.diploma.fordiplom.entity.*;
 import org.diploma.fordiplom.entity.DTO.TagDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
-import org.diploma.fordiplom.entity.SprintEntity;
-import org.diploma.fordiplom.entity.TagEntity;
-import org.diploma.fordiplom.entity.TaskEntity;
-import org.diploma.fordiplom.entity.UserEntity;
-import org.diploma.fordiplom.repository.SprintRepository;
-import org.diploma.fordiplom.repository.TagRepository;
-import org.diploma.fordiplom.repository.TaskRepository;
+import org.diploma.fordiplom.repository.*;
 import org.diploma.fordiplom.service.ProjectService;
 import org.diploma.fordiplom.service.SprintService;
 import org.diploma.fordiplom.service.TaskService;
@@ -40,6 +35,10 @@ public class TaskServiceImpl implements TaskService {
     private UserService userService;
     @Autowired
     private TagRepository tagRepository;
+    @Autowired
+    private TeamRepository teamRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public TaskEntity createTask(TaskRequest request){
@@ -220,6 +219,26 @@ public class TaskServiceImpl implements TaskService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void assignTeam(Long taskId, Long teamId) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Задача не найдена"));
+        TeamEntity team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Команда не найдена"));
+
+        task.setTeam(team);
+        taskRepository.save(task);
+    }
+    @Override
+    public void assignExecutor(Long taskId, Long userId) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Задача не найдена"));
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        task.setExecutor(user);
+        taskRepository.save(task);
+    }
     // Метод для получения всех меток задачи
     @Override
     public List<TagDTO> getTagsForTask(Long taskId) {

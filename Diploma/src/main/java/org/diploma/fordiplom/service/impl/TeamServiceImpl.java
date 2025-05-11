@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class TeamServiceImpl implements TeamService {
@@ -137,6 +134,11 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<TeamEntity> getUserTeams(String email){return teamRepository.findByEmail(email);}
-
+    @Override
+    public List<UserEntity> getUsersForTeam(Long teamId) {
+        TeamEntity team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Команда не найдена"));
+        return new ArrayList<>(team.getEmails());
+    }
 
 }
