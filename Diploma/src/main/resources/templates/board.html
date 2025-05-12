@@ -98,7 +98,6 @@
                             <span>Выполнено</span>
                         </div>
                         <div class="tusk-container">
-
                             <button class="add-task-btn on-board">+  Добавить задачу</button>
                         </div>
                     </div>
@@ -141,6 +140,23 @@
                             <img src="/icons/plus.svg">
                             <span>Добавить файл</span>
                         </button>
+                        <div class="file-upload-progress" style="display: none;">
+                            <span>Загрузка: <span id="progressText">0%</span></span>
+                            <div id="progressBarContainer" style="width: 100%; height: 20px; background-color: #f3f3f3;">
+                                <div id="progressBar" style="height: 100%; width: 0; background-color: #4caf50;"></div>
+                            </div>
+                        </div>
+                        <div class="file-list"></div>
+                        <div id="deleteModal" class="custom-modal">
+                            <div class="custom-modal-content">
+                                <span class="close">&times;</span>
+                                <p>Вы уверены, что хотите удалить файл? Этот файл нельзя будет вернуть.</p>
+                                <div class="btns-delete-file">
+                                    <button id="confirmDelete">Удалить</button>
+                                    <button class="cancel-btn">Отмена</button>
+                                </div>
+                            </div>
+                        </div>
                             <div class="description-container">
                                 <h2>Описание</h2>
                                 <span class="description-text">Здесь будет описание задачи</span>
@@ -167,7 +183,7 @@
                             <div class="activity-content">
                                 <div class="comments-section section" style="display: none;">
                                         <textarea id="comments"></textarea>
-                                        <button id="submit-comment-btn">Отправить</button>
+                                    <div class="submit-comment-container"><button class="submit-btn" id="submit-comment-btn">Отправить</button></div>
                                     <div class="comments-list"></div>
 <!--                                    <div class="comment-container">-->
 <!--                                    </div>-->

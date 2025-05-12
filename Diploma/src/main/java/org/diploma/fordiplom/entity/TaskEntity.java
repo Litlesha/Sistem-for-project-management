@@ -73,6 +73,9 @@ public class TaskEntity {
     )
     private Set<TagEntity> tags = new HashSet<>();
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "team_id") // имя столбца в таблице task
+    @JoinColumn(name = "team_id") //
     private TeamEntity team;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TaskFileRelation> fileRelations = new HashSet<>();
 }

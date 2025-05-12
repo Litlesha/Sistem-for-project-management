@@ -1144,6 +1144,7 @@ menu, ol, ul {
     padding: 25px;
     max-height: 99%;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 .task-title-modal{
     width: 100%;
@@ -1737,6 +1738,7 @@ menu, ol, ul {
 .close{
     display: flex;
     justify-content: flex-end;
+    cursor: pointer;
 }
 .close span{
     align-items: center;
@@ -1810,4 +1812,131 @@ menu, ol, ul {
 
 .search-results .search-result-item:hover {
     background-color: #f1f1f1;
+}
+
+.file-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    align-items: flex-start;
+    min-height: fit-content;
+    padding-top: 10px;
+    max-width: 100%;
+}
+
+.file-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 150px;
+    height: 145px;
+    border: 1px solid #DCDFE4;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    text-align: center;
+    overflow: hidden;
+    min-width: 150px;
+}
+
+.file-photo {
+    width: 128px;
+    height: 72px;
+    max-width: 100%;
+    max-height: 80px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.file-item .file-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+.file-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+}
+.file-actions button {
+    border-radius: 5px;
+    padding: 2px;
+    cursor: pointer;
+    border: 1px solid #DCDFE4;
+    transition: 0.2s ease-in;
+}
+.file-actions button img{
+    width: 20px;
+    height: 20px;
+}
+
+.file-actions button:hover {
+    background-color: #C6C6C6;
+}
+.file-name {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    display: block;
+    max-width: 100%;
+    white-space: nowrap; 
+    overflow: hidden;     
+    text-overflow: ellipsis;  
+}
+#confirmDelete {
+    background-color: #E63946;
+    color: white;
+    border-radius: 5px;
+    transition: 0.2s ease-in;
+    padding: 10px;
+}
+#confirmDelete:hover{
+    background-color: #C73944;
+}
+.custom-modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed;
+    z-index: 5;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+}
+
+/* Новый класс для содержимого модального окна */
+.custom-modal-content {
+    background-color: #fff;
+    margin: 20% auto;
+    padding: 25px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 450px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+.custom-modal-content p{
+    font-size: 14px;
+    text-align: left;
+}
+.btns-delete-file{
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+}
+.file-upload-progress {
+    margin-top: 10px;
+    text-align: center;
+}
+
+#progressBar {
+    transition: width 0.1s;
+}
+.submit-comment-container{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
 }

@@ -569,6 +569,7 @@ function openTaskModal(task) {
     if (commentsBtn) commentsBtn.classList.add('active');
     initializeTags(containerEl);
     loadTagsForTask(task.id, containerEl);
+    initializeFileUpload(containerEl, task.id);
     // const executorContainer = containerEl.querySelector('.executor-container');
     // if (task.team && task.team.id_team && executorContainer) {
     //     loadUsersForTeam(task.team.id_team, executorContainer, task.id);
@@ -1239,7 +1240,6 @@ function cancelTeamInput() {
     document.getElementById("teamName").value = "";
     document.getElementById("teamSuggestions").style.display = "none";
 }
-
 function initializeTeamSelection(containerEl, task) {
     const teamContainer = containerEl.querySelector('.team-tags-container');
     const teamSearchResults = containerEl.querySelector('.team-search-results');
@@ -1317,8 +1317,6 @@ function initializeTeamSelection(containerEl, task) {
         }
     });
 }
-
-
 // Прикрепить к задаче пользователя
 function initializeExecutorSelection(containerEl, task) {
     const executorContainer = containerEl.querySelector('.executor-container');
@@ -1386,6 +1384,168 @@ function initializeExecutorSelection(containerEl, task) {
         }
     });
 }
+
+// работа с файлами
+function initializeFileUpload(container, taskId) {
+    const addFileBtn = container.querySelector('.add-file');
+    const fileListContainer = container.querySelector('.file-list');
+
+    if (!addFileBtn || !fileListContainer) return;
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+
+    addFileBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length === 0) return;
+        const file = fileInput.files[0];
+
+        // Показываем прогресс-бар
+        const progressBarContainer = document.querySelector('.file-upload-progress');
+        progressBarContainer.style.display = 'block';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Создаем XMLHttpRequest для отслеживания прогресса
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/files/upload', true);
+
+        // Обработчик прогресса
+        xhr.upload.addEventListener('progress', function (e) {
+            if (e.lengthComputable) {
+                const percent = (e.loaded / e.total) * 100;
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${Math.round(percent)}%`;
+            }
+        });
+
+        // Обработчик завершения загрузки
+        xhr.onload = async function () {
+            if (xhr.status === 200) {
+                const fileData = JSON.parse(xhr.responseText);
+
+                // Прикрепить файл к задаче
+                const attachRes = await fetch(`/api/files/${taskId}/attach/${fileData.id}`, {
+                    method: 'POST'
+                });
+
+                if (!attachRes.ok) {
+                    alert('Ошибка при прикреплении');
+                }
+
+                renderFileItem(fileData, fileListContainer, taskId);
+            } else {
+                alert('Ошибка при загрузке');
+            }
+
+            // Скрываем прогресс-бар после завершения загрузки
+            progressBarContainer.style.display = 'none';
+        };
+
+        // Обработчик ошибок
+        xhr.onerror = function () {
+            alert('Ошибка при загрузке файла');
+            progressBarContainer.style.display = 'none'; // скрыть прогресс-бар при ошибке
+        };
+
+        // Отправка данных
+        xhr.send(formData);
+    });
+
+    // загрузить уже прикрепленные файлы
+    fetch(`/api/files/task/${taskId}`)
+        .then(res => res.json())
+        .then(files => {
+            fileListContainer.innerHTML = '';
+            files.forEach(file => renderFileItem(file, fileListContainer, taskId));
+        });
+}
+
+function renderFileItem(file, container, taskId) {
+    const item = document.createElement('div');
+    item.classList.add('file-item');
+
+    // Проверка типа файла
+    let fileContent = '';
+    if (file.contentType.startsWith('image/')) {
+        fileContent = `<img class="file-photo" src="/api/files/${file.id}/download" alt="${file.fileName}">`;
+    } else {
+        fileContent = ` 
+            <div class="file-icon" style="width: 128.4px; height: 72.22px; display: flex; justify-content: center; align-items: center;">
+                <img src="/icons/document.svg" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+        `;
+    }
+
+    item.innerHTML = `
+        ${fileContent}
+        <span class="file-name">${file.fileName}</span>
+        <div class="file-actions">
+            <button class="download-btn" title="Скачать"><img src="/icons/download.svg"></button>
+            <button class="delete-btn" title="Удалить"><img src="/icons/trash.svg"></button>
+        </div>
+    `;
+
+    item.querySelector('.download-btn').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.href = `/api/files/${file.id}/download`;
+        link.download = file.fileName; // Устанавливаем имя файла для скачивания
+        link.click();
+    });
+
+    const deleteBtn = item.querySelector('.delete-btn');
+    deleteBtn.addEventListener('click', () => {
+        // Открытие модального окна
+        openDeleteModal(file, taskId, item);
+    });
+
+    container.appendChild(item);
+}
+
+// Функция для открытия модального окна подтверждения удаления
+function openDeleteModal(file, taskId, item) {
+    const modal = document.getElementById('deleteModal');
+    const closeBtn = modal.querySelector('.close'); // Используем 'close' для кнопки закрытия
+    const confirmDeleteBtn = modal.querySelector('#confirmDelete');
+    const cancelDeleteBtn = modal.querySelector('.cancel-btn'); // Используем 'cancel-btn' для кнопки отмены
+
+    // Открытие модального окна
+    modal.style.display = 'block';
+
+    // Закрытие модального окна
+    closeBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    cancelDeleteBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    // Подтверждение удаления
+    confirmDeleteBtn.onclick = async () => {
+        try {
+            const res = await fetch(`/api/files/${taskId}/detach/${file.id}`, { method: 'DELETE' });
+            if (res.ok) {
+                item.remove();
+                modal.style.display = 'none'; // Закрыть модальное окно
+            } else {
+                alert('Не удалось удалить файл');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка при удалении файла');
+        }
+    };
+}
+
+
+
 
 
 
