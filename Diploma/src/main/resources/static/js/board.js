@@ -54,11 +54,7 @@ function initKanbanDragAndDrop() {
         });
     });
 }
-
-
 initKanbanDragAndDrop();
-
-
 
 // Отрисовывание задач на доске
 async function loadActiveSprint(projectId) {
@@ -82,7 +78,6 @@ async function loadActiveSprint(projectId) {
             'В работе': '.kanban-column:nth-child(2) .tusk-container',
             'Выполнено': '.kanban-column:nth-child(3) .tusk-container'
         };
-
         tasks.forEach(task => {
             const icon = iconMap[task.taskType] || 'icons/tusk.svg';
             const statusColumn = task.status; // Предполагаем, что статус хранится в поле task.status
@@ -118,7 +113,6 @@ async function loadActiveSprint(projectId) {
         console.error('Ошибка при загрузке активного спринта:', err);
     }
 }
-
 
 function getProjectIdFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -534,10 +528,6 @@ function openTaskModal(task) {
     containerEl.innerHTML = '';
     containerEl.appendChild(modal);
     containerEl.setAttribute('data-task-id', task.id);
-    // const assignedUserDiv = containerEl.querySelector('.assigned-user');
-    // if (assignedUserDiv && task.executorName) {
-    //     assignedUserDiv.textContent = `Исполнитель: ${task.executorName}`;
-    // }
     fillTaskModalData(containerEl, task);
     setupCloseModal(containerEl);
     const difficultyBlock = containerEl.querySelector('.difficulty-block');
@@ -551,6 +541,7 @@ function openTaskModal(task) {
     initializeTeamSelection(containerEl, task);
     initializeExecutorSelection(containerEl, task);
     loadComments(task.id);
+    loadTaskHistory(task.id);
     const submitBtn = containerEl.querySelector('#submit-comment-btn');
     if (submitBtn) {
         submitBtn.addEventListener('click', () => {
@@ -570,10 +561,6 @@ function openTaskModal(task) {
     initializeTags(containerEl);
     loadTagsForTask(task.id, containerEl);
     initializeFileUpload(containerEl, task.id);
-    // const executorContainer = containerEl.querySelector('.executor-container');
-    // if (task.team && task.team.id_team && executorContainer) {
-    //     loadUsersForTeam(task.team.id_team, executorContainer, task.id);
-    // }
 }
 //заполнение данных задачи из бд
 function fillTaskModalData(containerEl, task) {
@@ -668,6 +655,7 @@ function setupTitleEdit(containerEl, task) {
             if (!response.ok) throw new Error('Ошибка при обновлении названия');
             titleSpan.textContent = newTitle;
             task.title = newTitle;
+            loadTaskHistory(task.id);
         } catch (err) {
             console.error(err);
             alert('Не удалось обновить название задачи');
@@ -735,6 +723,7 @@ function setupDescriptionEdit(containerEl, task) {
 
             task.description = newDescription;
             descriptionSpan.textContent = newDescription || 'Добавьте описание';
+            loadTaskHistory(task.id);
         } catch (err) {
             console.error(err);
             alert('Не удалось обновить описание задачи');
@@ -752,7 +741,7 @@ function setupDescriptionEdit(containerEl, task) {
     });
 }
 //Редактирование сложности
-function initDifficultyEditor(containerEl,task) {
+function initDifficultyEditor(containerEl, task) {
     const difficultyEl = containerEl.querySelector('.difficulty');
     const difficultyEditor = containerEl.querySelector('.difficulty-editor');
     const difficultyInput = containerEl.querySelector('.difficulty-input');
@@ -760,6 +749,7 @@ function initDifficultyEditor(containerEl,task) {
     const cancelButton = containerEl.querySelector('.cancel-difficulty');
     const tagsContainer = containerEl.querySelector('.tags-container');
     const actionsContainer = containerEl.querySelector('.difficulty-actions');
+    const historySection = document.querySelector('.history-section');  // Контейнер для истории
 
     // Сброс состояния
     difficultyEditor.style.display = 'none';
@@ -769,7 +759,7 @@ function initDifficultyEditor(containerEl,task) {
     // Клик по .tags-container (именно сложности)
     tagsContainer.addEventListener('click', function () {
         if (difficultyEditor.style.display === 'none') {
-            difficultyInput.value = difficultyEl.textContent.trim();
+            difficultyInput.value = difficultyEl.textContent.trim(); // Устанавливаем текущее значение
             difficultyEl.style.display = 'none';
             difficultyEditor.style.display = 'flex';
             actionsContainer.style.display = 'flex';
@@ -777,10 +767,21 @@ function initDifficultyEditor(containerEl,task) {
         }
     });
 
+    // Сохранить новый приоритет
     saveButton.addEventListener('click', function (event) {
         event.stopPropagation();
-        const newPriority = difficultyInput.value;
 
+        const newPriority = difficultyInput.value.trim();
+
+        // Проверка на пустое значение
+        if (!newPriority) {
+            alert('Приоритет не может быть пустым');
+            return;
+        }
+
+        const oldPriority = difficultyEl.textContent.trim() || 'Нет'; // Старое значение, если пустое, то "Нет"
+
+        // Выполняем запрос на сервер для обновления приоритета
         fetch(`/api/tasks/${task.id}/priority`, {
             method: 'PUT',
             headers: {
@@ -788,19 +789,28 @@ function initDifficultyEditor(containerEl,task) {
             },
             body: JSON.stringify({ priority: newPriority })
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Не удалось обновить приоритет');
+                }
+                return response.json();
+            })
             .then(data => {
-                difficultyEl.textContent = data.priority;
+                difficultyEl.textContent = data.priority;  // Обновляем отображение
                 difficultyEl.style.display = 'inline';
                 difficultyEditor.style.display = 'none';
                 actionsContainer.style.display = 'none';
+
+                // Добавляем запись в историю
+                loadTaskHistory(data.id);
             })
             .catch(error => {
-                console.error('Error updating priority:', error);
+                console.error('Ошибка при обновлении приоритета:', error);
                 alert('Не удалось обновить приоритет');
             });
     });
 
+    // Отмена изменений
     cancelButton.addEventListener('click', function (event) {
         event.stopPropagation();
         difficultyEditor.style.display = 'none';
@@ -808,6 +818,7 @@ function initDifficultyEditor(containerEl,task) {
         difficultyEl.style.display = 'inline';
     });
 
+    // Запрещаем закрытие редактора при клике внутри
     difficultyInput.addEventListener('click', e => e.stopPropagation());
     difficultyEditor.addEventListener('click', e => e.stopPropagation());
 }
@@ -826,7 +837,8 @@ async function submitComment(taskId) {
 
     if (response.ok) {
         const comment = await response.json();
-        appendComment(comment);  // Добавляем комментарий на страницу
+        appendComment(comment);
+        loadTaskHistory(taskId);
         editor.setContent('');  // Очищаем редактор после отправки
     } else {
         alert('Ошибка при отправке комментария!');
@@ -1014,6 +1026,7 @@ async function addTag(tagName, tagContainer) {
         const tagSpan = createTagElement(newTag);
         tagContainer.appendChild(tagSpan);
         updateTagsDisplay();
+        loadTaskHistory(taskId);
     } else {
         console.error('Не удалось добавить метку');
     }
@@ -1057,6 +1070,7 @@ async function removeTag(tag) {
     await fetch(`/api/tasks/${taskId}/tags/${tag.id}`, {
         method: 'DELETE'
     });
+    loadTaskHistory(taskId);
 }
 
 async function updateTagsDisplay() {
@@ -1251,7 +1265,7 @@ function initializeTeamSelection(containerEl, task) {
     }
 
     // ВСТАВЛЯЕМ НАЗВАНИЕ ТЕКУЩЕЙ КОМАНДЫ ЕСЛИ ЕСТЬ
-    if (task.team.team_name) {
+    if (task.team && task.team.team_name) {  // добавлена проверка на существование task.team
         teamContainer.textContent = task.team.team_name;
     }
 
@@ -1297,6 +1311,7 @@ function initializeTeamSelection(containerEl, task) {
                         } else {
                             // Обновляем локальную переменную task
                             task.teamName = team.team_name;
+                            loadTaskHistory(taskId);
                         }
                     });
 
@@ -1317,6 +1332,7 @@ function initializeTeamSelection(containerEl, task) {
         }
     });
 }
+
 // Прикрепить к задаче пользователя
 function initializeExecutorSelection(containerEl, task) {
     const executorContainer = containerEl.querySelector('.executor-container');
@@ -1365,6 +1381,7 @@ function initializeExecutorSelection(containerEl, task) {
                             console.error('Ошибка при назначении исполнителя');
                         } else {
                             task.executorName = user.email; // Обновляем локальную переменную task
+                            loadTaskHistory(taskId);
                         }
                     });
 
@@ -1440,6 +1457,7 @@ function initializeFileUpload(container, taskId) {
                 }
 
                 renderFileItem(fileData, fileListContainer, taskId);
+                loadTaskHistory(taskId);
             } else {
                 alert('Ошибка при загрузке');
             }
@@ -1533,6 +1551,7 @@ function openDeleteModal(file, taskId, item) {
             const res = await fetch(`/api/files/${taskId}/detach/${file.id}`, { method: 'DELETE' });
             if (res.ok) {
                 item.remove();
+                loadTaskHistory(taskId);
                 modal.style.display = 'none'; // Закрыть модальное окно
             } else {
                 alert('Не удалось удалить файл');
@@ -1544,7 +1563,130 @@ function openDeleteModal(file, taskId, item) {
     };
 }
 
+//Работа с историей
+function addHistoryEntry(taskId, field, beforeValue, afterValue) {
+    const historySection = document.querySelector('.history-section');
 
+    // Если beforeValue пустое, то отображаем 'Нет'
+    beforeValue = beforeValue || 'Нет';
+    afterValue = afterValue || 'Нет';
+
+    // Делаем запрос к серверу для получения данных о задаче
+    fetch(`/api/tasks/${taskId}`)
+        .then(response => response.json())
+        .then(taskData => {
+            console.log(taskData)
+            const authorName = taskData.authorName; // Получаем имя автора из DTO
+
+            // Получаем локализованное название действия (например, "Создал", "Обновил")
+            const actionLabel = taskData.actionTypeName; // Используем actionTypeName из DTO
+
+            // Создаём новый элемент для записи в историю
+            const container = document.createElement('div');
+            container.classList.add('grid-container-history');
+
+            // Добавляем новый элемент в HTML
+            container.innerHTML = `
+                <div class="section-photo-history">
+                    <img src="icons/Group%205.svg">
+                </div>
+                <div class="section-action-history">
+                    <div class="action-container">
+                        <span>${authorName}</span> <!-- Динамически вставляем имя пользователя -->
+                        <span>${actionLabel}</span> <!-- Динамически вставляем действие -->
+                        <span class="bold">${mapField(field)}</span>
+                        <span>${formatDate(new Date())}</span> <!-- Текущее время изменения -->
+                    </div>
+                </div>
+                <div class="section-actin-show-history">
+                    <div class="actions-show">
+                        <span class="action-before">${beforeValue}</span> <!-- Отображаем старое значение -->
+                        <img src="/icons/arrow-right.svg">
+                        <span class="action-after">${afterValue}</span> <!-- Отображаем новое значение -->
+                    </div>
+                </div>
+            `;
+
+            historySection.insertBefore(container, historySection.firstChild);  // Вставляем запись в начало
+        })
+        .catch(error => {
+            console.error('Ошибка при получении данных о задаче:', error);
+        });
+}
+// Форматирование даты
+function formatDate(isoDate) {
+    const date = new Date(isoDate);
+    if (isNaN(date)) return 'Неверная дата';
+    return date.toLocaleString('ru-RU', {
+        day: 'numeric', month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+
+// Маппинг для полей
+function mapField(field) {
+    const map = {
+        title: 'Название задачи',
+        description: 'Описание',
+        priority: 'Приоритет',
+        task_type: 'Тип задачи',
+        status: 'Статус',
+        assignedUser: 'Назначенный пользователь',
+        executor: 'Исполнитель',
+        sprint: 'Спринт',
+        project: 'Проект',
+        tags: 'Метки',
+        team: 'Команда',
+        file: 'Прикреплённый файл',
+        comments: 'Комментарий'
+    };
+    return map[field] || field;
+}
+function loadTaskHistory(taskId) {
+    fetch(`/api/tasks/${taskId}/history`)
+        .then(response => response.json())
+        .then(historyEntries => {
+
+            const historySection = document.querySelector('.history-section');
+            historySection.innerHTML = ''; // Очищаем при загрузке
+
+            historyEntries.forEach(entry => {
+                const container = document.createElement('div');
+                container.classList.add('grid-container-history');
+
+                const beforeVal = entry.beforeValue || 'Нет';
+                const afterVal = entry.afterValue || 'Нет';
+                const authorName = entry.authorName || 'Неизвестный пользователь';
+                const dateStr = formatDate(entry.createdAt); // используем createdAt
+                const actionLabel = entry.actionTypeName || 'Неизвестное действие'; // используем actionTypeName для отображения действия
+
+                container.innerHTML = `
+                    <div class="section-photo-history">
+                        <img src="icons/Group%205.svg">
+                    </div>
+                    <div class="section-action-history">
+                        <div class="action-container">
+                            <span>${authorName}</span>
+                            <span>${actionLabel}</span> <!-- Динамически вставляем действие -->
+                            <span class="bold">${mapField(entry.field)}</span>
+                            <span>${dateStr}</span>
+                        </div>
+                    </div>
+                    <div class="section-actin-show-history">
+                        <div class="actions-show">
+                            <span class="action-before">${beforeVal}</span>
+                            <img src="/icons/arrow-right.svg">
+                            <span class="action-after">${afterVal}</span>
+                        </div>
+                    </div>
+                `;
+                historySection.appendChild(container);
+            });
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке истории:', error);
+        });
+}
 
 
 

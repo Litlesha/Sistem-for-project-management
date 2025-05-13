@@ -8,17 +8,16 @@ import org.diploma.fordiplom.entity.DTO.TagDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.repository.*;
-import org.diploma.fordiplom.service.ProjectService;
-import org.diploma.fordiplom.service.SprintService;
-import org.diploma.fordiplom.service.TaskService;
-import org.diploma.fordiplom.service.UserService;
+import org.diploma.fordiplom.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +38,8 @@ public class TaskServiceImpl implements TaskService {
     private TeamRepository teamRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TaskHistoryService taskHistoryService;
 
     @Override
     public TaskEntity createTask(TaskRequest request){
@@ -113,17 +114,33 @@ public class TaskServiceImpl implements TaskService {
         } else {
             task.setSprint(null); // Если задача возвращается в бэклог, убираем привязку
         }
-
+        task.setUpdatedAt(Instant.now());
         taskRepository.save(task); // Сохраняем обновлённую задачу
     }
 
     @Override
-    public void updateStatus(Long taskId, String status) {
+    public void updateStatus(Long taskId, String newStatus) {
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Задача не найдена"));
 
-        task.setStatus(status);
+        String oldStatus = task.getStatus(); // сохраняем старый статус
+
+        task.setStatus(newStatus);
+        task.setUpdatedAt(Instant.now());
         taskRepository.save(task);
+
+        // Получаем email текущего пользователя
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Добавляем в историю
+        taskHistoryService.saveTaskHistory(
+                task,
+                oldStatus,
+                newStatus,
+                email,
+                "update",         // действие
+                "status"          // поле
+        );
     }
     public List<TaskDTO> searchTasksInSprint(String query, Long projectId, Long sprintId) {
         // Получаем список задач из репозитория
@@ -145,48 +162,109 @@ public class TaskServiceImpl implements TaskService {
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Задача не найдена с id " + taskId));
 
-        task.setTitle(taskTitle);
-        return taskRepository.save(task);
+        String oldTitle = task.getTitle();
+        String newTitle = taskTitle;
+
+        // Если название не изменилось, ничего не делать
+        if (Objects.equals(oldTitle, newTitle)) {
+            return task;
+        }
+
+        task.setTitle(newTitle);
+        task.setUpdatedAt(Instant.now());
+        TaskEntity savedTask = taskRepository.save(task);
+
+        // actionType: create/update (в зависимости от наличия старого значения)
+        String actionType = (oldTitle == null || oldTitle.isBlank()) ? "create" : "update";
+
+        // Подставь email текущего пользователя
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        taskHistoryService.saveTaskHistory(savedTask, oldTitle, newTitle, email, actionType, "title");
+
+        return savedTask;
     }
+
 
     @Override
     public TaskEntity updateTaskDescription(Long taskId, String taskDescription) {
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Задача не найдена с id " + taskId));
-        task.setDescription(taskDescription);
-        return taskRepository.save(task);
+
+        String oldDescription = task.getDescription();
+        if (oldDescription == null) {
+            oldDescription = "";
+        }
+        String newDescription = taskDescription;
+
+        if (Objects.equals(oldDescription, newDescription)) {
+            return task;
+        }
+
+        task.setDescription(newDescription);
+        task.setUpdatedAt(Instant.now());
+        TaskEntity savedTask = taskRepository.save(task);
+
+        String actionType = (oldDescription == null || oldDescription.isBlank()) ? "create" : "update";
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        taskHistoryService.saveTaskHistory(savedTask, oldDescription, newDescription, email, actionType, "description");
+
+        return savedTask;
     }
 
-    public TaskEntity updateTaskPriority(Long taskId, String newPriority) {
+    public TaskEntity updateTaskPriority(Long taskId, String newPriority, String email) {
         TaskEntity task = getTaskById(taskId);
-        task.setPriority(newPriority);
-        task.setUpdatedAt(Instant.now());
-        return taskRepository.save(task);
+        String oldPriority = task.getPriority();
+
+        if (oldPriority == null) {
+            oldPriority = "";
+        }
+
+        // Если приоритет ещё не был установлен, то это первый раз
+        String actionType = oldPriority.isEmpty() ? "create" : "update";
+
+        if (!oldPriority.equals(newPriority)) {
+            task.setPriority(newPriority);
+            task.setUpdatedAt(Instant.now());
+            task = taskRepository.save(task);
+
+            // Используем выделенный метод для сохранения истории
+            taskHistoryService.saveTaskHistory(task, oldPriority, newPriority, email, actionType, "priority");
+        }
+
+        return task;
     }
+
     @Transactional
     public TagDTO addTagToTask(Long taskId, TagDTO tagDTO) {
-        // Найти задачу по ID
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
-        // Найти метку по имени (если она уже существует)
-        TagEntity tagEntity = tagRepository.findByName(tagDTO.getName())
-                .orElse(null);
-
+        TagEntity tagEntity = tagRepository.findByName(tagDTO.getName()).orElse(null);
         if (tagEntity == null) {
-            // Если метка не существует в базе данных, создаём новую
             tagEntity = new TagEntity();
             tagEntity.setName(tagDTO.getName());
             tagEntity = tagRepository.save(tagEntity);
         }
 
-        // Добавляем метку в задачу, если её ещё нет в связях
         if (!task.getTags().contains(tagEntity)) {
             task.getTags().add(tagEntity);
+            task.setUpdatedAt(Instant.now());
             taskRepository.save(task);
+
+            // ✅ История
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            taskHistoryService.saveTaskHistory(
+                    task,
+                    "",                             // oldValue
+                    tagEntity.getName(),            // newValue
+                    email,
+                    "create",                          // actionCode
+                    "tags"                           // fieldCode
+            );
         }
 
-        // Возвращаем DTO метки
         return new TagDTO(tagEntity.getId(), tagEntity.getName());
     }
 
@@ -194,18 +272,27 @@ public class TaskServiceImpl implements TaskService {
     // Метод для удаления метки из задачи
     @Transactional
     public void removeTagFromTask(Long taskId, Long tagId) {
-        // Найти задачу по ID
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
-        // Найти метку по ID
         TagEntity tagEntity = tagRepository.findById(tagId)
                 .orElseThrow(() -> new RuntimeException("Tag not found"));
 
-        // Удаляем метку из задачи
         if (task.getTags().contains(tagEntity)) {
             task.getTags().remove(tagEntity);
+            task.setUpdatedAt(Instant.now());
             taskRepository.save(task);
+
+            // ✅ История
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            taskHistoryService.saveTaskHistory(
+                    task,
+                    tagEntity.getName(),            // oldValue
+                    "",                             // newValue
+                    email,
+                    "delete",                       // actionCode
+                    "tags"                           // fieldCode
+            );
         }
     }
 
@@ -226,8 +313,26 @@ public class TaskServiceImpl implements TaskService {
         TeamEntity team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new RuntimeException("Команда не найдена"));
 
+        String oldTeamName = task.getTeam() != null ? task.getTeam().getTeam_name() : ""; // Сохраняем старое значение команды
+        String newTeamName = team.getTeam_name(); // Новое значение команды
+
         task.setTeam(team);
-        taskRepository.save(task);
+        task.setUpdatedAt(Instant.now());
+        task = taskRepository.save(task);
+        String actionType = oldTeamName.isEmpty() ? "create" : "update";
+        // Проверяем, изменилась ли команда
+        if (!oldTeamName.equals(newTeamName)) {
+            // Добавляем запись в историю
+            String email = SecurityContextHolder.getContext().getAuthentication().getName(); // Получаем email пользователя
+            taskHistoryService.saveTaskHistory(
+                    task,
+                    oldTeamName,               // Старое значение (команда до изменений)
+                    newTeamName,               // Новое значение (команда после изменений)
+                    email,
+                    actionType,                  // Тип действия
+                    "team"                     // Поле, которое было изменено
+            );
+        }
     }
     @Override
     public void assignExecutor(Long taskId, Long userId) {
@@ -236,8 +341,26 @@ public class TaskServiceImpl implements TaskService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
+        String oldExecutorEmail = task.getExecutor() != null ? task.getExecutor().getEmail() : ""; // Старое значение исполнителя
+        String newExecutorEmail = user.getEmail(); // Новое значение исполнителя
+
         task.setExecutor(user);
-        taskRepository.save(task);
+        task.setUpdatedAt(Instant.now());
+        task = taskRepository.save(task);
+        String actionType = oldExecutorEmail.isEmpty() ? "create" : "update";
+        // Проверяем, изменился ли исполнитель
+        if (!oldExecutorEmail.equals(newExecutorEmail)) {
+            // Добавляем запись в историю
+            String email = SecurityContextHolder.getContext().getAuthentication().getName(); // Получаем email пользователя
+            taskHistoryService.saveTaskHistory(
+                    task,
+                    oldExecutorEmail,               // Старое значение (исполнитель до изменений)
+                    newExecutorEmail,               // Новое значение (исполнитель после изменений)
+                    email,
+                    actionType,                       // Тип действия
+                    "executor"                      // Поле, которое было изменено
+            );
+        }
     }
     // Метод для получения всех меток задачи
     @Override

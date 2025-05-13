@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -40,8 +42,11 @@ public class FileController {
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) {
         FileEntity file = fileService.getFileById(fileId);
 
+        String encodedFilename = URLEncoder.encode(file.getFileName(), StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20");
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFilename)
                 .contentType(MediaType.parseMediaType(file.getContentType()))
                 .body(file.getData());
     }

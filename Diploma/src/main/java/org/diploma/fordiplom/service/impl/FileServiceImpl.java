@@ -9,7 +9,9 @@ import org.diploma.fordiplom.repository.FileRepository;
 import org.diploma.fordiplom.repository.TaskFileRelationRepository;
 import org.diploma.fordiplom.repository.TaskRepository;
 import org.diploma.fordiplom.service.FileService;
+import org.diploma.fordiplom.service.TaskHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +30,8 @@ public class FileServiceImpl implements FileService {
     private  TaskRepository taskRepository;
     @Autowired
     private  TaskFileRelationRepository relationRepository;
+    @Autowired
+    TaskHistoryService taskHistoryService;
 
     @Override
     @Transactional
@@ -61,11 +65,30 @@ public class FileServiceImpl implements FileService {
         TaskEntity task = taskRepository.findById(taskId).orElseThrow();
         FileEntity file = fileRepository.findById(fileId).orElseThrow();
 
+        // Старое состояние файлов задачи (пустое)
+        String oldFileNames = "";  // Старое состояние файлов - пустая строка
+
+        // Создание связи между файлом и задачей
         TaskFileRelation relation = new TaskFileRelation();
         relation.setTask(task);
         relation.setFile(file);
-
+        task.setUpdatedAt(Instant.now());
         relationRepository.save(relation);
+
+        // Новое состояние файлов задачи (только имя добавленного файла)
+        String newFileNames = file.getFileName();  // Имя добавленного файла
+
+        // Получаем email текущего пользователя
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        // Добавление записи в историю
+        taskHistoryService.saveTaskHistory(
+                task,
+                oldFileNames,                 // Старое состояние файлов (пустое)
+                newFileNames,                 // Новое состояние файлов
+                email,
+                "create",                     // Тип действия
+                "file"                        // Поле, которое изменилось
+        );
     }
 
     @Override
@@ -81,7 +104,32 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public void deleteFileFromTask(Long taskId, Long fileId) {
+        TaskEntity task = taskRepository.findById(taskId).orElseThrow();
+        FileEntity file = fileRepository.findById(fileId).orElseThrow();
+
+        // Старое состояние файлов задачи (до удаления)
+        String oldFileNames = file.getFileName();
+
+        // Удаление связи между файлом и задачей
         relationRepository.deleteByTaskIdAndFileId(taskId, fileId);
+        task.setUpdatedAt(Instant.now());
+
+        // Новое состояние файлов задачи (после удаления)
+        String newFileNames = "";
+
+        // Получаем email текущего пользователя
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+
+        // Добавление записи в историю
+        taskHistoryService.saveTaskHistory(
+                task,
+                oldFileNames,                 // Старое состояние файлов
+                newFileNames,                 // Новое состояние файлов
+                email,
+                "delete",                     // Тип действия
+                "file"                        // Поле, которое изменилось
+        );
     }
 
     @Override

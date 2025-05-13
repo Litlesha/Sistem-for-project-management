@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
-    List<CommentEntity> findByTaskIdOrderByCreatedAtDesc(Long taskId);
+    List<CommentEntity> findByTaskIdOrderByCreatedAtAsc(Long taskId);
 }

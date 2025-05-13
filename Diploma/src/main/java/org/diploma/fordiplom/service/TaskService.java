@@ -24,7 +24,7 @@ public interface TaskService {
     TaskEntity getTaskById(Long taskId);
     TaskEntity updateTaskTitle(Long taskId, String taskTitle);
     TaskEntity updateTaskDescription(Long taskId, String taskDescription);
-    TaskEntity updateTaskPriority(Long taskId, String newPriority);
+    TaskEntity updateTaskPriority(Long taskId, String newPriority, String email);
     List<TagDTO> getTagsForTask(Long taskId);
     TagDTO addTagToTask(Long taskId, TagDTO tagDTO);
     void removeTagFromTask(Long taskId, Long tagId);

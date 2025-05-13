@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -125,9 +126,12 @@ public class TaskController {
     @PutMapping("/api/tasks/{id}/priority")
     public ResponseEntity<TaskResponseDTO> updateTaskPriority(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateTaskPriorityRequest request
+            @Valid @RequestBody UpdateTaskPriorityRequest request,
+            Principal principal // для получения пользователя
     ) {
-        TaskEntity updatedTask = taskService.updateTaskPriority(id, request.getPriority());
+        // Обновляем приоритет задачи и сохраняем её в БД
+        TaskEntity updatedTask = taskService.updateTaskPriority(id, request.getPriority(), principal.getName());
+
         return ResponseEntity.ok(new TaskResponseDTO(updatedTask));
     }
     @PostMapping("/api/tasks/{taskId}/tags")
