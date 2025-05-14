@@ -79,6 +79,7 @@ async function loadActiveSprint(projectId) {
             'Выполнено': '.kanban-column:nth-child(3) .tusk-container'
         };
         tasks.forEach(task => {
+            console.log("Полученные задачи:", tasks);
             const icon = iconMap[task.taskType] || 'icons/tusk.svg';
             const statusColumn = task.status; // Предполагаем, что статус хранится в поле task.status
             if (!task.status) return;
@@ -1564,55 +1565,6 @@ function openDeleteModal(file, taskId, item) {
 }
 
 //Работа с историей
-function addHistoryEntry(taskId, field, beforeValue, afterValue) {
-    const historySection = document.querySelector('.history-section');
-
-    // Если beforeValue пустое, то отображаем 'Нет'
-    beforeValue = beforeValue || 'Нет';
-    afterValue = afterValue || 'Нет';
-
-    // Делаем запрос к серверу для получения данных о задаче
-    fetch(`/api/tasks/${taskId}`)
-        .then(response => response.json())
-        .then(taskData => {
-            console.log(taskData)
-            const authorName = taskData.authorName; // Получаем имя автора из DTO
-
-            // Получаем локализованное название действия (например, "Создал", "Обновил")
-            const actionLabel = taskData.actionTypeName; // Используем actionTypeName из DTO
-
-            // Создаём новый элемент для записи в историю
-            const container = document.createElement('div');
-            container.classList.add('grid-container-history');
-
-            // Добавляем новый элемент в HTML
-            container.innerHTML = `
-                <div class="section-photo-history">
-                    <img src="icons/Group%205.svg">
-                </div>
-                <div class="section-action-history">
-                    <div class="action-container">
-                        <span>${authorName}</span> <!-- Динамически вставляем имя пользователя -->
-                        <span>${actionLabel}</span> <!-- Динамически вставляем действие -->
-                        <span class="bold">${mapField(field)}</span>
-                        <span>${formatDate(new Date())}</span> <!-- Текущее время изменения -->
-                    </div>
-                </div>
-                <div class="section-actin-show-history">
-                    <div class="actions-show">
-                        <span class="action-before">${beforeValue}</span> <!-- Отображаем старое значение -->
-                        <img src="/icons/arrow-right.svg">
-                        <span class="action-after">${afterValue}</span> <!-- Отображаем новое значение -->
-                    </div>
-                </div>
-            `;
-
-            historySection.insertBefore(container, historySection.firstChild);  // Вставляем запись в начало
-        })
-        .catch(error => {
-            console.error('Ошибка при получении данных о задаче:', error);
-        });
-}
 // Форматирование даты
 function formatDate(isoDate) {
     const date = new Date(isoDate);
@@ -1622,7 +1574,6 @@ function formatDate(isoDate) {
         hour: '2-digit', minute: '2-digit'
     });
 }
-
 // Маппинг для полей
 function mapField(field) {
     const map = {
@@ -1688,6 +1639,36 @@ function loadTaskHistory(taskId) {
         });
 }
 
+// Завершение спринта
+async function completeSprint() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+
+    try {
+        // Запрос на сервер для получения активного спринта
+        const response = await fetch(`/api/sprint/active/${projectId}`);
+        if (!response.ok) {
+            throw new Error('Не удалось получить активный спринт');
+        }
+
+        const sprintDTO = await response.json(); // Получаем данные активного спринта
+        const sprintId = sprintDTO.id; // Извлекаем sprintId
+
+        // Отправляем запрос на завершение спринта
+        const completeResponse = await fetch(`/api/sprint/${sprintId}/complete`, {
+            method: 'POST'
+        });
+
+        if (!completeResponse.ok) {
+            throw new Error('Не удалось завершить спринт');
+        }
+
+        // Перенаправляем на страницу бэклога
+        window.location.href = `/project_page?id=${projectId}&section=backlog`;
+    } catch (err) {
+        console.error('Ошибка при завершении спринта:', err);
+    }
+}
 
 
 

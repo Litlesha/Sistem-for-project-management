@@ -44,6 +44,11 @@ public class SprintController {
         SprintDTO sprintDTO = new SprintDTO(sprint);
         return ResponseEntity.ok(sprintDTO);
     }
+    @PostMapping("/api/sprint/{sprintId}/complete")
+    public ResponseEntity<List<TaskDTO>> completeSprint(@PathVariable Long sprintId) {
+        List<TaskDTO> updatedTasks = sprintService.completeSprint(sprintId);
+        return ResponseEntity.ok(updatedTasks);
+    }
     @PutMapping("/api/sprint/{sprintId}/update")
     public SprintEntity updateSprint(@PathVariable Long sprintId, @RequestBody SprintRequest request) {
         return sprintService.updateSprint(sprintId, request);

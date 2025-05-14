@@ -14,6 +14,7 @@ import org.diploma.fordiplom.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,7 @@ public class SprintServiceImpl implements SprintService {
         SprintEntity activeSprint = sprintRepository.findActiveSprintByProjectId(projectId)
                 .orElseThrow(() -> new RuntimeException("Активный спринт не найден"));
 
-        List<TaskEntity> tasks = taskRepository.findBySprintId(activeSprint.getId());
+        List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(activeSprint.getId());
 
         // Создаём DTO для активного спринта
         SprintDTO sprintDTO = new SprintDTO(activeSprint.getId(), activeSprint.getSprintName(), activeSprint.getStartDate(),
@@ -78,7 +79,7 @@ public class SprintServiceImpl implements SprintService {
 
     @Override
     public List<SprintResponse> getSprintsByProjectId(Long projectId) {
-        List<SprintEntity> entities = sprintRepository.findByProjectId(projectId);
+        List<SprintEntity> entities = sprintRepository.findByProjectIdAndIsCompletedFalse(projectId);
         return entities.stream().map(this::mapToDto).toList();
     }
 
@@ -89,11 +90,37 @@ public class SprintServiceImpl implements SprintService {
         sprintRepository.save(sprint);
 
         // Обновляем все задачи, связанные с этим спринтом
-        List<TaskEntity> tasks = taskRepository.findBySprintId(sprintId); // Получаем все задачи для текущего спринта
+        List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(sprintId); // Получаем все задачи для текущего спринта
         for (TaskEntity task : tasks) {
-            task.setSprint(sprint); // Привязываем задачи к текущему спринту
+            task.setSprint(sprint);
+            task.setStatus("К выполнению");// Привязываем задачи к текущему спринту
         }
         taskRepository.saveAll(tasks); // Сохраняем все обновленные задачи
+    }
+
+    public List<TaskDTO> completeSprint(Long sprintId) {
+        SprintEntity sprint = sprintRepository.findById(sprintId)
+                .orElseThrow(() -> new RuntimeException("Sprint not found"));
+
+        sprint.setIsActive(false);
+        sprint.setIsCompleted(true);  // Устанавливаем флаг завершения спринта
+        sprintRepository.save(sprint);
+
+        List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(sprintId);
+        List<TaskDTO> updatedTasks = new ArrayList<>();
+
+        for (TaskEntity task : tasks) {
+            if ("Выполнено".equalsIgnoreCase(task.getStatus())) {
+                task.setIsCompleted(true);  // Помечаем задачу как завершённую
+                taskRepository.save(task);
+            } else {
+                task.setSprint(null); // Возвращаем задачу в бэклог
+                taskRepository.save(task);
+            }
+            updatedTasks.add(new TaskDTO(task));  // Добавляем задачу в обновлённый список
+        }
+
+        return updatedTasks;
     }
 
     private SprintResponse mapToDto(SprintEntity entity) {

@@ -26,6 +26,7 @@ public class TaskDTO {
     private String sprintName;
     private TeamDTO team;
     private String executorName;
+    private Boolean isCompleted;
     public TaskDTO(Long id, String title, Long sprintId, String taskType, String status, String taskKey, String description, String priority, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.title = title;
@@ -58,7 +59,7 @@ public class TaskDTO {
         this.priority = taskEntity.getPriority();
         this.createdAt = taskEntity.getCreatedAt();
         this.updatedAt = taskEntity.getUpdatedAt();
-
+        this.isCompleted = taskEntity.getIsCompleted();
 
         if (taskEntity.getAssignedUser() != null) {
             this.authorName = (taskEntity.getAssignedUser().getUsername() != null && !taskEntity.getAssignedUser().getUsername().isEmpty())

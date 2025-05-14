@@ -94,7 +94,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskEntity> getTasksBySprintId(Long sprintId) {
-        return taskRepository.findBySprintId(sprintId);
+        return taskRepository.findBySprintIdAndIsCompletedFalse(sprintId);
     }
 
     @Override

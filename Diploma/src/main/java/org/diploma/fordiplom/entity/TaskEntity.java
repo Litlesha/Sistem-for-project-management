@@ -52,7 +52,8 @@ public class TaskEntity {
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
     private Instant updatedAt;
-
+    @Column(name = "is_complited")
+    private Boolean isCompleted;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "assigned_user_id")
     private UserEntity assignedUser;
@@ -78,4 +79,5 @@ public class TaskEntity {
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TaskFileRelation> fileRelations = new HashSet<>();
+
 }

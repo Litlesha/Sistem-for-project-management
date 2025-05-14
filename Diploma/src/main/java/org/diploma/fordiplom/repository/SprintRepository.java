@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SprintRepository extends JpaRepository<SprintEntity, Long> {
-    @Query("SELECT s FROM SprintEntity s JOIN s.project p WHERE p.id = :id_project AND (s.isActive IS NULL OR s.isActive = false)")
+    @Query("SELECT s FROM SprintEntity s JOIN s.project p WHERE p.id = :id_project AND (s.isActive IS NULL OR s.isActive = false) and s.isCompleted = false ")
     List<SprintEntity> findByProjectId(@Param("id_project") Long id_project);
-    @Query("SELECT s FROM SprintEntity s WHERE s.project.id = :projectId AND s.isActive = true")
+    @Query("SELECT s FROM SprintEntity s WHERE s.project.id = :projectId AND s.isActive = true AND s.isCompleted = false")
     Optional<SprintEntity> findActiveSprintByProjectId(@Param("projectId") Long projectId);
+    List<SprintEntity> findByProjectIdAndIsCompletedFalse(Long projectId);
 }

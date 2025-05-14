@@ -276,7 +276,7 @@ menu, ol, ul {
     background: rgba(134, 145, 162, 0.5);
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 1002;
 }
 
 .modal:target {
@@ -293,6 +293,7 @@ menu, ol, ul {
     max-width: 90%;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     position: relative;
+    z-index: 1003;
 }
 
 .modal-content h2 {
@@ -1896,7 +1897,7 @@ menu, ol, ul {
 .custom-modal {
     display: none; /* Скрыто по умолчанию */
     position: fixed;
-    z-index: 5;
+    z-index: 1005;
     left: 0;
     top: 0;
     width: 100%;
@@ -1916,6 +1917,7 @@ menu, ol, ul {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
+
 .custom-modal-content p{
     font-size: 14px;
     text-align: left;
@@ -1940,3 +1942,46 @@ menu, ol, ul {
     justify-content: flex-end;
     margin-top: 10px;
 }
+
+.sprint-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.sprint-modal-overlay.active {
+    display: flex;
+}
+
+.sprint-modal-window {
+    background: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    width: 600px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 10000; /* Внутри overlay — на верхнем слое */
+}
+
+.sprint-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.sprint-modal-buttons {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
