@@ -51,11 +51,32 @@ function initKanbanDragAndDrop() {
             }
 
             taskElement.classList.remove('drag-over');
+            await updateTaskOrder(container);
         });
     });
 }
 initKanbanDragAndDrop();
+async function updateTaskOrder(container) {
+    const tasks = container.querySelectorAll('.task-content');
+    const updates = [];
 
+    tasks.forEach((taskElement, index) => {
+        const taskId = taskElement.dataset.taskId;
+        updates.push({ taskId: parseInt(taskId), position: index });
+    });
+
+    try {
+        const response = await fetch('/update_task_positions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+        });
+
+        if (!response.ok) throw new Error('Ошибка при обновлении позиций');
+    } catch (err) {
+        console.error(err);
+    }
+}
 // Отрисовывание задач на доске
 async function loadActiveSprint(projectId) {
     const iconMap = {
@@ -79,7 +100,6 @@ async function loadActiveSprint(projectId) {
             'Выполнено': '.kanban-column:nth-child(3) .tusk-container'
         };
         tasks.forEach(task => {
-            console.log("Полученные задачи:", tasks);
             const icon = iconMap[task.taskType] || 'icons/tusk.svg';
             const statusColumn = task.status; // Предполагаем, что статус хранится в поле task.status
             if (!task.status) return;

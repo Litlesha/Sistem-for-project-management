@@ -72,6 +72,7 @@ public class SprintServiceImpl implements SprintService {
         return sprintDTO;
     }
 
+
     @Override
     public SprintEntity getSprintById(Long id){return sprintRepository.findById(id).orElse(null);}
     @Override
@@ -79,7 +80,7 @@ public class SprintServiceImpl implements SprintService {
 
     @Override
     public List<SprintResponse> getSprintsByProjectId(Long projectId) {
-        List<SprintEntity> entities = sprintRepository.findByProjectIdAndIsCompletedFalse(projectId);
+        List<SprintEntity> entities = sprintRepository.findByProjectIdAndIsCompletedFalseAndIsActiveFalse(projectId);
         return entities.stream().map(this::mapToDto).toList();
     }
 
@@ -89,13 +90,14 @@ public class SprintServiceImpl implements SprintService {
         sprint.setIsActive(true);
         sprintRepository.save(sprint);
 
-        // Обновляем все задачи, связанные с этим спринтом
-        List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(sprintId); // Получаем все задачи для текущего спринта
+        List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(sprintId);
+        int position = 0;
         for (TaskEntity task : tasks) {
             task.setSprint(sprint);
-            task.setStatus("К выполнению");// Привязываем задачи к текущему спринту
+            task.setStatus("К выполнению");
+            task.setPosition(position++); // Устанавливаем позицию внутри спринта
         }
-        taskRepository.saveAll(tasks); // Сохраняем все обновленные задачи
+        taskRepository.saveAll(tasks);
     }
 
     public List<TaskDTO> completeSprint(Long sprintId) {
@@ -103,21 +105,22 @@ public class SprintServiceImpl implements SprintService {
                 .orElseThrow(() -> new RuntimeException("Sprint not found"));
 
         sprint.setIsActive(false);
-        sprint.setIsCompleted(true);  // Устанавливаем флаг завершения спринта
+        sprint.setIsCompleted(true);
         sprintRepository.save(sprint);
 
         List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(sprintId);
+        int maxBacklogPosition = taskRepository.findMaxPositionInSprint(null); // null = бэклог
         List<TaskDTO> updatedTasks = new ArrayList<>();
 
         for (TaskEntity task : tasks) {
             if ("Выполнено".equalsIgnoreCase(task.getStatus())) {
-                task.setIsCompleted(true);  // Помечаем задачу как завершённую
-                taskRepository.save(task);
+                task.setIsCompleted(true);
             } else {
-                task.setSprint(null); // Возвращаем задачу в бэклог
-                taskRepository.save(task);
+                task.setSprint(null); // В бэклог
+                task.setPosition(++maxBacklogPosition); // Ставим в конец бэклога
             }
-            updatedTasks.add(new TaskDTO(task));  // Добавляем задачу в обновлённый список
+            taskRepository.save(task);
+            updatedTasks.add(new TaskDTO(task));
         }
 
         return updatedTasks;

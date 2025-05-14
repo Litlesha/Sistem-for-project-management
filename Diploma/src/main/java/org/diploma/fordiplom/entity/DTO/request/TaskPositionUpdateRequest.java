@@ -5,9 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TaskLocationUpdateRequest {
+public class TaskPositionUpdateRequest {
     private Long taskId;
-    private Long sprintId;
     private Integer position;
-
 }

@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import org.diploma.fordiplom.entity.*;
 import org.diploma.fordiplom.entity.DTO.TagDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
+import org.diploma.fordiplom.entity.DTO.request.TaskPositionUpdateRequest;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.repository.*;
 import org.diploma.fordiplom.service.*;
@@ -96,26 +97,56 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskEntity> getTasksBySprintId(Long sprintId) {
         return taskRepository.findBySprintIdAndIsCompletedFalse(sprintId);
     }
-
     @Override
-    public List<TaskEntity> getBackLogTasksByProjectId(Long projectId){
-        return taskRepository.findByProject_IdAndSprintIsNull(projectId);
+    public List<TaskDTO> getTaskDTOsBySprintId(Long sprintId) {
+        List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(sprintId);
+        return tasks.stream()
+                .map(TaskDTO::new) // используем конструктор
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void updateTaskLocation(Long taskId, Long sprintId) {
-        TaskEntity task = taskRepository.findById(taskId).get();
+    public List<TaskEntity> getBackLogTasksByProjectId(Long projectId){
+        return taskRepository.findByProject_IdAndSprintIsNullOrderByPositionAsc(projectId);
+    }
 
-        // Если sprintId не null, обновляем привязку задачи к спринту
+    @Override
+    @Transactional
+    public void updateTaskLocation(Long taskId, Long sprintId, Integer newPosition) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Задача не найдена"));
+
+        // Удаляем задачу из текущего списка (обнуляем позицию, чтобы не конфликтовала при переиндексации)
+        Integer oldPosition = task.getPosition();
+        SprintEntity oldSprint = task.getSprint();
+
+        // Получаем целевой спринт (или null для бэклога)
+        SprintEntity newSprint = null;
         if (sprintId != null) {
-            SprintEntity sprint = sprintRepository.findById(sprintId)
+            newSprint = sprintRepository.findById(sprintId)
                     .orElseThrow(() -> new RuntimeException("Спринт не найден"));
-            task.setSprint(sprint);
-        } else {
-            task.setSprint(null); // Если задача возвращается в бэклог, убираем привязку
         }
+
+        // Обновляем позиции всех задач в целевом спринте (или в бэклоге)
+        List<TaskEntity> tasksInTarget = taskRepository.findBySprintOrderByPositionAsc(newSprint);
+
+        tasksInTarget.removeIf(t -> t.getId().equals(taskId)); // исключаем текущую задачу, если она уже в списке
+
+        // Вставляем задачу в нужную позицию
+        if (newPosition < 0 || newPosition > tasksInTarget.size()) {
+            newPosition = tasksInTarget.size();
+        }
+        tasksInTarget.add(newPosition, task);
+
+        // Переустанавливаем позиции всем задачам
+        for (int i = 0; i < tasksInTarget.size(); i++) {
+            TaskEntity t = tasksInTarget.get(i);
+            t.setPosition(i);
+        }
+
+        task.setSprint(newSprint);
         task.setUpdatedAt(Instant.now());
-        taskRepository.save(task); // Сохраняем обновлённую задачу
+        taskRepository.saveAll(tasksInTarget); // сохраняем все задачи с обновленными позициями
     }
 
     @Override
@@ -362,6 +393,19 @@ public class TaskServiceImpl implements TaskService {
             );
         }
     }
+
+    @Override
+    public void updateTaskPositions(List<TaskPositionUpdateRequest> updates) {
+        for (TaskPositionUpdateRequest update : updates) {
+            TaskEntity task = taskRepository.findById(update.getTaskId())
+                    .orElseThrow(() -> new IllegalArgumentException("Задача не найдена"));
+
+            task.setPosition(update.getPosition());
+            task.setUpdatedAt(Instant.now());
+            taskRepository.save(task);
+        }
+    }
+
     // Метод для получения всех меток задачи
     @Override
     public List<TagDTO> getTagsForTask(Long taskId) {

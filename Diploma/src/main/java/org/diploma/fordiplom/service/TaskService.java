@@ -4,6 +4,7 @@ package org.diploma.fordiplom.service;
 import org.aspectj.apache.bcel.generic.Tag;
 import org.diploma.fordiplom.entity.DTO.TagDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
+import org.diploma.fordiplom.entity.DTO.request.TaskPositionUpdateRequest;
 import org.diploma.fordiplom.entity.DTO.request.TaskRequest;
 import org.diploma.fordiplom.entity.TagEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
@@ -18,7 +19,7 @@ public interface TaskService {
     String keyGenerator(TaskRequest request);
     List<TaskEntity> getTasksBySprintId(Long sprintId);
     List<TaskEntity> getBackLogTasksByProjectId(Long projectId);
-    void updateTaskLocation(Long taskId, Long sprintId);
+    void updateTaskLocation(Long taskId, Long sprintId, Integer position);
     void updateStatus(Long taskId, String status);
     List<TaskDTO> searchTasksInSprint(String query, Long projectId, Long sprintId);
     TaskEntity getTaskById(Long taskId);
@@ -31,5 +32,7 @@ public interface TaskService {
     List<TagDTO> searchTags(String query);
     void assignTeam(Long taskId, Long teamId);
     void assignExecutor(Long taskId, Long userId);
+    void updateTaskPositions(List<TaskPositionUpdateRequest> updates);
+    List<TaskDTO> getTaskDTOsBySprintId(Long sprintId);
 
 }

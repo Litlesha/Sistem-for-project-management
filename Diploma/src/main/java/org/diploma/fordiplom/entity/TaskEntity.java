@@ -44,7 +44,8 @@ public class TaskEntity {
     @Size(max = 50)
     @Column(name = "status", length = 50)
     private String status;
-
+    @Column(name = "position")
+    private Integer position;
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
     private Instant createdAt;

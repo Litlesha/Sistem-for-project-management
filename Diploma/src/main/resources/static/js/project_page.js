@@ -24,7 +24,6 @@ async function startSprint(button) {
 }
 
 
-
 // Логика для Drag-and-drop
 async function initTaskInputHandlers(scope = document) {
     scope.querySelectorAll('.task-title-bs').forEach(input => {
@@ -82,6 +81,7 @@ async function initTaskInputHandlers(scope = document) {
         });
     });
 }
+
 function renderTaskToSprint(task, sprintContainer) {
     const iconMap = {
         task: 'icons/tusk.svg',
@@ -94,7 +94,7 @@ function renderTaskToSprint(task, sprintContainer) {
     <div class="task-wrap-container" draggable="true" data-task-id="${task.id}" data-sprint-id="${task.sprintId}">
         <div class="tusk-wrap">
             <div class="tusk-wrap-right">
-                <img  class="task-type" src="${icon}">
+                <img class="task-type" src="${icon}">
                 <div class="key-and-name">
                     <span class="key">${task.taskKey}</span>
                     <span class="tusk-name">${task.title}</span>
@@ -117,7 +117,6 @@ function renderTaskToSprint(task, sprintContainer) {
 
     createBtnWrapper.insertAdjacentHTML('beforebegin', taskHTML);
     const taskElement = sprintContainer.querySelector(`div[data-task-id="${task.id}"]`);
-    console.log(taskElement);
     taskElement.addEventListener("dragstart", handleDragStart);
     taskElement.addEventListener("dragover", handleDragOver);
     taskElement.addEventListener("drop", handleDrop);
@@ -164,18 +163,17 @@ function renderTaskToBacklog(task) {
     createBtnWrapper.insertAdjacentHTML('beforebegin', taskHTML);
     initTaskInputHandlers();
     const taskElement = backlogContainer.querySelector(`div[data-task-id="${task.id}"]`);
-    console.log(taskElement);
     taskElement.addEventListener("dragstart", handleDragStart);
     taskElement.addEventListener("dragover", handleDragOver);
     taskElement.addEventListener("drop", handleDrop);
 }
+
 function handleDragStart(e) {
-    // Храним ID задачи для использования при drop
     e.dataTransfer.setData("taskId", e.target.dataset.taskId);
 }
 
 function handleDragOver(e) {
-    e.preventDefault(); // Нужно для разрешения drop
+    e.preventDefault();
 }
 
 async function handleDrop(e) {
@@ -186,14 +184,21 @@ async function handleDrop(e) {
     let dropTarget = e.target.closest('.task-wrap-container');
     let newContainer = e.target.closest('.backlog-sprint-tusk-wrapper');
 
-    // Если дропнули на пустую надпись
-    if (e.target.classList.contains('empty-backlog') || e.target.closest('.empty-backlog')) {
-        newContainer = e.target.closest('.backlog-sprint-tusk-wrapper');
-    }
-
     if (!newContainer) return;
 
     const sprintId = newContainer.dataset.sprintId || null;
+
+    // 🔽 Новый корректный расчет позиции
+    let position = 0;
+    if (dropTarget && dropTarget !== taskElement) {
+        const siblings = Array.from(newContainer.querySelectorAll('.task-wrap-container'))
+            .filter(el => el !== taskElement); // исключаем перемещаемую задачу
+        position = siblings.indexOf(dropTarget);
+    } else {
+        const siblings = Array.from(newContainer.querySelectorAll('.task-wrap-container'))
+            .filter(el => el !== taskElement); // исключаем перемещаемую задачу
+        position = siblings.length; // вставляем в конец
+    }
 
     try {
         const response = await fetch('/update_task_location', {
@@ -201,7 +206,8 @@ async function handleDrop(e) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 taskId: taskId,
-                sprintId: sprintId
+                sprintId: sprintId,
+                position: position
             })
         });
 
@@ -240,12 +246,10 @@ function initDragOverHandlers() {
     });
 }
 
-
 initDragOverHandlers();
 
 
 
-// =======================================>//
 function initCreateTaskButtons(scope = document) {
     scope.querySelectorAll(".create-task-btn-wrapper").forEach(wrapper => {
         const createBtn = wrapper.querySelector(".create-task-btn");
@@ -543,7 +547,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!response.ok) throw new Error('Ошибка при получении задач');
 
         const tasks = await response.json();
-        tasks.forEach(renderTaskToBacklog); // отрисовываем только в бэклоге
+        tasks.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+        tasks.forEach(renderTaskToBacklog);
+        console.log('Задачи из бэклога:', tasks);// отрисовываем только в бэклоге
     } catch (err) {
         console.error('Ошибка при загрузке задач из бэклога:', err);
     }
@@ -555,6 +561,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) throw new Error(`Ошибка при получении задач для спринта ${sprintId}`);
             const tasks = await response.json();
             tasks.forEach(task => renderTaskToSprint(task, sprintElement));
+            console.log('Задачи из спринта:', tasks);
         }
     } catch (err) {
         console.error('Ошибка загрузки задач для спринтов:', err);

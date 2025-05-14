@@ -53,7 +53,8 @@ public class TaskController {
                         task.getSprint() != null ? task.getSprint().getId() : null,
                         task.getTaskKey(),
                         task.getTaskType(),
-                        task.getStatus()
+                        task.getStatus(),
+                        task.getPosition()
                 ))
                 .collect(Collectors.toList());
     }
@@ -61,17 +62,21 @@ public class TaskController {
     @PostMapping("/update_task_location")
     public ResponseEntity<?> updateTaskLocation(@RequestBody TaskLocationUpdateRequest request) {
         try {
-            taskService.updateTaskLocation(request.getTaskId(), request.getSprintId());
+            taskService.updateTaskLocation(request.getTaskId(), request.getSprintId(), request.getPosition());
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при обновлении задачи");
         }
-
     }
 
     @PostMapping("/update_status")
     public ResponseEntity<?> updateStatus(@RequestBody TaskStatusUpdateRequest request) {
         taskService.updateStatus(request.getTaskId(), request.getStatus());
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/update_task_positions")
+    public ResponseEntity<?> updateTaskPositions(@RequestBody List<TaskPositionUpdateRequest> updates) {
+        taskService.updateTaskPositions(updates);
         return ResponseEntity.ok().build();
     }
 
@@ -98,7 +103,8 @@ public class TaskController {
                         task.getSprint() != null ? task.getSprint().getId() : null,
                         task.getStatus(),
                         task.getTaskKey(),
-                        task.getTaskType()
+                        task.getTaskType(),
+                        task.getPosition()
                 ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(taskDTOs);

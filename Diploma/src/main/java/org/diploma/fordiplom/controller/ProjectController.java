@@ -59,8 +59,6 @@ public class ProjectController {
     @PostMapping("/api/projects/addTeamToProject")
     public ResponseEntity<String> addTeamToProject(@RequestBody AddTeamToProjectRequest request) {
         try {
-            System.out.println("Проект ID: " + request.getProjectId());
-            System.out.println("Команда ID: " + request.getTeamId());
             // Вызываем сервисный метод для добавления команды в проект
             projectService.addTeamToProject(request.getProjectId(), request.getTeamId());
             return ResponseEntity.ok("Команда успешно добавлена в проект");

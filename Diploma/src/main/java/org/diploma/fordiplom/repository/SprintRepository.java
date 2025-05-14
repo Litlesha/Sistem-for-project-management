@@ -13,5 +13,5 @@ public interface SprintRepository extends JpaRepository<SprintEntity, Long> {
     List<SprintEntity> findByProjectId(@Param("id_project") Long id_project);
     @Query("SELECT s FROM SprintEntity s WHERE s.project.id = :projectId AND s.isActive = true AND s.isCompleted = false")
     Optional<SprintEntity> findActiveSprintByProjectId(@Param("projectId") Long projectId);
-    List<SprintEntity> findByProjectIdAndIsCompletedFalse(Long projectId);
+    List<SprintEntity> findByProjectIdAndIsCompletedFalseAndIsActiveFalse(Long projectId);
 }
