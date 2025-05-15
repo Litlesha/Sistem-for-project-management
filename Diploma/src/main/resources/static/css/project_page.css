@@ -1069,3 +1069,18 @@ input[readonly] {
   border: 2px dashed #007bff; /* пунктирная граница */
   transition: background-color 0.2s, border 0.2s;
 }
+.complete-project-btn {
+  padding: 10px;
+  border-radius: 5px;
+  align-items: center;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-family: "IBM Plex Sans", serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 13px;
+  opacity: 0.9;
+}
+.complete-project-btn:hover {
+  background-color: #DCDFE4;
+}

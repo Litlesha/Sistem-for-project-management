@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -42,13 +43,19 @@ public class FileController {
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) {
         FileEntity file = fileService.getFileById(fileId);
 
-        String encodedFilename = URLEncoder.encode(file.getFileName(), StandardCharsets.UTF_8)
-                .replaceAll("\\+", "%20");
+        try {
+            byte[] fileData = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(file.getFilePath()));
+            String encodedFilename = URLEncoder.encode(file.getFileName(), StandardCharsets.UTF_8)
+                    .replaceAll("\\+", "%20");
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFilename)
-                .contentType(MediaType.parseMediaType(file.getContentType()))
-                .body(file.getData());
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFilename)
+                    .contentType(MediaType.parseMediaType(file.getContentType()))
+                    .body(fileData);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read file", e);
+        }
     }
 
     @DeleteMapping("/{taskId}/detach/{fileId}")

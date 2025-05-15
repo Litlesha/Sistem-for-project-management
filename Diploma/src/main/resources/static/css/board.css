@@ -534,7 +534,7 @@ menu, ol, ul {
 /* Заголовок и кнопка */
 .header-main {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     margin: 20px 20px 40px 20px;
 }
@@ -1985,3 +1985,129 @@ menu, ol, ul {
     gap: 20px;
 }
 
+/*завершение спринта модалка*/
+.modal-complete-sprint-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-complete-sprint-window {
+    background: white;
+    padding: 24px;
+    border-radius: 10px;
+    width: 500px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-complete-sprint-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+.modal-complete-sprint-text {
+    margin-bottom: 20px;
+}
+
+.modal-complete-sprint-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-complete-sprint-confirm,
+.modal-complete-sprint-cancel {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+.modal-complete-sprint-select-wrapper {
+    margin: 16px 0;
+}
+
+.modal-complete-sprint-select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border-radius: 6px;
+    border: 1px solid #DCDFE4;
+    outline: none;
+}
+
+.modal-complete-sprint-info-text {
+    margin: 16px 0;
+    font-size: 14px;
+    color: #444;
+    list-style-type: disc;
+}
+
+.modal-complete-sprint-task-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid #DCDFE4;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+.select-all-wrapper{
+    font-size: 14px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 5px;
+    margin-left:7px;
+}
+.modal-complete-sprint-task-item {
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 8px;
+    border: 1px solid #DCDFE4;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.modal-complete-sprint-task-checkbox {
+    cursor: pointer;
+}
+.ul-padding{
+    padding-left: 30px;
+    text-align: justify;
+}
+.modal-complete-sprint-task-box{
+    margin-left: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px  ;
+}
+.finish-task-wrapper{
+    display: flex;
+    flex-direction: row;
+}
+.modal-complete-sprint-task-icon{
+    width: 15px;
+    height: 15px;
+}
+.modal-complete-sprint-task-key{
+    font-size: 12px;
+    color: #777777;
+
+}
+.modal-complete-sprint-task-title{
+    font-size: 14px;
+    font-weight: lighter;
+}

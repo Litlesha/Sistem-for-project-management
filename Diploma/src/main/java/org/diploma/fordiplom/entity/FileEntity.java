@@ -34,10 +34,8 @@ public class FileEntity {
     @Column(name = "content_type")
     private String contentType;
 
-    @NotNull
-    @Lob
-    @Column(name = "data", nullable = false, columnDefinition = "LONGBLOB")
-    private byte[] data;
+    @Column(name = "file_path", nullable = false)
+    private String filePath;
 
     @Column(name = "uploaded_at")
     private Instant uploadedAt;

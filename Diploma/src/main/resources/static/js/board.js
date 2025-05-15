@@ -78,7 +78,7 @@ async function updateTaskOrder(container) {
     }
 }
 // Отрисовывание задач на доске
-async function loadActiveSprint(projectId) {
+async function loadActiveSprints(projectId) {
     const iconMap = {
         task: 'icons/tusk.svg',
         story: 'icons/history.svg',
@@ -87,51 +87,49 @@ async function loadActiveSprint(projectId) {
 
     try {
         const response = await fetch(`/api/sprint/active/${projectId}`);
-        if (!response.ok) {
-            throw new Error('Не удалось загрузить активный спринт');
-        }
-        const sprintData = await response.json();
-        const { tasks } = sprintData;
+        if (!response.ok) throw new Error('Не удалось загрузить активные спринты');
+        const sprints = await response.json(); // теперь это массив
 
-        // Колонки по статусу задачи
         const columnMap = {
             'К выполнению': '.kanban-column:first-child .tusk-container',
             'В работе': '.kanban-column:nth-child(2) .tusk-container',
             'Выполнено': '.kanban-column:nth-child(3) .tusk-container'
         };
-        tasks.forEach(task => {
-            const icon = iconMap[task.taskType] || 'icons/tusk.svg';
-            const statusColumn = task.status; // Предполагаем, что статус хранится в поле task.status
-            if (!task.status) return;
-            const taskContentHTML = `
-                <div class="task-content" draggable="true" data-task-id="${task.id}">
-                    <div class="task-name">
-                        <span class="task-title">${task.title}</span>
-                    </div>
-                    <div class="tusk-bottom">
-                        <div class="tag-and-key">
-                            <img class="tag" src="${icon}">
-                            <span class="task-id">${task.taskKey}</span>
+
+        sprints.forEach(sprint => {
+            sprint.tasks.forEach(task => {
+                if (!task.status) return;
+                const icon = iconMap[task.taskType] || 'icons/tusk.svg';
+                const taskContentHTML = `
+                    <div class="task-content" draggable="true" data-task-id="${task.id}">
+                        <div class="task-name">
+                            <span class="task-title">${task.title}</span>
                         </div>
-                        <button>
-                            <img class="performer" src="/icons/Group%205.svg">
-                        </button>
+                        <div class="tusk-bottom">
+                            <div class="tag-and-key">
+                                <img class="tag" src="${icon}">
+                                <span class="task-id">${task.taskKey}</span>
+                            </div>
+                            <button>
+                                <img class="performer" src="/icons/Group%205.svg">
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
-            const taskContainer = document.createElement('div');
-            taskContainer.innerHTML = taskContentHTML;
+                const taskContainer = document.createElement('div');
+                taskContainer.innerHTML = taskContentHTML;
 
-            // Находим колонку по статусу задачи
-            const kanbanColumn = document.querySelector(columnMap[statusColumn]);
-            const addButton = kanbanColumn.querySelector('.add-task-btn');
-            kanbanColumn.insertBefore(taskContainer.firstElementChild, addButton);
-            const taskElement = kanbanColumn.querySelector(`[data-task-id="${task.id}"]`);
-            taskElement.addEventListener("dragstart", handleDragStart);
+                const kanbanColumn = document.querySelector(columnMap[task.status]);
+                const addButton = kanbanColumn.querySelector('.add-task-btn');
+                kanbanColumn.insertBefore(taskContainer.firstElementChild, addButton);
+
+                const taskElement = kanbanColumn.querySelector(`[data-task-id="${task.id}"]`);
+                taskElement.addEventListener("dragstart", handleDragStart);
+            });
         });
     } catch (err) {
-        console.error('Ошибка при загрузке активного спринта:', err);
+        console.error('Ошибка при загрузке активных спринтов:', err);
     }
 }
 
@@ -149,16 +147,7 @@ async function loadSprintInfo(projectId) {
         }
 
         const sprintData = await response.json();
-        const sprintName = sprintData.sprintName || "Спринт какой по списку был создан";
-        const startDate = new Date(sprintData.startDate);
-        const endDate = new Date(sprintData.endDate);
-        const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
-        // Отображаем название спринта
-        document.getElementById('sprint-name').textContent = `${sprintName}`;
-
-        // Запуск отсчета
-        startSprintCountdownDisplay(sprintData.startDate, duration);
 
     } catch (error) {
         console.error(error);
@@ -170,7 +159,7 @@ async function loadSprintInfo(projectId) {
 document.addEventListener('DOMContentLoaded', () => {
     const projectId = getProjectIdFromUrl();
     if (projectId) {
-        loadActiveSprint(projectId);
+        loadActiveSprints(projectId);
         loadSprintInfo(projectId);
     }
     const searchInput = document.querySelector(".search-input-board");
@@ -192,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const container = column.querySelector(".tusk-container");
                     container.querySelectorAll(".task-content").forEach(el => el.remove());
                 });
-                loadActiveSprint(projectId);
+                loadActiveSprints(projectId);
                 return;
             }
 
@@ -486,31 +475,6 @@ function renderSearchResults(tasks) {
         const addButton = column.querySelector(".add-task-btn");
         column.querySelector(".tusk-container").insertBefore(taskElement.firstElementChild, addButton);
     });
-}
-
-// Длительность спринта
-function startSprintCountdownDisplay(startDateStr, durationInDays) {
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(startDate.getTime() + durationInDays * 24 * 60 * 60 * 1000);
-
-    function updateCountdown() {
-        const now = new Date();
-        const diff = endDate - now;
-
-        const durationElement = document.getElementById('sprint-duration');
-
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-
-        // Форматируем с ведущим нулём
-        const formatted = `${days} дней ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-        durationElement.textContent = formatted;
-
-        setTimeout(updateCountdown, 60 * 1000); // обновляем каждую минуту
-    }
-
-    updateCountdown();
 }
 
 // работа с задачей
@@ -1660,35 +1624,136 @@ function loadTaskHistory(taskId) {
 }
 
 // Завершение спринта
-async function completeSprint() {
+const overlay = document.querySelector('.modal-complete-sprint-overlay');
+const summaryBlock = document.querySelector('.modal-complete-sprint-summary');
+const sprintSelect = document.getElementById('modal-complete-sprint-select');
+const doneCountSpan = document.querySelector('.modal-complete-sprint-done-count');
+const openCountSpan = document.querySelector('.modal-complete-sprint-open-count');
+const taskListContainer = document.querySelector('.modal-complete-sprint-task-list');
+
+let selectedSprintId = null;
+
+// Открытие модального окна и загрузка спринтов
+async function openCompleteSprintModal() {
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('id');
 
     try {
-        // Запрос на сервер для получения активного спринта
         const response = await fetch(`/api/sprint/active/${projectId}`);
-        if (!response.ok) {
-            throw new Error('Не удалось получить активный спринт');
-        }
+        if (!response.ok) throw new Error('Не удалось получить список активных спринтов');
 
-        const sprintDTO = await response.json(); // Получаем данные активного спринта
-        const sprintId = sprintDTO.id; // Извлекаем sprintId
+        const sprints = await response.json();
+        console.log(sprints)
+        // Очистим селект
+        sprintSelect.innerHTML = `<option value="">-- Выберите спринт --</option>`;
 
-        // Отправляем запрос на завершение спринта
-        const completeResponse = await fetch(`/api/sprint/${sprintId}/complete`, {
-            method: 'POST'
+        // Заполним опции
+        sprints.forEach(sprint => {
+            const option = document.createElement('option');
+            option.value = sprint.id;
+            option.textContent = sprint.sprintName;
+            sprintSelect.appendChild(option);
         });
 
-        if (!completeResponse.ok) {
-            throw new Error('Не удалось завершить спринт');
-        }
+        // Открыть модалку
+        overlay.classList.remove('hidden');
+        summaryBlock.classList.add('hidden'); // скрыть сводку до выбора
+    } catch (err) {
+        console.error('Ошибка при загрузке спринтов:', err);
+    }
+}
 
-        // Перенаправляем на страницу бэклога
+// Слушатель на выбор спринта
+sprintSelect.addEventListener('change', async (event) => {
+    const sprintId = event.target.value;
+    if (!sprintId) {
+        summaryBlock.classList.add('hidden');
+        return;
+    }
+
+    selectedSprintId = sprintId;
+
+    try {
+        const response = await fetch(`/api/sprint/${sprintId}/summary`);
+        if (!response.ok) throw new Error('Не удалось получить данные спринта');
+
+        const data = await response.json(); // { doneCount, openCount, openTasks: [{id, key, title, type}] }
+
+        // Обновим данные
+        doneCountSpan.textContent = data.doneCount;
+        openCountSpan.textContent = data.openCount;
+
+        // Очистим задачи и вставим новые
+        taskListContainer.innerHTML = `
+            <div class="select-all-wrapper">
+                <input type="checkbox" class="modal-complete-sprint-select-all">
+                <span>Выбрать все</span>
+            </div>
+        `;
+        const selectAllCheckbox = taskListContainer.querySelector('.modal-complete-sprint-select-all');
+        selectAllCheckbox.addEventListener('change', function () {
+            const isChecked = this.checked;
+            document.querySelectorAll('.modal-complete-sprint-task-checkbox').forEach(cb => {
+                cb.checked = isChecked;
+            });
+        });
+        data.openTasks.forEach(task => {
+            const typeIcon = task.taskType === 'task' ? 'tusk': task.taskType === 'story' ? 'history': task.taskType;
+            console.log(task);
+            const taskItem = document.createElement('div');
+            taskItem.classList.add('modal-complete-sprint-task-item');
+            taskItem.innerHTML = `
+                <div class="finish-task-wrapper">
+                    <input type="checkbox" class="modal-complete-sprint-task-checkbox" data-task-id="${task.id}">
+                    <div class="modal-complete-sprint-task-box">
+                        <img src="icons/${typeIcon}.svg" class="modal-complete-sprint-task-icon" alt="${task.taskType}">
+                        <span class="modal-complete-sprint-task-key">${task.taskKey}</span>
+                        <span class="modal-complete-sprint-task-title">${task.title}</span>
+                    </div>
+                </div>
+            `;
+            taskListContainer.appendChild(taskItem);
+        });
+
+        // Показать блок сводки
+        summaryBlock.classList.remove('hidden');
+    } catch (err) {
+        console.error('Ошибка при получении информации о спринте:', err);
+    }
+});
+
+// Подключи кнопку "Завершить спринт"
+document.querySelector('.modal-complete-sprint-confirm').addEventListener('click', async () => {
+    if (!selectedSprintId) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+
+    // Собираем ID отмеченных задач
+    const selectedCheckboxes = document.querySelectorAll('.modal-complete-sprint-task-checkbox:checked');
+    const selectedTaskIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.taskId);
+
+    try {
+        const response = await fetch(`/api/sprint/${selectedSprintId}/complete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ taskIds: selectedTaskIds }) // Отправляем массив
+        });
+
+        if (!response.ok) throw new Error('Не удалось завершить спринт');
+
         window.location.href = `/project_page?id=${projectId}&section=backlog`;
     } catch (err) {
         console.error('Ошибка при завершении спринта:', err);
     }
-}
+});
+// Кнопка отмены
+document.querySelector('.modal-complete-sprint-cancel').addEventListener('click', () => {
+    overlay.classList.add('hidden');
+});
+
 
 
 

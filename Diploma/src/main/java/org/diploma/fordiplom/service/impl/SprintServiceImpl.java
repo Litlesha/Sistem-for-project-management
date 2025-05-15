@@ -1,6 +1,7 @@
 package org.diploma.fordiplom.service.impl;
 
 import org.diploma.fordiplom.entity.DTO.SprintDTO;
+import org.diploma.fordiplom.entity.DTO.SprintSummaryDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.SprintRequest;
 import org.diploma.fordiplom.entity.DTO.response.SprintResponse;
@@ -53,23 +54,58 @@ public class SprintServiceImpl implements SprintService {
         return sprintRepository.save(updSprint);}
 
     @Override
-    public SprintDTO getActiveSprintWithTasks(Long projectId) {
-        SprintEntity activeSprint = sprintRepository.findActiveSprintByProjectId(projectId)
-                .orElseThrow(() -> new RuntimeException("Активный спринт не найден"));
+    public List<SprintDTO> getActiveSprintsWithTasks(Long projectId) {
+        List<SprintEntity> activeSprints = sprintRepository.findByProjectIdAndIsActiveTrueAndIsCompletedFalse(projectId);
 
-        List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(activeSprint.getId());
+        if (activeSprints.isEmpty()) {
+            throw new RuntimeException("Нет активных спринтов");
+        }
 
-        // Создаём DTO для активного спринта
-        SprintDTO sprintDTO = new SprintDTO(activeSprint.getId(), activeSprint.getSprintName(), activeSprint.getStartDate(),
-                activeSprint.getEndDate(), activeSprint.getGoal(), activeSprint.getDuration(), activeSprint.getIsActive());
+        return activeSprints.stream().map(sprint -> {
+            List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(sprint.getId());
 
-        // Преобразуем задачи в список DTO (если нужно)
-        List<TaskDTO> taskDTOs = tasks.stream()
-                .map(TaskDTO::new)
-                .collect(Collectors.toList());
-        sprintDTO.setTasks(taskDTOs);  // Нужно создать соответствующий TaskDTO, если нужно преобразовать TaskEntity в DTO
+            SprintDTO sprintDTO = new SprintDTO(
+                    sprint.getId(),
+                    sprint.getSprintName(),
+                    sprint.getStartDate(),
+                    sprint.getEndDate(),
+                    sprint.getGoal(),
+                    sprint.getDuration(),
+                    sprint.getIsActive()
+            );
 
-        return sprintDTO;
+            List<TaskDTO> taskDTOs = tasks.stream()
+                    .map(TaskDTO::new)
+                    .collect(Collectors.toList());
+
+            sprintDTO.setTasks(taskDTOs);
+            return sprintDTO;
+        }).collect(Collectors.toList());
+    }
+
+    public SprintSummaryDTO getSprintSummary(Long sprintId) {
+        List<TaskEntity> allTasks = taskRepository.findBySprintIdAndIsCompletedFalse(sprintId);
+
+        int doneCount = 0;
+        int openCount = 0;
+        List<TaskDTO> openTasks = new ArrayList<>();
+
+        for (TaskEntity task : allTasks) {
+            String status = task.getStatus();
+            Boolean isCompleted = task.getIsCompleted();
+
+            // Считаем задачи со статусом "Выполнено" как выполненные
+            if ("Выполнено".equalsIgnoreCase(status) || Boolean.TRUE.equals(isCompleted)) {
+                doneCount++;
+            } else if ("К выполнению".equalsIgnoreCase(status) || "В работе".equalsIgnoreCase(status)) {
+                // В списке для выбора только задачи со статусом "К выполнению" и "В работе"
+                openCount++;
+                openTasks.add(new TaskDTO(task));
+            }
+            // Если статус другой — просто игнорируем (не считаем в doneCount и openCount)
+        }
+
+        return new SprintSummaryDTO(doneCount, openCount, openTasks);
     }
 
 
@@ -100,7 +136,7 @@ public class SprintServiceImpl implements SprintService {
         taskRepository.saveAll(tasks);
     }
 
-    public List<TaskDTO> completeSprint(Long sprintId) {
+    public List<TaskDTO> completeSprint(Long sprintId, List<Long> tasksToBacklog) {
         SprintEntity sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new RuntimeException("Sprint not found"));
 
@@ -109,15 +145,15 @@ public class SprintServiceImpl implements SprintService {
         sprintRepository.save(sprint);
 
         List<TaskEntity> tasks = taskRepository.findBySprintIdAndIsCompletedFalse(sprintId);
-        int maxBacklogPosition = taskRepository.findMaxPositionInSprint(null); // null = бэклог
+        int maxBacklogPosition = taskRepository.findMaxPositionInSprint(null);
         List<TaskDTO> updatedTasks = new ArrayList<>();
 
         for (TaskEntity task : tasks) {
-            if ("Выполнено".equalsIgnoreCase(task.getStatus())) {
-                task.setIsCompleted(true);
+            if (tasksToBacklog.contains(task.getId())) {
+                task.setSprint(null); // Вернуть в бэклог
+                task.setPosition(++maxBacklogPosition);
             } else {
-                task.setSprint(null); // В бэклог
-                task.setPosition(++maxBacklogPosition); // Ставим в конец бэклога
+                task.setIsCompleted(true); // Удалить/завершить
             }
             taskRepository.save(task);
             updatedTasks.add(new TaskDTO(task));

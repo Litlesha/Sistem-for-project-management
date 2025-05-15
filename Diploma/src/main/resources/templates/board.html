@@ -17,13 +17,13 @@
     <section id="board" class="section">
         <main class="main-content">
             <div class="header-main">
-                <h1 id="sprint-name">Спринт: Название спринта</h1>
+                <h1 id="sprint-name">Доска</h1>
                 <div class="main-content-complete-container">
                     <div class="duration-info">
-                        <img src="/icons/clock.svg" alt="Иконка времени">
-                        <p id="sprint-duration">Загрузка...</p>
+<!--                        <img src="/icons/clock.svg" alt="Иконка времени">-->
+<!--                        <p id="sprint-duration">Загрузка...</p>-->
                     </div>
-                    <button class="complete-project-btn" onclick="completeSprint()">Завершить спринт</button>
+                    <button class="complete-project-btn" onclick="openCompleteSprintModal()">Завершить спринт</button>
                 </div>
             </div>
             <div class="header-main-wrap">
@@ -286,6 +286,39 @@
             </div>
         </div>
     </template>
+    <div class="modal-complete-sprint-overlay hidden">
+        <div class="modal-complete-sprint-window">
+            <h2 class="modal-complete-sprint-title">Завершение спринта</h2>
+
+            <!-- Селект выбора активного спринта -->
+            <div class="modal-complete-sprint-select-wrapper">
+                <label for="modal-complete-sprint-select">Выберите спринт:</label>
+                <select id="modal-complete-sprint-select" class="modal-complete-sprint-select">
+                    <option value="">-- Выберите спринт --</option>
+                    <!-- Активные спринты будут добавлены через JS -->
+                </select>
+            </div>
+
+            <!-- Блок информации о задачах -->
+            <div class="modal-complete-sprint-summary hidden">
+                <p class="modal-complete-sprint-info-text">
+                    В этом спринте <strong><span class="modal-complete-sprint-done-count"></span> завершённых задач</strong> и
+                    <strong> <span class="modal-complete-sprint-open-count"></span> открытых задач</strong>.
+                <ul class="modal-complete-sprint-info-text ul-padding">
+                    <li>В число завершенных входят все задачи из последнего столбца доски — «<strong>Выполнено</strong>».</li>
+                    <li>К открытым относятся все задачи во всех остальных столбцах доски. Отметьте задачи, которые будут перенесены в бэклог. Неотмеченные задачи будут <strong>удалены</strong>.</li>
+                </ul>
+                <!-- Список незавершённых задач -->
+                <div class="modal-complete-sprint-task-list">
+                </div>
+            </div>
+            <!-- Кнопки действия -->
+            <div class="modal-complete-sprint-actions">
+                <button class="submit-btn modal-complete-sprint-confirm">Завершить</button>
+                <button class="cancel-btn modal-complete-sprint-cancel">Отмена</button>
+            </div>
+        </div>
+    </div>
 </div>
 <script th:src="@{/js/board.js}"></script>
 </body>

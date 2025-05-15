@@ -15,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -42,22 +44,41 @@ public class FileServiceImpl implements FileService {
 
             FileEntity existingFile = fileRepository.findByFileHash(fileHash);
             if (existingFile != null) {
-
                 return existingFile;
             }
 
-            // Если файл новый, сохраняем его
+            // Путь для хранения файла
+            String uploadDir = "uploaded-files/";
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String fullPath = uploadDir + fileName;
+
+            // Убедитесь, что папка существует
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            // Сохраняем файл на диск
+            File destination = new File(fullPath);
+            try (FileOutputStream fos = new FileOutputStream(destination)) {
+                fos.write(fileData);
+            }
+
+            // Сохраняем информацию в БД
             FileEntity entity = new FileEntity();
             entity.setFileName(file.getOriginalFilename());
             entity.setContentType(file.getContentType());
-            entity.setData(fileData);
             entity.setUploadedAt(Instant.now());
-            entity.setFileHash(fileHash); // Сохраняем хеш файла
+            entity.setFileHash(fileHash);
+            entity.setFilePath(fullPath);
+
             return fileRepository.save(entity);
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file", e);
         }
     }
+
 
     @Override
     @Transactional

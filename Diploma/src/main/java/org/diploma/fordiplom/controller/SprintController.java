@@ -2,13 +2,12 @@ package org.diploma.fordiplom.controller;
 
 
 import org.diploma.fordiplom.entity.DTO.SprintDTO;
+import org.diploma.fordiplom.entity.DTO.SprintSummaryDTO;
 import org.diploma.fordiplom.entity.DTO.TaskDTO;
 import org.diploma.fordiplom.entity.DTO.request.SprintRequest;
 import org.diploma.fordiplom.entity.DTO.response.SprintResponse;
 import org.diploma.fordiplom.entity.SprintEntity;
-import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.service.SprintService;
-import org.diploma.fordiplom.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 public class SprintController {
@@ -45,8 +44,9 @@ public class SprintController {
         return ResponseEntity.ok(sprintDTO);
     }
     @PostMapping("/api/sprint/{sprintId}/complete")
-    public ResponseEntity<List<TaskDTO>> completeSprint(@PathVariable Long sprintId) {
-        List<TaskDTO> updatedTasks = sprintService.completeSprint(sprintId);
+    public ResponseEntity<List<TaskDTO>> completeSprint(@PathVariable Long sprintId, @RequestBody Map<String, List<Long>> body) {
+        List<Long> taskIds = body.get("taskIds");
+        List<TaskDTO> updatedTasks = sprintService.completeSprint(sprintId, taskIds);
         return ResponseEntity.ok(updatedTasks);
     }
     @PutMapping("/api/sprint/{sprintId}/update")
@@ -54,14 +54,19 @@ public class SprintController {
         return sprintService.updateSprint(sprintId, request);
         }
     @GetMapping("/api/sprint/active/{projectId}")
-    public ResponseEntity<SprintDTO> getActiveSprintWithTasks(@PathVariable Long projectId) {
+    public ResponseEntity<List<SprintDTO>> getActiveSprintWithTasks(@PathVariable Long projectId) {
         try {
-            SprintDTO sprintDTO = sprintService.getActiveSprintWithTasks(projectId);
+            List<SprintDTO> sprintDTO = sprintService.getActiveSprintsWithTasks(projectId);
             return ResponseEntity.ok(sprintDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+    @GetMapping("/api/sprint/{sprintId}/summary")
+    public SprintSummaryDTO getSprintSummary(@PathVariable Long sprintId) {
+        return sprintService.getSprintSummary(sprintId);
     }
+
+}
 
 
