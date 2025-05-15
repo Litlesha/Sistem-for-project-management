@@ -1,6 +1,7 @@
 package org.diploma.fordiplom.controller;
 
 import org.diploma.fordiplom.entity.DTO.ProjectDTO;
+import org.diploma.fordiplom.entity.DTO.ProjectSummaryDTO;
 import org.diploma.fordiplom.entity.DTO.TeamDTO;
 import org.diploma.fordiplom.entity.DTO.request.AddTeamToProjectRequest;
 import org.diploma.fordiplom.entity.DTO.request.ProjectRequest;
@@ -75,6 +76,15 @@ public class ProjectController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+    @GetMapping("/api/project/{projectId}/summary")
+    public ProjectSummaryDTO getProjectSummary(@PathVariable Long projectId) {
+        return projectService.getProjectSummary(projectId);
+    }
+    @PostMapping("/api/project/{projectId}/complete")
+    public ResponseEntity<?> completeProject(@PathVariable Long projectId) {
+        projectService.completeProject(projectId);
+        return ResponseEntity.ok().build();
     }
 
 }

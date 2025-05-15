@@ -12,6 +12,6 @@ import java.util.Optional;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<ProjectEntity,Long> {
-    @Query("SELECT p FROM ProjectEntity p JOIN p.users u WHERE u.email = :email")
+    @Query("SELECT p FROM ProjectEntity p JOIN p.users u WHERE u.email = :email AND p.isDeleted = false ")
     List<ProjectEntity> findByUserEmail(@Param("email") String email);
 }

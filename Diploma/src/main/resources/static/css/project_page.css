@@ -1084,3 +1084,56 @@ input[readonly] {
 .complete-project-btn:hover {
   background-color: #DCDFE4;
 }
+
+/*Модальное окно для завершения проекта*/
+.modal-complete-project-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-complete-project-window {
+  font-family: "IBM Plex Sans", sans-serif;
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+  background: white;
+  padding: 24px;
+  border-radius: 5px;
+  width: 500px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-complete-project-title {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.modal-complete-project-text {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.modal-complete-project-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-complete-project-confirm,
+.modal-complete-project-cancel {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}

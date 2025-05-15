@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,6 +33,12 @@ public class ProjectEntity {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDate createdAt;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 
     @ManyToMany
     @JsonIgnore

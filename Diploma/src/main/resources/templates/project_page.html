@@ -123,6 +123,23 @@
       </main>
     </section>
   </div>
+<div class="modal-complete-project-overlay hidden">
+  <div class="modal-complete-project-window">
+    <h2 class="modal-complete-project-title">Завершение проекта</h2>
+
+    <div class="modal-complete-project-summary">
+      <p class="modal-complete-project-text" >Завершенных спринтов: <strong><span class="completed-sprints-count"></span></strong></p>
+      <p class="modal-complete-project-text">Выполнено задач: <strong><span class="completed-tasks-count"></span></strong></p>
+      <p class="modal-complete-project-text">Проект был в работе: <strong><span class="project-duration-days"></span> дней</strong></p>
+    </div>
+
+    <div class="modal-complete-project-actions">
+      <button class="submit-btn modal-complete-project-confirm">Завершить проект</button>
+      <button class="cancel-btn modal-complete-project-cancel">Отмена</button>
+    </div>
+  </div>
+</div>
+
 <script th:src="@{/js/project_page.js}"></script>
 </body>
 </html>

@@ -670,3 +670,57 @@ function updateSprint() {
         });
 }
 
+
+//Завершение проекта
+const projectCompleteOverlay = document.querySelector('.modal-complete-project-overlay');
+const completedSprintsCountSpan = document.querySelector('.completed-sprints-count');
+const completedTasksCountSpan = document.querySelector('.completed-tasks-count');
+const projectDurationDaysSpan = document.querySelector('.project-duration-days');
+const completeProjectBtn = document.querySelector('.complete-project-btn');
+
+completeProjectBtn.addEventListener('click', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+
+    try {
+        const response = await fetch(`/api/project/${projectId}/summary`);
+        if (!response.ok) throw new Error('Не удалось получить данные проекта');
+
+        const data = await response.json();
+
+        completedSprintsCountSpan.textContent = data.completedSprintsCount;
+        completedTasksCountSpan.textContent = data.completedTasksCount;
+        projectDurationDaysSpan.textContent = data.projectDurationDays;
+
+        projectCompleteOverlay.classList.remove('hidden');
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+// Кнопка отмены
+document.querySelector('.modal-complete-project-cancel').addEventListener('click', () => {
+    projectCompleteOverlay.classList.add('hidden');
+});
+
+// Кнопка подтверждения завершения проекта
+document.querySelector('.modal-complete-project-confirm').addEventListener('click', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+
+    try {
+        const response = await fetch(`/api/project/${projectId}/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error('Не удалось завершить проект');
+
+        // Перенаправить на страницу проектов или обновить текущую
+        window.location.href = `/projects`;
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+

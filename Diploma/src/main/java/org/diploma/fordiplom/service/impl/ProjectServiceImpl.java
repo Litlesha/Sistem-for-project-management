@@ -3,12 +3,14 @@ package org.diploma.fordiplom.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.diploma.fordiplom.entity.DTO.ProjectDTO;
+import org.diploma.fordiplom.entity.DTO.ProjectSummaryDTO;
 import org.diploma.fordiplom.entity.DTO.TeamDTO;
 import org.diploma.fordiplom.entity.ProjectEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.entity.TeamEntity;
 import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.repository.ProjectRepository;
+import org.diploma.fordiplom.repository.SprintRepository;
 import org.diploma.fordiplom.repository.TaskRepository;
 import org.diploma.fordiplom.service.ProjectService;
 import org.diploma.fordiplom.service.TaskService;
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.diploma.fordiplom.entity.DTO.request.ProjectRequest;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +38,8 @@ public class ProjectServiceImpl implements ProjectService {
     private TeamService teamService;
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private SprintRepository sprintRepository;
 
     public ProjectEntity createProject(ProjectRequest request, String creatorEmail) {
         UserEntity creator = userService.getUserByEmail(creatorEmail);
@@ -44,7 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setName(request.getName());
         project.setKey(request.getKey());
         project.setDescription(request.getDescription());
-
+        project.setCreatedAt(LocalDate.now());
         Set<UserEntity> users = new HashSet<>();
         users.add(creator); // добавляем создателя
         project.setUsers(users);
@@ -96,6 +102,33 @@ public class ProjectServiceImpl implements ProjectService {
 
         // Создаем ProjectDTO для отправки
         return new ProjectDTO(project.getId(), project.getName());
+    }
+
+    @Override
+    public ProjectSummaryDTO getProjectSummary(Long projectId) {
+        // 1. Получить проект, убедиться, что он существует
+
+        ProjectEntity project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Проект не найден"));
+
+        // 2. Посчитать количество завершённых спринтов для проекта
+        int completedSprintsCount = sprintRepository.countByProjectIdAndIsCompletedTrue(projectId);
+
+        // 3. Посчитать количество выполненных задач по всем спринтам проекта
+        int completedTasksCount = taskRepository.countByProjectIdAndIsCompletedTrue(projectId);
+
+        // 4. Рассчитать длительность проекта в днях (например, по датам создания и текущей дате)
+        long projectDurationDays = Duration.between(project.getCreatedAt().atStartOfDay(), LocalDate.now().atStartOfDay()).toDays();
+
+        return new ProjectSummaryDTO(completedSprintsCount, completedTasksCount, projectDurationDays);
+    }
+
+    @Override
+    public void completeProject(Long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Проект не найден"));
+        project.setIsDeleted(true);
+        projectRepository.save(project);
     }
 
 

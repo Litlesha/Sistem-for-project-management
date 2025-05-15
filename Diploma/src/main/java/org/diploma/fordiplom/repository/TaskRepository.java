@@ -28,4 +28,5 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
                                     @Param("projectId") Long projectId,
                                     @Param("sprintId") Long sprintId);
     List<TaskEntity> findBySprintOrderByPositionAsc(SprintEntity sprint);
+    int countByProjectIdAndIsCompletedTrue(Long projectId);
 }
