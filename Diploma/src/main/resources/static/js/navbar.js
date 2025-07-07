@@ -41,12 +41,14 @@ formProject.addEventListener("submit", async (e) => {
 
         const result = await response.json();
         console.log("Проект создан:", result);
+        await setRoleForCreator(result.id);
 
         window.location.href = `/project_page?id=${result.id}&section=backlog`;
     } catch (error) {
         console.error("Ошибка при отправке запроса:", error);
         alert("Ошибка при создании проекта: " + error.message);
     }
+
 });
 const form = document.getElementById("team-form");
 
@@ -84,6 +86,26 @@ form.addEventListener("submit", async (e) => {
         alert("Ошибка при создании команды: " + error.message);
     }
 });
+
+async function setRoleForCreator(projectId) {
+    const response = await fetch("/api/roles/set_creator_role", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `projectId=${projectId}`
+    });
+
+    if (!response.ok) {
+        const text = await response.text();
+        console.error("Ошибка при назначении роли создателя:", text);
+        throw new Error("Ошибка назначения роли");
+    }
+
+    return await response.json();
+}
+
+
 
 function goBack() {
     window.history.back();

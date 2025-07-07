@@ -18,6 +18,7 @@ public interface TeamService {
     void updateTeamName(Long teamId, String newName);
     void addMembers(Long teamId, List<String> emails);
     void leaveTeam(Long teamId, UserEntity user);
+    boolean isUserInTeam(String email, Long teamId);
     void deleteTeam(Long teamId);
     List<TeamEntity> searchTeams(String teamName);
     List<UserEntity> getUsersForTeam(Long teamId);

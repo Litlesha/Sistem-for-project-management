@@ -14,22 +14,26 @@
 <div class="project-container">
   <div th:replace="fragments/project-side-navigation.html"></div>
   <!-- Секция Чат -->
-  <section id="chat" class="section">
-    <div class="messenger">
+  <section th:attr="id=${chatId}, data-id=${entityId}" class="section">
+    <div class="main-content">
+      <div class="chat-header">
+        <h2 id="chat-title">Загрузка...</h2>
+        <p id="chat-info"></p>
+      </div>
       <div class="chat-messages" id="chat-messages">
       </div>
-    </div>
-    <div class="chat-input-wrap">
-      <label class="file-attach-label">
-        <input type="file" class="file-input" hidden>
-        <img src="/icons/send-file.svg" alt="Прикрепить файл" class="attach-icon">
-      </label>
+      <div class="chat-input-wrap">
+        <label class="file-attach-label">
+          <input type="file" class="file-input" hidden>
+          <img src="/icons/send-file.svg" alt="Прикрепить файл" class="attach-icon">
+        </label>
 
-      <input type="text" class="chat-input" placeholder="Сообщение">
+        <input type="text" class="chat-input" placeholder="Сообщение">
 
-      <button class="send-button">
-        <img src="/icons/send-message.svg" alt="Отправить">
-      </button>
+        <button class="send-button">
+          <img src="/icons/send-message.svg" alt="Отправить">
+        </button>
+      </div>
     </div>
   </section>
 </div>

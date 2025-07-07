@@ -2,9 +2,7 @@ package org.diploma.fordiplom.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.diploma.fordiplom.entity.DTO.ProjectDTO;
-import org.diploma.fordiplom.entity.DTO.ProjectSummaryDTO;
-import org.diploma.fordiplom.entity.DTO.TeamDTO;
+import org.diploma.fordiplom.entity.DTO.*;
 import org.diploma.fordiplom.entity.ProjectEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.entity.TeamEntity;
@@ -12,13 +10,12 @@ import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.repository.ProjectRepository;
 import org.diploma.fordiplom.repository.SprintRepository;
 import org.diploma.fordiplom.repository.TaskRepository;
-import org.diploma.fordiplom.service.ProjectService;
-import org.diploma.fordiplom.service.TaskService;
-import org.diploma.fordiplom.service.TeamService;
-import org.diploma.fordiplom.service.UserService;
+import org.diploma.fordiplom.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.diploma.fordiplom.entity.DTO.request.ProjectRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -51,8 +48,9 @@ public class ProjectServiceImpl implements ProjectService {
         project.setKey(request.getKey());
         project.setDescription(request.getDescription());
         project.setCreatedAt(LocalDate.now());
+        project.setUser(creator);
         Set<UserEntity> users = new HashSet<>();
-        users.add(creator); // добавляем создателя
+        users.add(creator);
         project.setUsers(users);
         return projectRepository.save(project);
     }
@@ -77,9 +75,17 @@ public class ProjectServiceImpl implements ProjectService {
             TeamEntity team = teamService.getTeamById(teamId);
             project.getTeams().add(team);
             project.addUsersFromTeam(team);
-
             projectRepository.save(project);
         }
+
+    @Override
+    public boolean isUserInProject(String email, Long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId).orElse(null);
+        if (project == null) return false;
+
+        return project.getUsers().stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+    }
 
     @Override
     public List<TeamDTO> getTeamsByProjectId(Long projectId) {
@@ -131,10 +137,33 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.save(project);
     }
 
+    @Override
+    public UserEntity getCreator(Long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId).orElse(null);
+        return project.getUser();
+    }
 
     @Override
     public List<ProjectEntity> getProjectsByUserEmail(String email) {
         return projectRepository.findByUserEmail(email);
     }
 
+    @Override
+    public ProjectEntity getProjectBySprint(Long sprintId) {
+        return null;
+    }
+
+    @Override
+    public List<ProjectWithTaskCountDTO> getRecentProjectsForUser(String email) {
+        Pageable limit = PageRequest.of(0, 5);
+        List<ProjectEntity> projects = projectRepository.findRecentProjectsForUser(email, limit);
+
+        List<ProjectWithTaskCountDTO> dtos = new ArrayList<>();
+        for (ProjectEntity project : projects) {
+            long openTasksCount = taskRepository.countActiveOpenTasksByProjectId(project.getId());
+            long activeSprintsCount = sprintRepository.countActiveSprintsByProjectId(project.getId());
+            dtos.add(new ProjectWithTaskCountDTO(project, openTasksCount, activeSprintsCount));
+        }
+        return dtos;
+    }
 }

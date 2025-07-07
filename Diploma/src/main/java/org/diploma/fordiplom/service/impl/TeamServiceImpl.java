@@ -6,8 +6,6 @@ import org.diploma.fordiplom.entity.TeamEntity;
 import org.diploma.fordiplom.entity.DTO.request.TeamRequest;
 import org.diploma.fordiplom.entity.UserEntity;
 import org.diploma.fordiplom.repository.TeamRepository;
-
-import org.diploma.fordiplom.repository.UserRepository;
 import org.diploma.fordiplom.service.TeamService;
 import org.diploma.fordiplom.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +49,15 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public TeamEntity getTeamById(Long id) {
         return teamRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Team not found"));
+    }
+
+    @Override
+    public boolean isUserInTeam(String email, Long teamId) {
+        TeamEntity team = teamRepository.findById(teamId).orElse(null);
+        if (team == null) return false;
+
+        return team.getEmails().stream()
+                .anyMatch(user -> user.getEmail().equals(email));
     }
 
     @Override

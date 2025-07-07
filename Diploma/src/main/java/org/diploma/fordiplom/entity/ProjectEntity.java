@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -36,9 +38,12 @@ public class ProjectEntity {
 
     @Column(name = "created_at", updatable = false)
     private LocalDate createdAt;
-
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "creator_id")
+    private UserEntity user;
 
     @ManyToMany
     @JsonIgnore

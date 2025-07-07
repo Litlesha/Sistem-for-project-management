@@ -14,11 +14,20 @@
 <main class="main-content">
   <div class="recent-projects">
     <p class="recent-projects-title">Недавние проекты</p>
-    <div class = "line"></div>
-    <div class="create-project-card">
-      <h3>Создать проект</h3>
-      <p>Начните проект вместе с нами</p>
-      <a  href="#create-project-modal" class="create-project-btn" > Новый проект</a>
+    <div class="line"></div>
+
+    <div class="recent-projects-container">
+      <!-- Блок создания проекта -->
+      <div class="create-project-card">
+        <h3>Создать проект</h3>
+        <p>Начните проект вместе с нами</p>
+        <a href="#create-project-modal" class="create-project-btn">Новый проект</a>
+      </div>
+
+      <!-- Контейнер для недавних проектов, JS подставит сюда карточки -->
+      <div id="recent-projects-list" class="recent-projects-list">
+        <!-- JS сюда добавит карточки -->
+      </div>
     </div>
   </div>
   <div class="last-section">
@@ -33,5 +42,6 @@
     </div>
   </div>
 </main>
+<script th:src="@{/js/main.js}"></script>
 </body>
 </html>

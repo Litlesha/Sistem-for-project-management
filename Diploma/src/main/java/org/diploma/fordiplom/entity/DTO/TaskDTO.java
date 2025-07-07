@@ -28,6 +28,7 @@ public class TaskDTO {
     private String executorName;
     private Boolean isCompleted;
     private Integer position;
+    private ProjectDTO project;
     public TaskDTO(Long id, String title, Long sprintId, String taskType, String status, String taskKey, String description, String priority, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.title = title;
@@ -70,6 +71,7 @@ public class TaskDTO {
         }
         this.sprintName = taskEntity.getSprint() != null ? taskEntity.getSprint().getSprintName() : null;
         this.team = taskEntity.getTeam() != null ? new TeamDTO(taskEntity.getTeam()) : null;
+        this.project = taskEntity.getProject() != null ? new ProjectDTO(taskEntity.getProject()) : null;
         if (taskEntity.getExecutor() != null) {
             this.executorName = taskEntity.getExecutor().getUsername() != null
                     ? taskEntity.getExecutor().getUsername()

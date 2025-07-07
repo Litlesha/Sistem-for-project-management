@@ -1,7 +1,8 @@
 package org.diploma.fordiplom.service;
 
+import jakarta.mail.MessagingException;
+import org.diploma.fordiplom.entity.DTO.UserDTO;
 import org.diploma.fordiplom.entity.UserEntity;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -9,15 +10,22 @@ import java.util.List;
 
 @Service
 public interface UserService {
-        public UserEntity createUser(UserEntity user) throws Exception;
+        UserEntity createUser(UserEntity user) throws Exception;
 
-        public UserEntity updateUser(String email, UserEntity user);
+        UserEntity updateUser(String email, UserEntity user);
 
-        public UserEntity getUserByEmail(String email);
+        UserEntity getUserByEmail(String email);
         List<UserEntity> getAllUsersByEmails(List<String> emails);
-        public UserEntity findUserById(Long id);
-        public UserEntity getCurrentUser(Principal principal);
-        public boolean existsByEmail(String email);
+        UserEntity findUserById(Long id);
+        UserEntity getCurrentUser(Principal principal);
+        boolean existsByEmail(String email);
         UserEntity updateUserProfile(String email, String position,String username, String organization);
         void saveUserImgPath(Long userId, String imgUrl);
+        void sendConfirmationEmail(String toEmail, String token) throws MessagingException;
+        String confirmUser(String token);
+        List<UserEntity> getUsersByProjectTasks(Long projectId);
+        List<UserDTO> getUsersWithTasksByProjectId(Long projectId);
+        UserDTO getUserWithTasks(Long userId, Long projectId);
+        List<UserEntity> getUsersForProject(Long projectId);
+        String getGitHubToken(String email);
 }

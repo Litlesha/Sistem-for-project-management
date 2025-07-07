@@ -7,6 +7,12 @@ async function loadProjectTitle() {
 
     try {
         const response = await fetch(`/api/project/${projectId}/backlog`);
+
+        if (response.status === 403) {
+            window.location.href = "/access-project-denied";
+            return;
+        }
+
         if (!response.ok) throw new Error("Проект не найден");
 
         const project = await response.json();
@@ -47,6 +53,56 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activeSection) {
         activeSection.classList.add('active-section');
     }
+
+    checkRoleAndShowReportLink(projectId);
+
 });
+
+async function checkRoleAndShowReportLink(projectId) {
+    try {
+        const response = await fetch(`/api/roles/getUserRole/${projectId}`);
+        if (!response.ok) throw new Error("Ошибка при получении роли");
+
+        const role = await response.text();
+
+        // Показываем ссылку на "Отчет", если пользователь — админ
+        if (role === "PROJECT_ADMIN") {
+            const reportLink = document.querySelector('.nav-link[data-section="report"]');
+            if (reportLink) {
+                reportLink.classList.remove("hidden");
+            }
+        }
+    } catch (err) {
+        console.error("Ошибка при проверке роли:", err);
+    }
+}
+
+document.getElementById("report-button").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const { projectId } = getProjectIdAndSectionFromUrl();
+
+    try {
+        const response = await fetch(`/project_page?id=${projectId}&section=report`, {
+            method: "GET",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest" // чтобы сервер мог понять, что это запрос, а не переход
+            }
+        });
+
+        if (response.status === 403) {
+            alert("У вас нет доступа к отчету");
+            return;
+        }
+
+        // Если все хорошо — перейти
+        window.location.href = `/project_page?id=${projectId}&section=report`;
+
+    } catch (err) {
+        alert("Ошибка при проверке доступа");
+        console.error(err);
+    }
+});
+
+
 
 window.addEventListener("DOMContentLoaded", loadProjectTitle);

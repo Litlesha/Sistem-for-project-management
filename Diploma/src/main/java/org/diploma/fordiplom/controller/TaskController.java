@@ -10,14 +10,13 @@ import org.diploma.fordiplom.entity.DTO.response.TaskResponseDTO;
 import org.diploma.fordiplom.entity.TagEntity;
 import org.diploma.fordiplom.entity.TaskEntity;
 import org.diploma.fordiplom.entity.UserEntity;
-import org.diploma.fordiplom.service.ProjectService;
-import org.diploma.fordiplom.service.TaskService;
-import org.diploma.fordiplom.service.TeamService;
+import org.diploma.fordiplom.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.util.List;
@@ -30,9 +29,19 @@ public class TaskController {
     @Autowired
     private ProjectService projectService;
     @Autowired
-    private TeamService teamService;
+    private UserService userService;
+    @Autowired
+    private PURService purService;
     @PostMapping(path = "/create_task", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public TaskEntity createNewTask(@RequestBody TaskRequest task) {
+    public TaskEntity createNewTask(@RequestBody TaskRequest task, Principal principal) {
+        Long projectId = task.getProjectId();
+        String user = principal.getName();
+
+        boolean assignedUser = purService.checkAccess(projectId, userService.getUserByEmail(user).getId_user());
+        if (!assignedUser) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
         return taskService.createTask(task);
     }
 
@@ -80,13 +89,11 @@ public class TaskController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/api/sprint/{sprintId}/search")
-    public ResponseEntity<List<TaskDTO>> searchTasksInSprint(
-            @PathVariable Long sprintId,
-            @RequestParam Long projectId,
+    @GetMapping("/api/project/{projectId}/search")
+    public ResponseEntity<List<TaskDTO>> searchTasksInActiveSprints(
+            @PathVariable Long projectId,
             @RequestParam String query) {
-        // Получаем список TaskDTO от сервиса
-        List<TaskDTO> tasks = taskService.searchTasksInSprint(query, projectId, sprintId);
+        List<TaskDTO> tasks = taskService.searchTasksInActiveSprints(query, projectId);
         return ResponseEntity.ok(tasks);
     }
 
@@ -118,14 +125,30 @@ public class TaskController {
     @PutMapping("/api/tasks/{id}/title")
     public ResponseEntity<TaskResponseDTO> updateTaskTitle(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateTaskTitleRequest request
+            @Valid @RequestBody UpdateTaskTitleRequest request,
+            Principal principal
     ) {
+        String user = principal.getName();
+
+        boolean assignedUser = purService.checkAccess(taskService.extractProjectIdFromTask(id),
+                userService.getUserByEmail(user).getId_user());
+        if (!assignedUser) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         TaskEntity updatedTask = taskService.updateTaskTitle(id, request.getTitle());
         return ResponseEntity.ok(new TaskResponseDTO(updatedTask));
     }
     @PutMapping("/api/tasks/{id}/description")
     public ResponseEntity<TaskResponseDTO> updateTaskDescription(@PathVariable Long id,
-                                                                 @RequestBody EditDescriptionRequest request){
+                                                                 @RequestBody EditDescriptionRequest request, Principal principal) {
+        String user = principal.getName();
+
+        boolean assignedUser = purService.checkAccess(taskService.extractProjectIdFromTask(id),
+                userService.getUserByEmail(user).getId_user());
+        if (!assignedUser) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         TaskEntity updatedTask = taskService.updateTaskDescription(id, request.getDescription());
         return ResponseEntity.ok(new TaskResponseDTO(updatedTask));
     }
@@ -136,14 +159,29 @@ public class TaskController {
             Principal principal // для получения пользователя
     ) {
         // Обновляем приоритет задачи и сохраняем её в БД
-        TaskEntity updatedTask = taskService.updateTaskPriority(id, request.getPriority(), principal.getName());
+        boolean assignedUser = purService.checkAccess(taskService.extractProjectIdFromTask(id),
+                userService.getUserByEmail(principal.getName()).getId_user());
+        if (!assignedUser) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
+        TaskEntity updatedTask = taskService.updateTaskPriority(id, request.getPriority(), principal.getName());
         return ResponseEntity.ok(new TaskResponseDTO(updatedTask));
     }
     @PostMapping("/api/tasks/{taskId}/tags")
     public ResponseEntity<TagDTO> addTag(@PathVariable Long taskId, @RequestBody TagDTO tagDTO) {
         TagDTO createdTag = taskService.addTagToTask(taskId, tagDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTag);
+    }
+
+    @PutMapping("/api/tasks/{taskId}/sprint/{sprintId}")
+    public ResponseEntity<?> assignSprintToTask(@PathVariable Long taskId, @PathVariable Long sprintId) {
+        taskService.assignSprint(taskId, sprintId);
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/api/tasks/by-key/{key}")
+    public TaskDTO getTaskByKey(@PathVariable String key) {
+        return taskService.getTaskByKey(key);
     }
 
     @DeleteMapping("/api/tasks/{taskId}/tags/{tagId}")
@@ -171,14 +209,30 @@ public class TaskController {
         }
     }
     @PutMapping("/api/tasks/{taskId}/team/{teamId}")
-    public ResponseEntity<Void> assignTeamToTask(@PathVariable Long taskId, @PathVariable Long teamId) {
+    public ResponseEntity<Void> assignTeamToTask(@PathVariable Long taskId, @PathVariable Long teamId, Principal principal) {
+        String user = principal.getName();
+
+        boolean assignedUser = purService.checkAccess(taskService.extractProjectIdFromTask(taskId),
+                userService.getUserByEmail(user).getId_user());
+        if (!assignedUser) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
         taskService.assignTeam(taskId, teamId);
         return ResponseEntity.ok().build();
     }
     @PutMapping("/api/tasks/{taskId}/executor/{userId}")
-    public ResponseEntity<?> assignExecutor(@PathVariable Long taskId, @PathVariable Long userId) {
+    public ResponseEntity<?> assignExecutor(@PathVariable Long taskId, @PathVariable Long userId, Principal principal) {
+        String user = principal.getName();
+
+        boolean assignedUser = purService.checkAccess(taskService.extractProjectIdFromTask(taskId),
+                userService.getUserByEmail(user).getId_user());
+        if (!assignedUser) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
         taskService.assignExecutor(taskId, userId);
         return ResponseEntity.ok().build();
     }
+
 
 }

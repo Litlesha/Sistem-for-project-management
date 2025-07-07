@@ -156,9 +156,11 @@ async function loadSprintInfo(projectId) {
     }
 }
 
+
 document.addEventListener('DOMContentLoaded', () => {
     const projectId = getProjectIdFromUrl();
     if (projectId) {
+        checkRoleAndHideUI(projectId);
         loadActiveSprints(projectId);
         loadSprintInfo(projectId);
     }
@@ -167,14 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener("input", async (e) => {
         const query = e.target.value.trim();
-
-        // Очищаем предыдущий таймер
         if (searchTimeout) clearTimeout(searchTimeout);
 
         searchTimeout = setTimeout(async () => {
             const projectId = getProjectIdFromUrl();
 
-            // Если строка поиска пуста — перезагружаем все задачи
             if (!query) {
                 const columns = document.querySelectorAll(".kanban-column");
                 columns.forEach(column => {
@@ -185,24 +184,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Если введён текст — ищем
-            const sprintId = await getActiveSprintId(projectId);
-            if (!sprintId) return;
-
             try {
-                const res = await fetch(`/api/sprint/${sprintId}/search?projectId=${projectId}&query=${encodeURIComponent(query)}`);
+                const res = await fetch(`/api/project/${projectId}/search?query=${encodeURIComponent(query)}`);
                 if (!res.ok) {
                     console.error("Ошибка поиска задач");
                     return;
                 }
-
                 const tasks = await res.json();
-
                 renderSearchResults(tasks);
             } catch (err) {
                 console.error("Ошибка во время выполнения поиска:", err);
             }
-        }, 400); // Задержка 400 мс
+        }, 400);
     });
 });
 
@@ -304,7 +297,8 @@ document.addEventListener("click", (e) => {
         });
 
         if (!createRes.ok) {
-            alert("Ошибка создания задачи");
+            alert("О КАК");
+            form.remove();
             return;
         }
 
@@ -499,6 +493,7 @@ document.addEventListener('click', (event) => {
         .then(task => {
             // Открываем модалку с полученными данными
             openTaskModal(task);
+            setTaskBranchData(task.taskKey, task.title)
         })
         .catch(error => {
             console.error(error);
@@ -524,6 +519,7 @@ function openTaskModal(task) {
     initTinyMCEIfNeeded(containerEl);
     setupDescriptionEdit(containerEl, task);
     initializeTeamSelection(containerEl, task);
+    initializeSprintSelection(containerEl, task);
     initializeExecutorSelection(containerEl, task);
     loadComments(task.id);
     loadTaskHistory(task.id);
@@ -543,10 +539,92 @@ function openTaskModal(task) {
 
     const commentsBtn = containerEl.querySelector('button[data-target="comments-section"]');
     if (commentsBtn) commentsBtn.classList.add('active');
+    const createBranchBtn = containerEl.querySelector('.create-branch-btn');
+    if (createBranchBtn) {
+        createBranchBtn.dataset.issueKey = `TASK-${task.id}`;
+        createBranchBtn.dataset.issueTitle = task.title;
+    }
     initializeTags(containerEl);
     loadTagsForTask(task.id, containerEl);
     initializeFileUpload(containerEl, task.id);
+
 }
+
+function initializeSprintSelection(containerEl, task) {
+    const sprintContainer = containerEl.querySelector('.sprint-tags-container');
+    const sprintSearchResults = containerEl.querySelector('.sprint-search-results');
+    const taskId = document.getElementById('modal-container')?.getAttribute('data-task-id');
+
+    if (!taskId) {
+        console.error('Ошибка: taskId не найден');
+        return;
+    }
+
+    // Показ текущего названия спринта
+    if (task.sprint && task.sprint.sprintName) {
+        sprintContainer.textContent = task.sprint.sprintName;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+    if (!projectId) {
+        console.error('Ошибка: projectId не найден в URL');
+        return;
+    }
+
+    sprintContainer.addEventListener('click', async () => {
+        if (sprintSearchResults.style.display === 'flex') {
+            sprintSearchResults.style.display = 'none';
+        } else {
+            try {
+                const response = await fetch(`/api/projects/${projectId}/sprints/active`);
+                const sprints = await response.json();
+                console.log(sprints)
+                if (!Array.isArray(sprints)) {
+                    console.error('Ошибка: данные о спринтах не являются массивом');
+                    return;
+                }
+
+                sprintSearchResults.innerHTML = '';
+
+                sprints.forEach(sprint => {
+                    const sprintDiv = document.createElement('div');
+                    sprintDiv.textContent = sprint.sprintName;
+                    sprintDiv.classList.add('search-result-item');
+
+                    sprintDiv.addEventListener('click', async () => {
+                        sprintContainer.textContent = sprint.sprintName;
+                        sprintSearchResults.style.display = 'none';
+
+                        const assignResponse = await fetch(`/api/tasks/${taskId}/sprint/${sprint.id}`, {
+                            method: 'PUT'
+                        });
+
+                        if (!assignResponse.ok) {
+                            console.error('Ошибка при прикреплении спринта');
+                        } else {
+                            task.sprint = sprint;
+                            loadTaskHistory(taskId);
+                        }
+                    });
+
+                    sprintSearchResults.appendChild(sprintDiv);
+                });
+
+                sprintSearchResults.style.display = 'block';
+            } catch (error) {
+                console.error('Ошибка загрузки спринтов:', error);
+            }
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!sprintContainer.contains(e.target)) {
+            sprintSearchResults.style.display = 'none';
+        }
+    });
+}
+
 //заполнение данных задачи из бд
 function fillTaskModalData(containerEl, task) {
     containerEl.querySelector('.task-key-info span').textContent = task.taskKey;
@@ -568,7 +646,7 @@ function fillTaskModalData(containerEl, task) {
 
     const boardEl = containerEl.querySelector('.info-tag-inner:nth-child(4) .tags-container span');
     if (boardEl && task.sprintName)  boardEl.textContent = task.sprintName;
-    const authorEl = containerEl.querySelector('.info-tag-inner:nth-child(6) .tags-container .user-div span');
+    const authorEl = containerEl.querySelector('.info-tag-inner:nth-child(7) .tags-container .user-div span');
     if (authorEl) {
         authorEl.textContent = task.authorName && task.authorName.trim() !== "Не назначено"
             ? task.authorName
@@ -703,6 +781,11 @@ function setupDescriptionEdit(containerEl, task) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ description: newDescription })
             });
+
+            if (response.status === 403) {
+                alert('У вас нет прав для редактирования этой задачи');
+                return;
+            }
 
             if (!response.ok) throw new Error('Ошибка при обновлении описания');
 
@@ -1124,6 +1207,19 @@ function closeTeamModal() {
     document.getElementById("teamModal").style.display = "none";
 }
 
+async function checkRoleAndHideUI(projectId) {
+    const response = await fetch(`/api/roles/getUserRole/${projectId}`);
+    const role = await response.text();
+
+    if (role === 'PROJECT_ADMIN') {
+        const addTeamButton = document.getElementById("add-team-button");
+        if (addTeamButton) {
+            addTeamButton.classList.remove('hidden');
+        }
+    }
+}
+
+
 async function addTeam(event) {
     event.preventDefault(); // Останавливаем отправку формы
 
@@ -1167,12 +1263,30 @@ async function addTeam(event) {
             teamId: teamId
         })
     });
+
     if (addTeamResponse.ok) {
         closeTeamModal();
+        await setRolesForAddedTeamUsers(projectId, teamId);
     } else {
-        alert("Произошла ошибка при добавлении команды.");
+        const errorText = await addTeamResponse.text(); // <-- читаем сообщение с сервера
+        alert(errorText); // Показываем пользователю
     }
 }
+
+async function setRolesForAddedTeamUsers(projectId, teamId){
+    await fetch("/api/roles/set_users_role", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            projectId: projectId,
+            teamId: teamId
+        })
+    });
+}
+
+
 async function searchTeams() {
     const input = document.getElementById("teamName");
     const query = input.value.trim();
@@ -1323,7 +1437,7 @@ function initializeExecutorSelection(containerEl, task) {
     const executorContainer = containerEl.querySelector('.executor-container');
     const executorSearchResults = containerEl.querySelector('.executor-search-results');
     const taskId = task.id;
-
+    // const projectId = getProjectIdFromUrl()
     // Отображаем выбранного исполнителя при загрузке страницы
     const assignedUserDiv = containerEl.querySelector('.assigned-user');
     if (task.executorName) {
@@ -1331,13 +1445,13 @@ function initializeExecutorSelection(containerEl, task) {
     } else {
         assignedUserDiv.textContent = 'Нет'; // Если исполнитель не выбран
     }
-
+    console.log(task)
     executorContainer.addEventListener('click', async () => {
         if (executorSearchResults.style.display === 'block') {
             executorSearchResults.style.display = 'none';
         } else {
             try {
-                const response = await fetch(`/api/teams/${task.team.id_team}/users`);
+                const response = await fetch(`/api/teams/${task.project.id}/users`);
                 const users = await response.json();
 
                 if (!Array.isArray(users)) {
@@ -1739,7 +1853,9 @@ document.querySelector('.modal-complete-sprint-confirm').addEventListener('click
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ taskIds: selectedTaskIds }) // Отправляем массив
+            body: JSON.stringify({
+                taskIds: selectedTaskIds,
+                projectId: projectId }) // Отправляем массив
         });
 
         if (!response.ok) throw new Error('Не удалось завершить спринт');
@@ -1753,14 +1869,3 @@ document.querySelector('.modal-complete-sprint-confirm').addEventListener('click
 document.querySelector('.modal-complete-sprint-cancel').addEventListener('click', () => {
     overlay.classList.add('hidden');
 });
-
-
-
-
-
-
-
-
-
-
-

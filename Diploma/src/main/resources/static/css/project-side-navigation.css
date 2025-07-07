@@ -5,6 +5,10 @@
     font-family: "IBM Plex Sans", sans-serif;
 }
 
+.hidden{
+    display: none !important;
+}
+
 /* Навигация слева */
 .project-sidebar {
     width: 250px;
@@ -15,7 +19,7 @@
     height: calc(100vh - 75px);
     top: 75px;
     left: 0;
-    z-index: 1000; /* чтобы была поверх других элементов */
+    z-index: 900; /* чтобы была поверх других элементов */
     overflow-y: auto; /* если навигация длинная */
 }
 

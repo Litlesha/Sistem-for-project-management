@@ -372,6 +372,7 @@ menu, ol, ul {
   justify-content: space-between;
   align-items: center;
   padding: 20px;
+  min-width: 300px;
   width: 300px;
   height: 200px;
   background-color: #ffffff;
@@ -439,4 +440,44 @@ menu, ol, ul {
   justify-content: center;
   margin-top: 50px;
   margin-left: 200px;
+}
+.project-card {
+  font-family: "IBM Plex Sans", sans-serif;
+  margin-top: 30px;
+  height: 200px;
+  width: 300px;
+  padding: 20px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.project-card:hover{
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.project-link {
+  text-decoration: none;
+  color: inherit;
+}
+.recent-projects-container{
+  display: flex;
+  flex-direction: row;
+  max-width: 95%;
+  overflow-y: hidden;
+  overflow-x: auto;
+  gap: 5px;
+}
+.recent-projects-list{
+  display: flex;
+  gap: 5px;
+  padding-right: 10px;
+}
+.link-header{
+  font-size: 20px;
+  font-weight: 600;
+}
+.tasks-margin{
+  margin-top: 10px;
 }

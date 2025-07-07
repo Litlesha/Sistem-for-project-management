@@ -34,7 +34,7 @@
                                 <input type="text" class="search-input search-input-board" placeholder="Поиск">
                         </div>
                     </div>
-                    <div class="participants-icons">
+                    <div id = "add-team-button" class="participants-icons hidden">
                         <button class="add-participant-btn">
                             <img src="/icons/addUser.svg" alt="Добавить участника" class="add-icon" onclick="openTeamModal()">
                         </button>
@@ -242,8 +242,11 @@
                                 </div>
                                 <div class="info-tag-inner">
                                     <span>Доска</span>
-                                    <div class="tags-container">
-                                        <span>Доска Спринт 1</span>
+                                    <div class="sprint-container"> <!-- Контейнер для текущего спринта и выпадающего списка -->
+                                        <div class="tags-container sprint-tags-container">
+                                            <span>Нет</span> <!-- Текущий спринт -->
+                                        </div>
+                                        <div class="search-results sprint-search-results"></div> <!-- Выпадающий список спринтов -->
                                     </div>
                                 </div>
                                 <div class="info-tag-inner difficulty-block" style="position: relative;">
@@ -258,6 +261,9 @@
                                         <button class="save-difficulty">✔</button>
                                         <button class="cancel-difficulty">×</button>
                                     </div>
+                                </div>
+                                <div class="info-tag-inner">
+                                    <button class="submit-btn" onclick="openRepoModalWithAuthCheck()">Создать ветку</button>
                                 </div>
                                 <div class="info-tag-inner">
                                     <span>Автор</span>
@@ -320,6 +326,44 @@
         </div>
     </div>
 </div>
+<div id="repoModal" class="modal" style="display: none;">
+    <div class="modal-add-team-wrapper">
+        <div class="modal-content">
+            <div class="close" onclick="closeRepoModal()"><span>&times;</span></div>
+            <h2>Создание ветки по задаче</h2>
+            <form id="repoBranchForm" onsubmit="submitRepoBranch(event)">
+                <label for="repo-select-modal">Репозиторий:</label>
+                <select id="repo-select-modal" required>
+                    <option disabled selected>Выберите репозиторий...</option>
+                </select>
+
+                <label for="branch-select-modal">Исходная ветка:</label>
+                <select id="branch-select-modal" required disabled>
+                    <option disabled selected>Сначала выберите репозиторий</option>
+                </select>
+
+                <label for="branch-type">Тип ветки:</label>
+                <select id="branch-type" required>
+                    <option value="feature/">feature</option>
+                    <option value="bugfix/">bugfix</option>
+                    <option value="hotfix/">hotfix</option>
+                    <option value="chore/">chore</option>
+                </select>
+
+                <label for="new-branch-name">Новая ветка:</label>
+                <input type="text" id="new-branch-name" placeholder="feature/ABC-123-add-login-form" required>
+
+
+                <div class="button-wrapper">
+                    <button type="submit" class="submit-btn">Создать ветку</button>
+                    <button type="button" class="cancel-btn" onclick="closeRepoModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script th:src="@{/js/board.js}"></script>
+<script th:src="@{/js/code.js}"></script>
 </body>
 </html>

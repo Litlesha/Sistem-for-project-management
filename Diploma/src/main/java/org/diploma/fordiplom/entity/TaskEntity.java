@@ -1,5 +1,6 @@
 package org.diploma.fordiplom.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -46,12 +48,12 @@ public class TaskEntity {
     private String status;
     @Column(name = "position")
     private Integer position;
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
+    @CreationTimestamp
     private Instant createdAt;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
+    @CreationTimestamp
     private Instant updatedAt;
     @Column(name = "is_complited")
     private Boolean isCompleted;
@@ -64,6 +66,7 @@ public class TaskEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sprint_id")
     private SprintEntity sprint;
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
     private ProjectEntity project;

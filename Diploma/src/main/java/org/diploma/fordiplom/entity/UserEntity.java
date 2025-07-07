@@ -35,6 +35,15 @@ public class UserEntity {
     private String organization;
     @Column(name = "username")
     private String username;
+
+    @Column(name = "enabled")
+    private Boolean enabled;
+    @Column(name = "confirmation_token")
+    private String confirmationToken;
+
+    @Column(name = "token")
+    private String gitHubAccessToken;
+
     @Column(name = "userImgPath")
     private String userImgPath;
     @Transient
@@ -46,4 +55,11 @@ public class UserEntity {
     @ManyToMany(mappedBy = "users")
     @JsonIgnore
     private Set<ProjectEntity> projects = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "user_repositories",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "repository_id")
+    )
+    private Set<RepositoryEntity> repositories = new HashSet<>();
 }

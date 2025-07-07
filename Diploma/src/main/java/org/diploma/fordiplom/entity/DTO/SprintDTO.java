@@ -23,6 +23,11 @@ public class SprintDTO {
     private List<TaskDTO> tasks;
 
 
+    public SprintDTO(Long id, String sprintName) {
+        this.id = id;
+        this.sprintName = sprintName;
+    }
+
     public SprintDTO(Long id, String sprintName, LocalDateTime startDate, LocalDateTime endDate, String goal, Integer duration, Boolean isActive) {
         this.id = id;
         this.sprintName = sprintName;
@@ -34,6 +39,13 @@ public class SprintDTO {
     }
 
     public SprintDTO(SprintEntity sprint) {
+        this.id = sprint.getId();
+        this.sprintName = sprint.getSprintName();
+        this.startDate = sprint.getStartDate();
+        this.endDate = sprint.getEndDate();
+        this.goal = sprint.getGoal();
+        this.duration = sprint.getDuration();
+        this.isActive = sprint.getIsActive();
     }
 
 }

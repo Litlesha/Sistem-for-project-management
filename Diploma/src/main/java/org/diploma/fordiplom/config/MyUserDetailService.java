@@ -24,6 +24,7 @@ public class MyUserDetailService implements UserDetailsService {
             return User.builder()
                     .username(userObj.getEmail())
                     .password(userObj.getPassword())
+                    .disabled(userObj.getEnabled() == null ? true : !userObj.getEnabled())
                     .build();
         } else {
             throw new UsernameNotFoundException(email);

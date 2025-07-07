@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -63,6 +64,15 @@ public class TaskServiceImpl implements TaskService {
 
         task.setProject(projectService.getProjectById(request.getProjectId()));
         return taskRepository.save(task);
+    }
+
+    @Override
+    public Long extractProjectIdFromTask(Long taskId) {
+        return taskRepository.findById(taskId)
+                .map(TaskEntity::getSprint)
+                .map(SprintEntity::getProject)
+                .map(ProjectEntity::getId)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
     }
 
 
@@ -173,13 +183,45 @@ public class TaskServiceImpl implements TaskService {
                 "status"          // поле
         );
     }
-    public List<TaskDTO> searchTasksInSprint(String query, Long projectId, Long sprintId) {
+    /*public List<TaskDTO> searchTasksInSprint(String query, Long projectId, Long sprintId) {
         // Получаем список задач из репозитория
         List<TaskEntity> tasks = taskRepository.searchInSprint(query, projectId, sprintId);
 
         // Преобразуем список TaskEntity в TaskDTO
         return tasks.stream()
                 .map(TaskDTO::new)  // Используем конструктор TaskDTO, который принимает TaskEntity
+                .collect(Collectors.toList());
+    }*/
+
+    @Override
+    public void assignSprint(Long taskId, Long sprintId) {
+        TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Задача не найдена"));
+        SprintEntity sprint = sprintRepository.findById(sprintId)
+                .orElseThrow(() -> new RuntimeException("Спринт не найден"));
+
+        task.setSprint(sprint);
+        task.setUpdatedAt(Instant.now());
+        taskRepository.save(task);
+    }
+    public TaskDTO getTaskByKey(String key) {
+        return taskRepository.findByKey(key);
+    }
+
+    @Override
+    public List<TaskDTO> searchTasksInActiveSprints(String query, Long projectId) {
+        // Получаем ID всех активных спринтов проекта
+        List<Long> activeSprintIds = sprintRepository.findActiveSprintIdsByProjectId(projectId);
+
+        if (activeSprintIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Ищем задачи в этих спринтах
+        List<TaskEntity> tasks = taskRepository.searchInSprints(query, projectId, activeSprintIds);
+
+        return tasks.stream()
+                .map(TaskDTO::new)
                 .collect(Collectors.toList());
     }
 

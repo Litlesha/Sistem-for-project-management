@@ -62,18 +62,22 @@ async function initTaskInputHandlers(scope = document) {
                         body: JSON.stringify(requestBody)
                     });
 
-                    if (!response.ok) throw new Error('Ошибка при создании задачи');
-                    const task = await response.json();
-
-                    // Передаем контейнер спринта для отображения задачи
-                    if (sprintId) {
-                        const sprintContainer = document.querySelector(`.backlog-sprint-tusk-wrapper[data-sprint-id="${sprintId}"]`);
-                        renderTaskToSprint(task, sprintContainer); // рендерим задачу в спринт
+                    if (!response.ok) {
+                        alert("О КАК");
                     } else {
-                        renderTaskToBacklog(task); // если задачи без спринта
-                    }
+                        const task = await response.json();
 
+                        // Передаем контейнер спринта для отображения задачи
+                        if (sprintId) {
+                            const sprintContainer = document.querySelector(`.backlog-sprint-tusk-wrapper[data-sprint-id="${sprintId}"]`);
+                            renderTaskToSprint(task, sprintContainer); // рендерим задачу в спринт
+                        } else {
+                            renderTaskToBacklog(task); // если задачи без спринта
+                        }
+
+                    }
                     titleInput.value = ''; // очищаем input
+
                 } catch (err) {
                     console.error('Ошибка:', err);
                 }
@@ -228,6 +232,23 @@ async function handleDrop(e) {
     } catch (err) {
         console.error('Ошибка при перемещении задачи:', err);
     }
+}
+
+function selectProject(projectId) {
+    fetch('/api/session/selectProject', {
+        method: 'POST', // Используем POST-запрос
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `projectId=${projectId}` // Передаем projectId в теле запроса
+    })
+        .then(response => response.json()) // Парсим ответ от сервера
+        .then(data => {
+            console.log('Project selected:', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 }
 
 function initDragOverHandlers() {
@@ -396,6 +417,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     window.projectIdFromURL = projectId;
+
+    selectProject(projectId);
     loadSprints(projectId); // теперь projectId корректный
 });
 async function loadSprints(projectId) {

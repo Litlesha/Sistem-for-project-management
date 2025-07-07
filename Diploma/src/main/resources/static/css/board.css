@@ -288,7 +288,8 @@ menu, ol, ul {
     border-radius: 10px;
     padding: 30px;
     width: 600px;
-    height: 400px;
+    height: 470px;
+    margin-top: 50px;
     margin-bottom: 270px;
     max-width: 90%;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -534,7 +535,7 @@ menu, ol, ul {
 /* Заголовок и кнопка */
 .header-main {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     margin: 20px 20px 40px 20px;
 }
@@ -2107,7 +2108,24 @@ menu, ol, ul {
     color: #777777;
 
 }
+
+.hidden {
+    display: none;
+}
+
+
+.branch-dropdown {
+    margin-left: 10px;
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+
 .modal-complete-sprint-task-title{
     font-size: 14px;
     font-weight: lighter;
+}
+
+.sprint-container{
+    position: relative;
 }
