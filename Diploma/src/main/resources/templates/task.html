@@ -1,0 +1,199 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Главная страница</title>-->
+<!--    <link rel="stylesheet" th:href="@{/css/task.css}">-->
+<!--    <link rel="preconnect" href="https://fonts.googleapis.com">-->
+<!--    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">-->
+<!--    <script src="https://cdn.tiny.cloud/1/echsbgwhmwfpf0hrwm2yabgagdjujrtgnuksgo7xosxv01l4/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div th:replace="fragments/navbar.html"></div>-->
+<!--<div class="project-container">-->
+<!--    <div th:replace="fragments/project-side-navigation.html"></div>-->
+<!--    <div id="modal-container"></div>-->
+<!--    <template id="task-modal-template">-->
+<!--        <div class="task-modal-overlay">-->
+<!--            <div class="task-modal-container">-->
+<!--                <div class="task-top-content">-->
+<!--                    <div class="task-key-info">-->
+<!--                        <img class="task-type-icon" src="" alt="Тип задачи" />-->
+<!--                        <span>KEYS-1</span>-->
+<!--                    </div>-->
+<!--                    <div class="task-buttons">-->
+<!--                        <button class="close-modal" type="button">×</button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="task-modal-wrapper">-->
+<!--                    <div class="task-content-left">-->
+<!--                        <div class="task-title-wrapper">-->
+<!--                            <span class="task-title-modal">Название задачи</span>-->
+
+<!--                            <div class="edit-title-controls" style="display: none;">-->
+<!--                                <input type="text" class="edit-title-input">-->
+<!--                                <div class="edit-title-buttons">-->
+<!--                                    <button class="save-title-btn">✔</button>-->
+<!--                                    <button class="cancel-title-btn">✖</button>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <button type="button" class="add-file">-->
+<!--                            <img src="/icons/plus.svg">-->
+<!--                            <span>Добавить файл</span>-->
+<!--                        </button>-->
+<!--                        <div class="file-upload-progress" style="display: none;">-->
+<!--                            <span>Загрузка: <span id="progressText">0%</span></span>-->
+<!--                            <div id="progressBarContainer" style="width: 100%; height: 20px; background-color: #f3f3f3;">-->
+<!--                                <div id="progressBar" style="height: 100%; width: 0; background-color: #4caf50;"></div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="file-list"></div>-->
+<!--                        <div id="deleteModal" class="custom-modal">-->
+<!--                            <div class="custom-modal-content">-->
+<!--                                <span class="close">&times;</span>-->
+<!--                                <p>Вы уверены, что хотите удалить файл? Этот файл нельзя будет вернуть.</p>-->
+<!--                                <div class="btns-delete-file">-->
+<!--                                    <button id="confirmDelete">Удалить</button>-->
+<!--                                    <button class="cancel-btn">Отмена</button>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="description-container">-->
+<!--                            <h2>Описание</h2>-->
+<!--                            <span class="description-text">Здесь будет описание задачи</span>-->
+<!--                            <div class="edit-description-controls" style="display: none;">-->
+<!--                                <textarea class="edit-description-textarea"></textarea>-->
+<!--                                <div class="edit-description-buttons">-->
+<!--                                    <button class="save-description-btn">✔</button>-->
+<!--                                    <button class="cancel-description-btn">✖</button>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="task-action">-->
+<!--                            <h2>Активность</h2>-->
+<!--                            <div class="action-nav">-->
+<!--                                <ul>-->
+<!--                                    <li>-->
+<!--                                        <button data-target="comments-section">Комментарии</button>-->
+<!--                                    </li>-->
+<!--                                    <li>-->
+<!--                                        <button data-target="history-section">История</button>-->
+<!--                                    </li>-->
+<!--                                </ul>-->
+<!--                            </div>-->
+<!--                            <div class="activity-content">-->
+<!--                                <div class="comments-section section" style="display: none;">-->
+<!--                                    <textarea id="comments"></textarea>-->
+<!--                                    <div class="submit-comment-container"><button class="submit-btn" id="submit-comment-btn">Отправить</button></div>-->
+<!--                                    <div class="comments-list"></div>-->
+<!--                                    &lt;!&ndash;                                    <div class="comment-container">&ndash;&gt;-->
+<!--                                    &lt;!&ndash;                                    </div>&ndash;&gt;-->
+<!--                                </div>-->
+<!--                                <div class="history-section section" style="display: none;">-->
+<!--                                    <div class="grid-container-history">-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="task-content-right">-->
+<!--                        <select class="select-status">-->
+<!--                            <option>К выполнению</option>-->
+<!--                            <option>В работе</option>-->
+<!--                            <option>Выполнено</option>-->
+<!--                        </select>-->
+<!--                        <div class="info-container">-->
+<!--                            <span class="info-header">Сведения</span>-->
+<!--                            <div class="info-inner">-->
+<!--                                <div class="info-tag-inner">-->
+<!--                                    <span>Исполнитель</span>-->
+<!--                                    <div class="user-container"> &lt;!&ndash; Контейнер для исполнителя и поиска &ndash;&gt;-->
+<!--                                        <div class="tags-container executor-container">-->
+<!--                                            <div class="user-div assigned-user">-->
+<!--                                                <span>Нет</span>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                        <div class="search-results executor-search-results"></div> &lt;!&ndash; ВЫПАДАЮЩИЙ СПИСОК ПОЛЬЗОВАТЕЛЕЙ &ndash;&gt;-->
+<!--                                    </div>-->
+<!--                                </div>-->
+
+<!--                                <div class="info-tag-inner">-->
+<!--                                    <span>Команда</span>-->
+<!--                                    <div class="team-container"> &lt;!&ndash; Общий контейнер для команды и поиска &ndash;&gt;-->
+<!--                                        <div class="tags-container team-tags-container">-->
+<!--                                            <span>Нет</span>-->
+<!--                                        </div>-->
+<!--                                        <div class="search-results team-search-results"></div> &lt;!&ndash; ВЫПАДАЮЩИЙ СПИСОК КОМАНД &ndash;&gt;-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                <div class="info-tag-inner">-->
+<!--                                    <span>Метки</span>-->
+<!--                                    <div class="tags-container task-tags-container">-->
+<!--                                        <div class="tags-tags"></div> &lt;!&ndash; обычный режим &ndash;&gt;-->
+
+<!--                                        <div class="editing-tags-input" style="display: none; position: relative;">-->
+<!--                                            &lt;!&ndash; редактируемые метки здесь &ndash;&gt;-->
+<!--                                            <div class="editing-tags-wrapper">-->
+<!--                                                &lt;!&ndash; Метки рендерим сюда &ndash;&gt;-->
+<!--                                            </div>-->
+<!--                                            <input class="tag-input" placeholder="Введите метку">-->
+<!--                                            <div class="tag-search-results" style="display: none;"></div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                <div class="info-tag-inner">-->
+<!--                                    <span>Доска</span>-->
+<!--                                    <div class="sprint-container"> &lt;!&ndash; Контейнер для текущего спринта и выпадающего списка &ndash;&gt;-->
+<!--                                        <div class="tags-container sprint-tags-container">-->
+<!--                                            <span>Нет</span> &lt;!&ndash; Текущий спринт &ndash;&gt;-->
+<!--                                        </div>-->
+<!--                                        <div class="search-results sprint-search-results"></div> &lt;!&ndash; Выпадающий список спринтов &ndash;&gt;-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                <div class="info-tag-inner difficulty-block" style="position: relative;">-->
+<!--                                    <span>Сложность</span>-->
+<!--                                    <div class="tags-container">-->
+<!--                                        <span class="difficulty">10</span>-->
+<!--                                        <div class="difficulty-editor">-->
+<!--                                            <input type="number" min="0" class="difficulty-input" />-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="difficulty-actions">-->
+<!--                                        <button class="save-difficulty">✔</button>-->
+<!--                                        <button class="cancel-difficulty">×</button>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                <div class="info-tag-inner">-->
+<!--                                    <span>Автор</span>-->
+<!--                                    <div class="tags-container">-->
+<!--                                        <div class="user-div">-->
+<!--                                            <img src="icons/Group%205.svg">-->
+<!--                                            <span>Винисиус Джуниор dasfd asdf asdf a</span>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="task-time-info">-->
+<!--                            <div class="createdAt">-->
+<!--                                <span>Создано</span>-->
+<!--                                <span>4 мая 2025 г. в 11:29</span>-->
+<!--                            </div>-->
+<!--                            <div class="editedAt">-->
+<!--                                <span>Изменено</span>-->
+<!--                                <span>4 мая 2025 г. в 11:30</span>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </template>-->
+<!--</div>-->
+<!--<script th:src="@{/js/task.js}"></script>-->
+<!--</body>-->
+<!--</html>-->

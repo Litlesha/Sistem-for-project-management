@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <link rel="stylesheet" th:href="@{/css/code.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+<div class="project-container">
+    <div th:replace="fragments/project-side-navigation.html"></div>
+    <section id="code" class="section">
+        <main class="main-content scroll">
+            <div class="header-main">
+                <h1>Версии</h1>
+                <a href="#" onclick="connectGithub()" class="github-login-btn">Подключить GitHub</a>
+            </div>
+
+            <div class="repository-wrapper">
+                <h2 class="container-title">Репозитории</h2>
+                <span class="code-info">Здесь отображаются репозитории, которые связаны с проектом</span>
+                <div class="repository-container">
+                    <div class="repository-card">
+                        <div class="repository-photo">
+                            <img src="icons/repository.svg"  alt="фото репозитория" >
+                        </div>
+                        <div class="repository-name">
+                            <span>Здесь выводи имя репозитория</span>
+                        </div>
+                        <div class="repository-last-change">
+                            <span>Последнее обновление: здесь пусть последнее обновление по времени</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pull-wrapper">
+                <h2 class="container-title">Запросы pull</h2>
+                <span class="code-info">Здесь отображаются запросы pull с учетом вашего уровня доступа</span>
+                <table class="pull-table">
+                    <thead>
+                    <tr>
+                        <th>Описание</th>
+                        <th>Статус</th>
+                        <th>Обновлено</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><div class="pull-description-container">
+                            <div class="pull-action-container">
+                                <div class="pull-action">
+                                    <div class="action-filename-container">
+                                        <span class="pull-action-name">Обновлено</span>
+                                        <span class="pull-filename">README.md</span>
+                                    </div>
+                                    <span>-></span>
+                                    <span class="pull-repo">master</span>
+                                </div>
+                            </div>
+                        </div></td>
+                        <td><div class="action-status">Открыт</div></td>
+                        <td>5 мин назад</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </section>
+    </div>
+<script th:src="@{/js/code.js}"></script>
+</body>
+</html>

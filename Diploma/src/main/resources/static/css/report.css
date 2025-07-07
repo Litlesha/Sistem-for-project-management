@@ -1,0 +1,693 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+    overflow: hidden;
+}
+
+a,
+button,
+input,
+select,
+h1,
+h2,
+h3,
+h4,
+h5,
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    background: none;
+    border: none;
+}
+
+menu, ol, ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    width: 100%;
+    position: fixed;
+    height: 75px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+    z-index: 1000;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-item {
+    margin-left: 100px;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 16px;
+    letter-spacing: 0.2px;
+    text-decoration: none;
+    color: black;
+    opacity: 0.75;
+    transition: background-color 0.3s, color 0.3s, opacity 0.3s;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    cursor: pointer;
+}
+
+
+.nav-item:hover {
+    background-color: #f0f0f0;
+}
+
+
+.nav-item:focus {
+    color: #0055cc;
+    text-decoration-color: #0055cc;
+    background-color: #e6f2ff
+}
+
+
+.nav-item:focus-visible {
+    outline: none;
+}
+
+
+
+.dropdown-container {
+    position: relative;
+}
+
+.dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, filter 0.3s;
+    border-radius: 5px;
+}
+
+.dropdown-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.dropdown-btn:active,
+.dropdown-btn:focus {
+    background-color: #e6f2ff;
+    color: #0055cc;
+}
+
+.dropdown-btn:active .dropdown-icon,
+.dropdown-btn:focus .dropdown-icon {
+    filter: brightness(0.8);
+}
+
+.dropdown-icon {
+    width: 20px;
+    height: 20px;
+    transition: filter 0.3s;
+}
+.dropdown-text{
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 16px;
+    opacity: 0.75;
+    letter-spacing: 0.2px;
+
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 100;
+    width: 300px;
+    padding: 10px 0;
+    margin-top: 10px;
+}
+
+
+.dropdown-container:focus-within .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li {
+    list-style: none;
+}
+
+.dropdown-menu li a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;
+    opacity: 0.9;
+}
+.dropdown-separator {
+
+    border-top: 1px solid #ddd;
+    margin: 10px 0;
+    margin-top: 75px;
+}
+.dropdown-header{
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 13px;
+    opacity: 0.9;
+    margin-left: 10px;
+    margin-top: 5px;
+}
+
+.dropdown-menu li a:hover {
+    background-color: #f0f0f0;
+}
+
+/* Иконки */
+.icon-btn {
+    font-size: 18px;
+    background: none;
+    color: #555;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s, color 0.3s, filter 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.icon-btn:hover {
+    background-color: #f0f0f0;
+    filter: brightness(0.9);
+}
+
+.icon-btn:active,
+.icon-btn:focus {
+    filter: brightness(0.8);
+}
+
+
+.icons {
+    display: flex;
+    gap: 10px;
+}
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-right:100px ;
+}
+
+.search-bar {
+    width: 240px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    background-color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #DDDEDF;
+    gap: 10px;
+    margin-left: 20px;
+}
+.search-bar:focus-within{
+    border-color: #3290ec;
+
+}
+
+.search-input {
+    border: none;
+    background: none;
+    font-size: 16px;
+    outline: none;
+    color: #333;
+    width: 200px;
+}
+
+.search-input::placeholder {
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 400;
+    font-style: normal;
+    opacity: 0.75;
+    letter-spacing: 0.2px;
+}
+
+.search-icon {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    opacity: 0.75;
+}
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(134, 145, 162, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1002;
+}
+
+.modal:target {
+    display: flex;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    width: 600px;
+    height: 400px;
+    margin-bottom: 270px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1003;
+}
+
+.modal-content h2 {
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 30px;
+    letter-spacing: 0.2px;
+    opacity: 0.9;
+    margin-bottom: 50px;
+}
+
+
+
+.modal-content input {
+    width: 70%;
+    padding: 10px;
+    margin: 10px 0 20px;
+    border-radius: 5px;
+    border: 1px solid #DDDEDF;
+    border-radius: 5px;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 400;
+    font-style: normal;
+    outline: none;
+    font-size: 15px;
+}
+.modal-content input::placeholder{
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 11px;
+    opacity: 0.9;
+    letter-spacing: 0.2px;
+
+}
+.modal-content input:focus {
+    border-color: #3290ec;
+}
+.modal-content textarea{
+    width: 80%;
+    height: 150px;
+    padding: 10px;
+    margin: 10px 0 20px;
+    border-radius: 5px;
+    border: 1px solid #DDDEDF;
+    border-radius: 5px;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 400;
+    font-style: normal;
+    outline: none;
+    font-size: 15px;
+    resize: none;
+    overflow-y: auto;
+}
+.modal-content textarea:focus {
+    border-color: #3290ec;
+}
+
+.modal-content label {
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    opacity: 0.9;
+    display: block;
+    margin-top: 25px;
+}
+
+.modal-content .required {
+    color: red;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.cancel-btn {
+    display: flex;
+    background: none;
+    border: none;
+    color: black;
+    cursor: pointer;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 13px;
+    opacity: 0.8;
+    border-radius: 5px;
+    padding: 10px;
+    margin-right: 5px;
+    align-items: center;
+}
+
+.cancel-btn:hover {
+    background-color: #DCDFE4;
+}
+
+.submit-btn {
+    background: #3290ec;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.submit-btn:hover {
+    background: #0055cc;
+}
+
+.input-hint{
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size:11px;
+    letter-spacing: 0.2px;
+    opacity: 0.9;
+    margin-top: -15px;
+
+}
+.modal-content-large {
+    width: 800px;
+    height: auto;
+    max-height: 90vh;
+    margin-bottom: -1px;
+    margin-top: -70px;
+}
+#project-name {
+    margin-bottom: -20px;
+}
+
+
+/* Контейнер всего проекта */
+.project-container {
+    display: flex;
+    height: 100vh;
+    background-color: #f9f9f9;
+    font-family: "IBM Plex Sans", sans-serif;
+}
+
+/* Навигация слева */
+.project-sidebar {
+    width: 250px;
+    position: fixed;
+    background-color: #ffffff;
+    border-right: 1px solid #DDDEDF;
+    padding: 20px;
+    height: calc(100vh - 75px);
+    top: 75px;
+    left: 0;
+    z-index: 1000; /* чтобы была поверх других элементов */
+    overflow-y: auto; /* если навигация длинная */
+}
+
+.project-title {
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 15px;
+    margin-bottom: 40px;
+    margin-top: 20px;
+    color: black;
+    opacity: 0.9;
+    letter-spacing: 0.2px;
+}
+
+.project-nav h3 {
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;
+    letter-spacing: 0.2px;
+    color: black;
+    opacity: 0.7;
+    margin-bottom: 20px;
+}
+
+.project-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.project-nav li {
+    margin-bottom: 10px;
+}
+
+.project-nav a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 14px;
+    opacity: 0.9;
+    letter-spacing: 0.2px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    gap: 10px;
+    margin-left: -12px;
+}
+
+.project-nav a:hover,
+.project-nav a:focus {
+    background-color:#e6f2ff;
+    color: #0055cc;
+}
+
+/* Основной контент */
+.main-content {
+    padding: 20px;
+    margin-top: 75px;
+    margin-left: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-x: auto; /* если у тебя горизонтальный скролл у канбана */
+}
+.section{
+    flex:1;
+    display: none;
+}
+.active-section {
+    display: block;
+}
+/* Заголовок и кнопка */
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 20px 40px 20px;
+}
+
+.header-main h1 {
+    font-size: 28px;
+    font-weight: 700;
+}
+.main-content-complete-container{
+    width: 25%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    opacity: 0.9;
+}
+.complete-project-btn {
+    padding: 10px;
+    border-radius: 5px;
+    align-items: center;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    font-family: "IBM Plex Sans", serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 13px;
+    opacity: 0.9;
+    cursor: pointer;
+}
+.filters-container {
+    display: flex;
+    gap: 20px;
+    margin-left: 20px;
+}
+.scroll{
+    max-height: 85%;
+    overflow-y: auto;
+}
+.select-report{
+    min-width: 200px;
+    padding:5px;
+    outline: none;
+    border: 1px solid #DCDFE4;
+    border-radius: 5px;
+}
+.select-report:focus-within{
+    border-color: #3290ec;
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.filter-group > label {
+    font-size: 12px;
+    color: #6B6E76;
+    font-weight: bold;
+}
+.chart-container{
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 1245px;
+    height: 400px;
+}
+.sprint-data{
+    margin-left: 20px;
+    font-size: 14px;
+}
+.lines{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: 50px;
+    margin-left: 40px;
+    font-size: 14px;
+}
+
+canvas{
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+}
+.report-title{
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+.table-title{
+    font-size: 16px;
+    font-weight: normal;
+    margin-bottom: 10px;
+}
+.report-table{
+    margin-bottom: 40px;
+    padding-inline: 10px;
+    border-collapse: collapse;
+}
+.report-table thead{
+    font-weight: bold;
+    font-size: 12px;
+}
+.report-table tbody{
+    font-size: 14px;
+
+}
+.report-table th{
+    text-align: left;
+    padding: 5px;
+}
+.td-status{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px ;
+}
+.report-table td{
+    padding-inline: 5px;
+    padding-block: 10px;
+}
+.report-table tbody tr:hover{
+    cursor: pointer;
+    transition: 0.1s ease-in ;
+    background-color: #DCDFE4;
+}
+#completed-tasks tr:first-child {
+    border-top: 2px solid #DCDFE4;
+}
+#completed-tasks tr:last-child {
+    border-bottom: 2px solid #DCDFE4;
+}
+#incomplete-tasks tr:first-child {
+    border-top: 2px solid #DCDFE4;
+}
+#incomplete-tasks tr:last-child {
+    border-bottom: 2px solid #DCDFE4;
+}
+
+.report-table th:nth-child(1) { width: 10%; } /* Ключ */
+.report-table th:nth-child(2) { width: 40%; } /* Сводка */
+.report-table th:nth-child(3) { width: 10%; } /* Тип задачи */
+.report-table th:nth-child(4) { width: 10%; } /* Статус */
+.report-table th:nth-child(5) { width: 25%; } /* Исполнитель */
+.report-table th:nth-child(6) { width: 5%; }
+
+.task-key-cell{
+
+}
+.task-key-cell:hover{
+    color: #3290ec;
+    text-decoration-line: underline;
+}

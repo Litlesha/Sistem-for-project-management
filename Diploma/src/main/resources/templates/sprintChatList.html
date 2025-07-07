@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <link rel="stylesheet" th:href="@{/css/chat.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+<div class="project-container">
+    <div th:replace="fragments/project-side-navigation.html"></div>
+    <!-- Секция Чат -->
+    <section th:attr="id=${chatId}" class="section">
+        <div class="main-content chat-list-container">
+            <ul class="chat-list">
+                <li class="chatbox"
+                    th:each="sprint : ${userSprints}"
+                    th:attr="data-type='sprintChat', data-id=${sprint.id}">
+                    <div class="message-container">
+                    <a class="chat-href"
+                       th:href="@{'/project_page'(id=${entityId}, section='sprintChat', sprint=${sprint.id})}"
+                       th:text="${sprint.sprintName}"></a>
+                        <span class="last-chat-date"></span>
+                    </div>
+                    <span class="last-chat-message">Загрузка...</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+</div>
+<script th:src="@{/js/chat.js}"></script>
+</body>
+</html>
